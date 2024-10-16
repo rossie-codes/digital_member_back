@@ -15,9 +15,13 @@ const memberRouter = new Hono();
 // GET /member - Retrieve all members
 memberRouter.get('/get_member_list', async (c: Context) => {
     try {
-        const data = await getMemberList();
+      console.log('get_member_list route begin');
+      console.log(process.env.ALLOWED_ORIGINS) 
+      const data = await getMemberList();
+      console.log('get_member_list route done');
         return c.json(data);
     } catch (error) {
+      console.log('get_member_list route end in error');
         // Let Hono’s `onError` handle the error
         throw error;
     }
