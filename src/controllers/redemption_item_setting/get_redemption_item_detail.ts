@@ -28,7 +28,7 @@ async function getRedemptionItemDetail(redemption_item_id: string): Promise<Rede
         fixed_discount_cap,
         minimum_spending,
         validity_period,
-        status,
+        is_active,
         created_at
       FROM redemption_item
       WHERE redemption_item_id = $1
@@ -43,8 +43,8 @@ async function getRedemptionItemDetail(redemption_item_id: string): Promise<Rede
 
     const row = rows[0];
 
-    // Map 'status' to 'is_active'
-    const isActive = row.status === 'active';
+    // Map 'is_active' to 'is_active'
+    const isActive = row.is_active === 'True';
 
     // Depending on 'discount_type', map 'discount_amount' appropriately
     let discountAmount: number | undefined = undefined;

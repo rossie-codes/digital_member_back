@@ -4,10 +4,10 @@ import { pool } from '../db';
 import type { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 
-async function putRedemptionItemStatus(c: Context): Promise<Response> {
+async function putRedemptionItemIsActive(c: Context): Promise<Response> {
   try {
     // Get redemption_item_id from route parameters
-    console.log('putRedemptionItemStatus function begin')
+    console.log('putRedemptionItemIsActive function begin')
 
     const redemption_item_id_str = c.req.param('redemption_item_id');
     const redemption_item_id = parseInt(redemption_item_id_str, 10);
@@ -18,8 +18,8 @@ async function putRedemptionItemStatus(c: Context): Promise<Response> {
     // Parse the request body to get is_active
     const body = await c.req.json();
 
-    console.log('putRedemptionItemStatus fucntion check body: ', body)
-    console.log('putRedemptionItemStatus fucntion check id: ', redemption_item_id)
+    console.log('putRedemptionItemIsActive fucntion check body: ', body)
+    console.log('putRedemptionItemIsActive fucntion check id: ', redemption_item_id)
     const { is_active } = body;
 
     if (typeof is_active !== 'boolean') {
@@ -27,7 +27,7 @@ async function putRedemptionItemStatus(c: Context): Promise<Response> {
     }
 
     // Map is_active to status
-    const status = is_active ? 'active' : 'inactive';
+    // const is_active = is_active ? 'true' : 'false';
 
     // Get a database client from the pool
     const client = await pool.connect();
@@ -39,11 +39,11 @@ async function putRedemptionItemStatus(c: Context): Promise<Response> {
       // Update the redemption item status
       const updateQuery = `
         UPDATE redemption_item
-        SET status = $1, updated_at = NOW()
+        SET is_active = $1, updated_at = NOW()
         WHERE redemption_item_id = $2
         RETURNING redemption_item_id
       `;
-      const values = [status, redemption_item_id];
+      const values = [is_active, redemption_item_id];
 
       const result = await client.query(updateQuery, values);
 
@@ -71,7 +71,7 @@ async function putRedemptionItemStatus(c: Context): Promise<Response> {
       client.release();
     }
   } catch (error) {
-    console.error('Error in putRedemptionItemStatus:', error);
+    console.error('Error in putRedemptionItemIsActive:', error);
     if (error instanceof HTTPException) {
       throw error;
     }
@@ -79,4 +79,4 @@ async function putRedemptionItemStatus(c: Context): Promise<Response> {
   }
 }
 
-export default putRedemptionItemStatus;
+export default putRedemptionItemIsActive;

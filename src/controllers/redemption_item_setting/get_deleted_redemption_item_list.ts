@@ -28,7 +28,7 @@ async function getDeletedRedemptionItemList(c: Context): Promise<RedemptionItem[
         fixed_discount_cap,
         minimum_spending,
         validity_period,
-        status,
+        is_active,
         created_at
         FROM redemption_item
       WHERE deleted_status IS TRUE  -- Add this WHERE clause
@@ -40,7 +40,7 @@ async function getDeletedRedemptionItemList(c: Context): Promise<RedemptionItem[
         // Map the results to the RedemptionItem interface
         const redemptionItems: RedemptionItem[] = rows.map((row) => {
             // Map 'status' to 'is_active'
-            const isActive = row.status === "active";
+            const isActive = row.is_active === "true";
 
             // Depending on 'discount_type', map 'discount_amount' appropriately
             let discountAmount: number | undefined = undefined;

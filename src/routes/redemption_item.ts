@@ -8,7 +8,7 @@ import getDeletedRedemptionItemList from '../controllers/redemption_item_setting
 
 import postRedemptionItemSetting from '../controllers/redemption_item_setting/post_redemption_item_setting';
 
-import putRedemptionItemStatus from '../controllers/redemption_item_setting/put_redemption_item_status';
+import putRedemptionItemIsActive from '../controllers/redemption_item_setting/put_redemption_item_is_active';
 import putRedemptionItemDetail from '../controllers/redemption_item_setting/put_redemption_item_detail';
 
 import deleteRedemptionItem from '../controllers/redemption_item_setting/delete_redemption_item';
@@ -84,17 +84,17 @@ redemptionItemRouter.post('/post_redemption_item', async (c: Context) => {
 });
 
 
-redemptionItemRouter.put('/put_redemption_item_status/:redemption_item_id', async (c: Context) => {
+redemptionItemRouter.put('/put_redemption_item_is_active/:redemption_item_id', async (c: Context) => {
   try {
-    console.log('put_redemption_item_status route begin');
+    console.log('put_redemption_item_is_active route begin');
 
-    const data = await putRedemptionItemStatus(c);
+    const data = await putRedemptionItemIsActive(c);
 
-    console.log('put_redemption_item_status route done');
+    console.log('put_redemption_item_is_active route done');
     //   return data;
     return c.json(data);
   } catch (error: any) {
-    console.log('put_redemption_item_status end in error');
+    console.log('put_redemption_item_is_active end in error');
     if (error.message === 'Member not found') {
       return c.json({ message: 'Member not found' }, 404);
     }
