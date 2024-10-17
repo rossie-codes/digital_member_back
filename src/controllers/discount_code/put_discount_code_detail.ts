@@ -1,3 +1,5 @@
+// src/controllers/discount_code/put_discount_code_detail.ts
+
 import { pool } from '../db';
 import type { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';

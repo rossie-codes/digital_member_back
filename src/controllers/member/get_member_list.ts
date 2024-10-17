@@ -35,12 +35,32 @@ interface Member {
 
 
 
-async function getMemberList(): Promise<Member[]> {
+async function getMemberList(c: Context): Promise<{ data: Member[]; total: number }> {
   try {
+    const pageParam = c.req.query('page');
+    const pageSizeParam = c.req.query('pageSize');
+    const page = pageParam ? parseInt(pageParam, 10) : 1;
+    const pageSize = pageSizeParam ? parseInt(pageSizeParam, 10) : 10;
+
+    // Validate page and pageSize
+    if (isNaN(page) || page < 1) {
+      throw new Error('Invalid page number');
+    }
+    if (isNaN(pageSize) || pageSize < 1) {
+      throw new Error('Invalid page size');
+    }
+
+    const offset = (page - 1) * pageSize;
+
+    // Get total count
+    const countResult = await pool.query('SELECT COUNT(*) FROM member');
+    const total = parseInt(countResult.rows[0].count, 10);
+
+    // Query the database with LIMIT and OFFSET
     const query = `
       SELECT
         m.*,
-        mt.member_tier_id,
+        mt.member_tier_id AS mt_member_tier_id,
         mt.member_tier_name,
         mt.member_tier_sequence,
         mt.require_point,
@@ -51,10 +71,13 @@ async function getMemberList(): Promise<Member[]> {
         member m
       LEFT JOIN
         membership_tier mt ON m.member_tier_id = mt.member_tier_id
+      ORDER BY m.member_id
+      LIMIT $1 OFFSET $2
     `;
-    const data = await pool.query(query);
+    const data = await pool.query(query, [pageSize, offset]);
+
     const members = data.rows.map((row) => {
-      // Construct the Member object
+      // Create Member object
       const member: Member = {
         member_id: row.member_id,
         created_at: row.created_at,
@@ -73,23 +96,25 @@ async function getMemberList(): Promise<Member[]> {
         member_note: row.member_note,
         member_tag: row.member_tag,
         state_code: row.state_code,
-        // Include the membership tier details if available
-        membership_tier: row.member_tier_id
+        membership_tier: row.mt_member_tier_id
           ? {
-              member_tier_id: row.member_tier_id,
-              member_tier_name: row.member_tier_name,
-              member_tier_sequence: row.member_tier_sequence,
-              require_point: row.require_point,
-              extend_membership_point: row.extend_membership_point,
-              point_multiplier: row.point_multiplier,
-              membership_period: row.membership_period,
+              member_tier_id: row.mt_member_tier_id,
+              member_tier_name: row.mt_member_tier_name,
+              member_tier_sequence: row.mt_member_tier_sequence,
+              require_point: row.mt_require_point,
+              extend_membership_point: row.mt_extend_membership_point,
+              point_multiplier: row.mt_point_multiplier,
+              membership_period: row.mt_membership_period,
             }
           : undefined,
       };
       return member;
     });
 
-    return members;
+    return {
+      data: members,
+      total: total,
+    };
   } catch (error) {
     console.error('Database query error:', error);
     throw new Error('Database query failed');

@@ -1,4 +1,4 @@
-// src/controllers/redemption_item_setting/get_redemption_item_setting.ts
+// src/controllers/redemption_item_setting/get_deleted_redemption_item_list.ts
 
 import { pool } from "../db";
 import { type Context } from "hono";

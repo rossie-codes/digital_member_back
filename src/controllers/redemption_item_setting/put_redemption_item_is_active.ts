@@ -1,4 +1,5 @@
-// src/controllers/redemption_item_setting/put_redemption_item_status.ts
+// src/controllers/redemption_item_setting/put_redemption_item_is_active.ts
+
 
 import { pool } from '../db';
 import type { Context } from 'hono';
