@@ -11,6 +11,9 @@ import getDeletedDiscountCodeList from '../controllers/discount_code/get_deleted
 import postNewDiscountCode from '../controllers/discount_code/post_new_discount_code';
 
 import putDiscountCodeDetail from '../controllers/discount_code/put_discount_code_detail';
+import putDiscountCodeIsActive from '../controllers/discount_code/put_discount_code_is_active';
+
+
 
 import deleteDiscountCode from '../controllers/discount_code/delete_discount_code';
 import restoreDiscountCode from '../controllers/discount_code/restore_discount_code';
@@ -121,6 +124,25 @@ discountCodeRouter.put('/put_discount_code_detail/:discount_code_id', async (c: 
     throw error;
   }
 });
+
+discountCodeRouter.put('/put_discount_code_is_active/:discount_code_id', async (c: Context) => {
+  try {
+    console.log('put_discount_code_is_active route begin');
+
+    const data = await putDiscountCodeIsActive(c);
+
+    console.log('put_discount_code_is_active route done');
+    //   return data;
+    return c.json(data);
+  } catch (error: any) {
+    console.log('put_discount_code_is_active end in error');
+    if (error.message === 'Member not found') {
+      return c.json({ message: 'Member not found' }, 404);
+    }
+    throw error;
+  }
+});
+
 
 
 discountCodeRouter.put('/delete_discount_code/:discount_code_id', async (c: Context) => {
