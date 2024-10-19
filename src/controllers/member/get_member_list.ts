@@ -1,18 +1,49 @@
 // src/controllers/member/get_member_list.ts
 
 import { pool } from '../db';
-import { type Context } from 'hono';
+import type { Context } from 'hono';
 
 interface Member {
-  // ... your existing Member interface ...
+  member_id: number;
+  created_at: string;
+  created_by: number | null;
+  updated_at: string;
+  updated_by: number | null;
+  member_phone: string;
+  member_name: string;
+  member_referral_code: string;
+  point: number;
+  member_tier_id: number | null;
+  membership_expiry_date: string;
+  referrer_member_id: number | null;
+  birthday: string | null;
+  is_active: number; // Consider changing to boolean
+  member_note: string | null;
+  member_tag: string[] | null; // Adjust type if necessary
+  state_code: string | null;
+  // Add a nested object to hold membership tier details
+  membership_tier?: {
+    member_tier_id: number;
+    member_tier_name: string;
+    member_tier_sequence: number;
+    require_point: number;
+    extend_membership_point: number;
+    point_multiplier: number;
+    membership_period: number;
+  };
 }
 
-async function getMemberList(c: Context): Promise<{ data: Member[]; total: number }> {
+async function getMemberList(c: Context): Promise<{ data: Member[]; total: number; membership_tiers: string[] }> {
   try {
     const pageParam = c.req.query('page');
     const pageSizeParam = c.req.query('pageSize');
     const sortFieldParam = c.req.query('sortField');
     const sortOrderParam = c.req.query('sortOrder');
+
+    const searchText = c.req.query('searchText') || '';
+
+    const url = new URL(c.req.url, 'http://localhost'); // Base URL is required for relative URLs
+    const membershipTierParams: string[] = url.searchParams.getAll('membership_tier') || [];
 
     const page = pageParam ? parseInt(pageParam, 10) : 1;
     const pageSize = pageSizeParam ? parseInt(pageSizeParam, 10) : 10;
@@ -66,14 +97,49 @@ async function getMemberList(c: Context): Promise<{ data: Member[]; total: numbe
 
     const offset = (page - 1) * pageSize;
 
-    // Get total count
-    const countResult = await pool.query('SELECT COUNT(*) FROM member');
+    // Build the WHERE clauses
+    const whereClauses: string[] = [];
+    const queryParams: any[] = [];
+
+    let paramIndex = 1;
+
+    // Handle searchText for member_name and member_phone
+    if (searchText) {
+      whereClauses.push(`(m.member_name ILIKE $${paramIndex} OR m.member_phone::text ILIKE $${paramIndex})`);
+      queryParams.push(`%${searchText}%`);
+      paramIndex++;
+    }
+
+    // Handle membership_tier filters
+    if (membershipTierParams && membershipTierParams.length > 0) {
+      const membershipTierPlaceholders = membershipTierParams.map((_, idx) => `$${paramIndex + idx}`).join(', ');
+      whereClauses.push(`mt.member_tier_name IN (${membershipTierPlaceholders})`);
+      queryParams.push(...membershipTierParams);
+      paramIndex += membershipTierParams.length;
+    }
+
+    // Combine WHERE clauses
+    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+    // Get total count with filters
+    const countQuery = `
+      SELECT COUNT(*) FROM member m
+      LEFT JOIN membership_tier mt ON m.member_tier_id = mt.member_tier_id
+      ${whereClause}
+    `;
+    const countResult = await pool.query(countQuery, queryParams);
     const total = parseInt(countResult.rows[0].count, 10);
 
     const orderByClause = `ORDER BY ${mappedSortField} ${sortOrder}`;
 
-    // Query the database with LIMIT and OFFSET
-    const query = `
+    // Append LIMIT and OFFSET to queryParams
+    queryParams.push(pageSize);
+    paramIndex++;
+    queryParams.push(offset);
+    paramIndex++;
+
+    // Data query with LIMIT and OFFSET
+    const dataQuery = `
       SELECT
         m.*,
         mt.member_tier_id AS mt_member_tier_id,
@@ -87,11 +153,12 @@ async function getMemberList(c: Context): Promise<{ data: Member[]; total: numbe
         member m
       LEFT JOIN
         membership_tier mt ON m.member_tier_id = mt.member_tier_id
+      ${whereClause}
       ${orderByClause}
-      LIMIT $1 OFFSET $2
+      LIMIT $${paramIndex - 2} OFFSET $${paramIndex - 1}
     `;
 
-    const data = await pool.query(query, [pageSize, offset]);
+    const data = await pool.query(dataQuery, queryParams);
 
     const members = data.rows.map((row) => {
       // Create Member object
@@ -114,23 +181,29 @@ async function getMemberList(c: Context): Promise<{ data: Member[]; total: numbe
         member_tag: row.member_tag,
         state_code: row.state_code,
         membership_tier: row.mt_member_tier_id
-        ? {
-          member_tier_id: row.mt_member_tier_id,
-          member_tier_name: row.mt_member_tier_name,
-          member_tier_sequence: row.mt_member_tier_sequence,
-          require_point: row.mt_require_point,
-          extend_membership_point: row.mt_extend_membership_point,
-          point_multiplier: row.mt_point_multiplier,
-          membership_period: row.mt_membership_period,
-        }
+          ? {
+              member_tier_id: row.mt_member_tier_id,
+              member_tier_name: row.mt_member_tier_name,
+              member_tier_sequence: row.mt_member_tier_sequence,
+              require_point: row.mt_require_point,
+              extend_membership_point: row.mt_extend_membership_point,
+              point_multiplier: row.mt_point_multiplier,
+              membership_period: row.mt_membership_period,
+            }
           : undefined,
       };
       return member;
     });
 
+    // Fetch all membership tiers
+    const tiersQuery = `SELECT member_tier_name FROM membership_tier`;
+    const tiersResult = await pool.query(tiersQuery);
+    const membershipTiers = tiersResult.rows.map(row => row.member_tier_name);
+
     return {
       data: members,
       total: total,
+      membership_tiers: membershipTiers,
     };
   } catch (error) {
     console.error('Database query error:', error);
