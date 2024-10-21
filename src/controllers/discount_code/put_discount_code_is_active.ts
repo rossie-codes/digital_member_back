@@ -3,44 +3,82 @@
 import { pool } from '../db';
 import type { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
+import putShopifyDiscountCodeIsActive from '../../shopify/put_shopify_discount_code_is_active';
 
 async function putDiscountCodeIsActive(c: Context): Promise<Response> {
   try {
-    // Log the beginning of the function
     console.log('putDiscountCodeIsActive function begin');
 
-    // Extract discount_code_id from route parameters
     const discount_code_id_str = c.req.param('discount_code_id');
     const discount_code_id = parseInt(discount_code_id_str, 10);
     if (isNaN(discount_code_id)) {
       throw new HTTPException(400, { message: 'Invalid discount code ID' });
     }
 
-    // Parse the request body to get is_active
     const body = await c.req.json();
 
-    console.log('putDiscountCodeIsActive function check body:', body);
-    console.log('putDiscountCodeIsActive function check discount_code_id:', discount_code_id);
+    console.log('Received body:', body);
+    console.log('Discount code ID:', discount_code_id);
 
-    // Extract is_active from the body
     const { is_active } = body;
 
-    // Validate is_active
     if (typeof is_active !== 'boolean') {
       throw new HTTPException(400, { message: 'Invalid input: is_active must be a boolean' });
     }
 
-    // Log the validated is_active value
     console.log('Validated is_active:', is_active);
 
-    // Get a database client from the pool
     const client = await pool.connect();
 
     try {
-      // Start a transaction
       await client.query('BEGIN');
 
-      // Update the discount code's is_active status
+      const selectQuery = `
+        SELECT webstore_discount_code_id, valid_from, valid_until
+        FROM discount_code
+        WHERE discount_code_id = $1
+      `;
+      const selectResult = await client.query(selectQuery, [discount_code_id]);
+
+      if (selectResult.rowCount === 0) {
+        await client.query('ROLLBACK');
+        throw new HTTPException(404, { message: 'Discount code not found' });
+      }
+
+      const {
+        webstore_discount_code_id,
+        valid_from,
+        valid_until,
+      } = selectResult.rows[0];
+
+      if (!webstore_discount_code_id) {
+        await client.query('ROLLBACK');
+        throw new HTTPException(400, { message: 'No Shopify discount code ID associated with this discount code' });
+      }
+
+      try {
+        let updatedDiscount;
+        if (is_active) {
+          // Reactivate the discount code with original validity dates
+          updatedDiscount = await putShopifyDiscountCodeIsActive(
+            webstore_discount_code_id,
+            is_active,
+            valid_from.toISOString(),
+            valid_until.toISOString(),
+          );
+        } else {
+          // Deactivate the discount code
+          updatedDiscount = await putShopifyDiscountCodeIsActive(
+            webstore_discount_code_id,
+            is_active,
+          );
+        }
+      } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error updating discount code status in Shopify:', error);
+        throw new HTTPException(500, { message: 'Failed to update discount code status in Shopify' });
+      }
+
       const updateQuery = `
         UPDATE discount_code
         SET is_active = $1, updated_at = NOW()
@@ -52,29 +90,26 @@ async function putDiscountCodeIsActive(c: Context): Promise<Response> {
       const result = await client.query(updateQuery, values);
 
       if (result.rowCount === 0) {
-        // Discount code not found
         await client.query('ROLLBACK');
-        throw new HTTPException(404, { message: 'Discount code not found' });
+        throw new HTTPException(404, { message: 'Discount code not found on update' });
       }
 
-      // Commit the transaction
       await client.query('COMMIT');
 
-      // Log the successful update
       console.log(`Successfully updated discount_code_id: ${discount_code_id} to is_active: ${is_active}`);
 
-      // Return success response
       return c.json(
         { message: 'Discount code status updated successfully', discount_code_id },
         200
       );
     } catch (error) {
-      // Roll back the transaction in case of error
       await client.query('ROLLBACK');
       console.error('Error updating discount code status:', error);
+      if (error instanceof HTTPException) {
+        throw error;
+      }
       throw new HTTPException(500, { message: 'Internal Server Error' });
     } finally {
-      // Release the client back to the pool
       client.release();
     }
   } catch (error) {
