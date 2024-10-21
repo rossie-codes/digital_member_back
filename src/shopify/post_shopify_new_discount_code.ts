@@ -39,13 +39,17 @@ interface DiscountInput {
   valid_until: string;
   discount_amount?: number;
   discount_percentage?: number;
-  fixed_discount_cap?: number;
+  // fixed_discount_cap?: number;
   is_active: boolean;
 }
 
 async function createShopifyDiscountCode(input: DiscountInput): Promise<any> {
+
+  console.log('createShopifyDiscountCode function start')
+
   try {
     let discountValue: any;
+
     if (input.discount_type === 'fixed_amount') {
       discountValue = {
         discountAmount: {
@@ -90,13 +94,13 @@ async function createShopifyDiscountCode(input: DiscountInput): Promise<any> {
       };
     }
 
-    // Handle fixed discount cap for percentage discounts
-    if (input.discount_type === 'percentage' && input.fixed_discount_cap) {
-      basicCodeDiscount.maximumDiscountAmount = {
-        amount: input.fixed_discount_cap.toString(),
-        currencyCode: 'USD', // Adjust currency code as needed
-      };
-    }
+    // // Handle fixed discount cap for percentage discounts
+    // if (input.discount_type === 'percentage' && input.fixed_discount_cap) {
+    //   basicCodeDiscount.maximumDiscountAmount = {
+    //     amount: input.fixed_discount_cap.toString(),
+    //     currencyCode: 'HKD', // Adjust currency code as needed
+    //   };
+    // }
 
     const result: any = await graphqlClient.query({
       data: {
