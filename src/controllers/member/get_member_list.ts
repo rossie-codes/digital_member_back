@@ -3,6 +3,8 @@
 import { pool } from '../db';
 import type { Context } from 'hono';
 
+import getShopifyOrderList from '../../shopify/get_shopify_order_list';
+
 interface Member {
   member_id: number;
   created_at: string;
@@ -34,6 +36,10 @@ interface Member {
 }
 
 async function getMemberList(c: Context): Promise<{ data: Member[]; total: number; membership_tiers: string[] }> {
+  
+  const aaa = await getShopifyOrderList(c)
+  console.log(aaa.json)
+
   try {
     const pageParam = c.req.query('page');
     const pageSizeParam = c.req.query('pageSize');

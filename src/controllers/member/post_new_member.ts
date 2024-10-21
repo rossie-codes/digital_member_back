@@ -98,14 +98,16 @@ async function postNewMember(c: Context): Promise<Response> {
 
             // Determine membership_tier and membership_expiry_date
             // Get the tier with the lowest member_tier_sequence
+            // Determine membership_tier and membership_expiry_date based on member's point
             const tierQuery = `
-            SELECT member_tier_name, membership_period 
-            FROM membership_tier 
-            ORDER BY member_tier_sequence ASC 
-            LIMIT 1
-            `;
+                SELECT member_tier_id, membership_period
+                FROM membership_tier
+                WHERE require_point <= $1
+                ORDER BY require_point DESC
+                LIMIT 1
+                `;
 
-            const tierResult = await client.query(tierQuery);
+            const tierResult = await client.query(tierQuery, [point]);
 
             let member_tier_id: number | null = null;
             let membership_expiry_date: string | null = null;
@@ -123,6 +125,10 @@ async function postNewMember(c: Context): Promise<Response> {
 
                 // Format the date as YYYY-MM-DD
                 membership_expiry_date = expiryDate.toISOString().split('T')[0];
+            } else {
+                // Handle case when no tier is matched
+                // You may set a default tier or handle it as needed
+                console.warn('No matching membership tier found for the given point value.');
             }
 
             // Insert the new member
