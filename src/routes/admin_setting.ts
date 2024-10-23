@@ -11,7 +11,7 @@ import postMemberPointRule from '../controllers/admin_setting/post_member_point_
 
 const adminSettingRouter = new Hono();
 
-adminSettingRouter.use('*', authMiddleware); // Protect all member routes
+// adminSettingRouter.use('*', authMiddleware); // Protect all member routes
 
 // GET /member - Retrieve all members
 adminSettingRouter.get('/get_membership_tier_setting', async (c: Context) => {

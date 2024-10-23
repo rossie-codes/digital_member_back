@@ -10,7 +10,7 @@ import postMembershipTierSetting from '../controllers/membership_tier/post_membe
 
 const membershipTierRouter = new Hono();
 
-membershipTierRouter.use('*', authMiddleware); // Protect all member routes
+// membershipTierRouter.use('*', authMiddleware); // Protect all member routes
 
 // GET /member - Retrieve all members
 membershipTierRouter.get('/get_membership_tier_setting', async (c: Context) => {

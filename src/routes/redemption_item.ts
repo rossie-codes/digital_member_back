@@ -25,7 +25,7 @@ interface ErrorWithMessage {
 
 const redemptionItemRouter = new Hono();
 
-redemptionItemRouter.use('*', authMiddleware); // Protect all member routes
+// redemptionItemRouter.use('*', authMiddleware); // Protect all member routes
 
 // GET /member - Retrieve all members
 redemptionItemRouter.get('/get_redemption_list', async (c: Context) => {

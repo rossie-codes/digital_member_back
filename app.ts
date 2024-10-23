@@ -13,9 +13,9 @@ const app = new Hono();
 
 // Apply global CORS middleware
 app.use('*', cors({
-  // origin: config.allowedOrigins, // Always a string array
+  origin: config.allowedOrigins, // Always a string array
   // origin: 'https://digitalmemberfront-production.up.railway.app',
-  origin: 'http://localhost:3001',
+  // origin: 'http://localhost:3001',
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type'],
   credentials: true,
