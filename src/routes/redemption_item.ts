@@ -2,6 +2,8 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
+import { authMiddleware } from '../middleware/authMiddleware';
+
 import getRedemptionItemSetting from '../controllers/redemption_item_setting/get_redemption_item_setting';
 import getRedemptionItemDetail from '../controllers/redemption_item_setting/get_redemption_item_detail';
 import getDeletedRedemptionItemList from '../controllers/redemption_item_setting/get_deleted_redemption_item_list';
@@ -22,6 +24,8 @@ interface ErrorWithMessage {
 }
 
 const redemptionItemRouter = new Hono();
+
+redemptionItemRouter.use('*', authMiddleware); // Protect all member routes
 
 // GET /member - Retrieve all members
 redemptionItemRouter.get('/get_redemption_list', async (c: Context) => {

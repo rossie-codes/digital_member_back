@@ -2,12 +2,16 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
+import { authMiddleware } from '../middleware/authMiddleware';
+
 import getMembershipTierSetting from '../controllers/membership_tier/get_membership_tier_setting';
 import postAdminSetting from '../controllers/admin_setting/post_admin_setting';
 import postMemberPointRule from '../controllers/admin_setting/post_member_point_rule';
 // Import other controllers as needed
 
 const adminSettingRouter = new Hono();
+
+adminSettingRouter.use('*', authMiddleware); // Protect all member routes
 
 // GET /member - Retrieve all members
 adminSettingRouter.get('/get_membership_tier_setting', async (c: Context) => {

@@ -2,15 +2,22 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
+import { authMiddleware } from '../middleware/authMiddleware';
+
 import getMemberList from '../controllers/member/get_member_list';
 import postNewMember from '../controllers/member/post_new_member';
 import getMemberDetail from '../controllers/member/get_member_detail';
+
+
 
 import { HTTPException } from 'hono/http-exception'
 
 // Import other controllers as needed
 
 const memberRouter = new Hono();
+
+// memberRouter.use('*', authMiddleware); // Protect all member routes
+
 
 // GET /member - Retrieve all members
 memberRouter.get('/get_member_list', async (c: Context) => {

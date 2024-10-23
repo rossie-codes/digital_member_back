@@ -2,7 +2,7 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-
+import { authMiddleware } from '../middleware/authMiddleware';
 
 import getDiscountCodeList from '../controllers/discount_code/get_discount_code_list';
 import getDiscountCodeDetail from '../controllers/discount_code/get_discount_code_detail';
@@ -27,6 +27,7 @@ import { HTTPException } from 'hono/http-exception'
 
 const discountCodeRouter = new Hono();
 
+// discountCodeRouter.use('*', authMiddleware); // Protect all member routes
 
 discountCodeRouter.get('/get_discount_code_list', async (c: Context) => {
   try {
