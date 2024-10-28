@@ -8,6 +8,7 @@ import membershipTierRouter from './src/routes/membership_tier';
 import adminSettingRouter from './src/routes/admin_setting';
 import redemptionItemRouter from './src/routes/redemption_item';
 import discountCodeRouter from './src/routes/discount_code';
+import broadcastSettingRouter from './src/routes/broadcast_setting';
 
 
 import { config } from './src/config'; // Adjust the path as needed
@@ -46,5 +47,6 @@ app.route('/membership_tier', membershipTierRouter); // Handles /membership_tier
 app.route('/admin_setting', adminSettingRouter);
 app.route('/redemption_item', redemptionItemRouter);
 app.route('/discount_code', discountCodeRouter);
+app.route('/broadcast_setting', broadcastSettingRouter);
 
 export default app;

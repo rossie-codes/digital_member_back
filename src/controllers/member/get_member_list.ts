@@ -35,8 +35,15 @@ interface Member {
   };
 }
 
-async function getMemberList(c: Context): Promise<{ data: Member[]; total: number; membership_tiers: string[] }> {
-  
+async function getMemberList(c: Context): Promise<{
+  data: Member[];
+  total: number;
+  membership_tiers: string[];
+  member_tier_counts: { [tier: string]: number };
+  expiring_members_count: number;
+  birthday_members_count: number;
+  new_members_count: number;
+}> {
   // const aaa = await getShopifyOrderList(c)
   // console.log(aaa.json)
 
@@ -206,15 +213,80 @@ async function getMemberList(c: Context): Promise<{ data: Member[]; total: numbe
     const tiersResult = await pool.query(tiersQuery);
     const membershipTiers = tiersResult.rows.map(row => row.member_tier_name);
 
+    // **A. Count of Members in Different Membership Tiers**
+    const tierCountsQuery = `
+      SELECT
+        COALESCE(mt.member_tier_name, 'No Tier') AS member_tier_name,
+        COUNT(m.member_id) AS member_count
+      FROM
+        member m
+      LEFT JOIN
+        membership_tier mt ON m.member_tier_id = mt.member_tier_id
+      GROUP BY
+        mt.member_tier_name
+      ORDER BY
+        MAX(mt.member_tier_sequence) -- Ensures correct ordering, handles NULL
+    `;
+    const tierCountsResult = await pool.query(tierCountsQuery);
+    const memberTierCounts: { [tier: string]: number } = {};
+    tierCountsResult.rows.forEach(row => {
+      memberTierCounts[row.member_tier_name || 'No Tier'] = parseInt(row.member_count, 10);
+    });
+
+    // **B. Count of Memberships Expiring in the Current Month**
+    const expiringMembersQuery = `
+      SELECT
+        COUNT(*) AS expiring_members_count
+      FROM
+        member
+      WHERE
+        membership_expiry_date IS NOT NULL
+        AND EXTRACT(YEAR FROM membership_expiry_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+        AND EXTRACT(MONTH FROM membership_expiry_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+    `;
+    const expiringMembersResult = await pool.query(expiringMembersQuery);
+    const expiringMembersCount = parseInt(expiringMembersResult.rows[0].expiring_members_count, 10);
+
+    // **C. Count of Members with Birthdays in the Current Month**
+    const birthdayMembersQuery = `
+      SELECT
+        COUNT(*) AS birthday_members_count
+      FROM
+        member
+      WHERE
+        birthday IS NOT NULL
+        AND EXTRACT(MONTH FROM birthday) = EXTRACT(MONTH FROM CURRENT_DATE)
+    `;
+    const birthdayMembersResult = await pool.query(birthdayMembersQuery);
+    const birthdayMembersCount = parseInt(birthdayMembersResult.rows[0].birthday_members_count, 10);
+
+    // **D. Count of Members Who Became Members in the Current Month**
+    const newMembersQuery = `
+      SELECT
+        COUNT(*) AS new_members_count
+      FROM
+        member
+      WHERE
+        EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM CURRENT_DATE)
+        AND EXTRACT(MONTH FROM created_at) = EXTRACT(MONTH FROM CURRENT_DATE)
+    `;
+    const newMembersResult = await pool.query(newMembersQuery);
+    const newMembersCount = parseInt(newMembersResult.rows[0].new_members_count, 10);
+
     return {
       data: members,
       total: total,
       membership_tiers: membershipTiers,
+      member_tier_counts: memberTierCounts,
+      expiring_members_count: expiringMembersCount,
+      birthday_members_count: birthdayMembersCount,
+      new_members_count: newMembersCount,
     };
   } catch (error) {
     console.error('Database query error:', error);
     throw new Error('Database query failed');
   }
 }
+
 
 export default getMemberList;
