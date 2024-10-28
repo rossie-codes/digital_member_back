@@ -1,3 +1,5 @@
+// src/controllers/auth/register.ts
+
 import type { Context } from 'hono';
 import { pool } from '../db';
 import bcrypt from 'bcryptjs';

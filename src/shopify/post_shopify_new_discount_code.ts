@@ -29,6 +29,41 @@ const CREATE_NEW_DISCOUNT_CODE_MUTATION = `
   }
 `;
 
+
+
+// const CREATE_NEW_DISCOUNT_CODE_MUTATION = `
+//   mutation discountCodeBasicCreate($basicCodeDiscount: DiscountCodeBasicInput!) {
+//     discountCodeBasicCreate(basicCodeDiscount: $basicCodeDiscount) {
+//       codeDiscountNode {
+//         id
+//       }
+//       userErrors {
+//         field
+//         message
+//       }
+//     }
+//   }
+// `;
+
+
+
+
+// const CREATE_NEW_DISCOUNT_REDEEMCODE_MUTATION = `
+// mutation discountRedeemCodeBulkAdd($discountId: ID!, $codes: [DiscountRedeemCodeInput!]!) {
+//   discountRedeemCodeBulkAdd(discountId: $discountId, codes: $codes) {
+//     bulkCreation {
+//       id
+//     }
+//     userErrors {
+//       code
+//       field
+//       message
+//     }
+//   }
+// }
+// `;
+
+
 interface DiscountInput {
   discount_code_name: string;
   discount_code: string;
@@ -63,7 +98,9 @@ async function createShopifyDiscountCode(input: DiscountInput): Promise<any> {
       };
     }
 
-    const appliesOncePerCustomer = input.use_limit_type === 'once_per_customer';
+    console.log('discountValue is: ', discountValue)
+    // const appliesOncePerCustomer = input.use_limit_type === 'once_per_customer';
+    const appliesOncePerCustomer = false;
 
     const usageLimit = input.use_limit_type === 'single_use' ? 1 : null;
 
@@ -86,6 +123,8 @@ async function createShopifyDiscountCode(input: DiscountInput): Promise<any> {
       usageLimit: usageLimit,
     };
 
+
+
     if (input.minimum_spending && input.minimum_spending > 0) {
       basicCodeDiscount.minimumRequirement = {
         subtotal: {
@@ -102,6 +141,13 @@ async function createShopifyDiscountCode(input: DiscountInput): Promise<any> {
     //   };
     // }
 
+    console.log('createShopifyDiscountCode function start create basic code')
+    console.log('createShopifyDiscountCode function start create basic code', basicCodeDiscount.code)
+    console.log('createShopifyDiscountCode function start create basic code', basicCodeDiscount)
+
+
+
+    
     const result: any = await graphqlClient.query({
       data: {
         'query': CREATE_NEW_DISCOUNT_CODE_MUTATION,
@@ -112,10 +158,38 @@ async function createShopifyDiscountCode(input: DiscountInput): Promise<any> {
       },
     });
 
+    console.log('createShopifyDiscountCode function done create basic code')
+
     // console.log(result)
     const webstore_discount_code_id = result.body.data.discountCodeBasicCreate.codeDiscountNode.id
-    console.log(webstore_discount_code_id)
     
+    console.log('webstore discount code id: ', webstore_discount_code_id)
+
+
+
+    // const discountRedeemCode: { [key: string]: any } = {
+    //   discountId: webstore_discount_code_id,
+    //   codes: input.discount_code
+      
+    // };
+
+    // console.log('createShopifyDiscountCode function start add redeem code')
+
+    // const redeemcode: any = await graphqlClient.query({
+    //   data: {
+    //     'query': CREATE_NEW_DISCOUNT_REDEEMCODE_MUTATION,
+    //     'variables': {
+    //       'basicCodeDiscount': discountRedeemCode
+    //       ,
+    //     },
+    //   },
+    // });
+
+    // console.log('createShopifyDiscountCode function done redeem code')
+
+    // console.log(redeemcode)
+
+
 
     const responseData = result.body.data?.discountCodeBasicCreate;
 

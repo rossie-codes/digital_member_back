@@ -2,9 +2,7 @@
 
 import '@shopify/shopify-api/adapters/node';
 import { shopifyApi, LATEST_API_VERSION } from '@shopify/shopify-api';
-// import dotenv from 'dotenv';
 
-// dotenv.config({ path: '.env.local' });
 
 const shopDomain = process.env.SHOPIFY_ID;
 const accessToken = process.env.SHOPIFY_TOKEN; // This should be your Admin API access token

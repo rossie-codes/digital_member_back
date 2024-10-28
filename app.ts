@@ -2,11 +2,14 @@
 
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
+import authRouter from './src/routes/auth';
 import memberRouter from './src/routes/member';
 import membershipTierRouter from './src/routes/membership_tier';
 import adminSettingRouter from './src/routes/admin_setting';
 import redemptionItemRouter from './src/routes/redemption_item';
 import discountCodeRouter from './src/routes/discount_code';
+
+
 import { config } from './src/config'; // Adjust the path as needed
 
 const app = new Hono();
@@ -14,6 +17,8 @@ const app = new Hono();
 // Apply global CORS middleware
 app.use('*', cors({
   origin: config.allowedOrigins, // Always a string array
+  // origin: '*', // Always a string array
+  // origin: process.env.ALLOWED_ORIGINS, // Always a string array
   // origin: 'https://digitalmemberfront-production.up.railway.app',
   // origin: 'http://localhost:3001',
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -21,9 +26,9 @@ app.use('*', cors({
   credentials: true,
 }));
 
+
 // Error handling middleware
 app.onError((err: any, c: Context) => {
-  console.error('config.allowedOrigins is!!!!!!!!!!!!!!!', config.allowedOrigins);
   console.error('Error occurred:', err);
 
   // Check if the error is an instance of Hono's HTTPException
@@ -35,6 +40,7 @@ app.onError((err: any, c: Context) => {
 });
 
 // Mount sub-routers
+app.route('/auth', authRouter);
 app.route('/member', memberRouter); // Handles /member and nested routes
 app.route('/membership_tier', membershipTierRouter); // Handles /membership_tier and nested routes
 app.route('/admin_setting', adminSettingRouter);

@@ -37,8 +37,8 @@ interface Member {
 
 async function getMemberList(c: Context): Promise<{ data: Member[]; total: number; membership_tiers: string[] }> {
   
-  const aaa = await getShopifyOrderList(c)
-  console.log(aaa.json)
+  // const aaa = await getShopifyOrderList(c)
+  // console.log(aaa.json)
 
   try {
     const pageParam = c.req.query('page');
