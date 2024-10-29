@@ -99,8 +99,8 @@ async function createShopifyDiscountCode(input: DiscountInput): Promise<any> {
     }
 
     console.log('discountValue is: ', discountValue)
-    // const appliesOncePerCustomer = input.use_limit_type === 'once_per_customer';
-    const appliesOncePerCustomer = false;
+    const appliesOncePerCustomer = input.use_limit_type === 'once_per_customer';
+    // const appliesOncePerCustomer = false;
 
     const usageLimit = input.use_limit_type === 'single_use' ? 1 : null;
 

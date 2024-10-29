@@ -52,22 +52,25 @@ async function getMemberList(c: Context): Promise<{
     const pageSizeParam = c.req.query('pageSize');
     const sortFieldParam = c.req.query('sortField');
     const sortOrderParam = c.req.query('sortOrder');
-
     const searchText = c.req.query('searchText') || '';
 
+
     const url = new URL(c.req.url, 'http://localhost'); // Base URL is required for relative URLs
+    
     const membershipTierParams: string[] = url.searchParams.getAll('membership_tier') || [];
+    const isActiveFilters: string[] = url.searchParams.getAll('is_active');
 
     const page = pageParam ? parseInt(pageParam, 10) : 1;
     const pageSize = pageSizeParam ? parseInt(pageSizeParam, 10) : 10;
 
     // Allowed fields for sorting
-    const allowedSortFields = ['member_name', 'member_phone', 'point', 'membership_expiry_date'];
+    const allowedSortFields = ['member_name', 'member_phone', 'point', 'membership_expiry_date', 'membership_tier'];
     const sortFieldMapping: { [key: string]: string } = {
       'member_name': 'm.member_name',
       'member_phone': 'm.member_phone',
       'point': 'm.point',
       'membership_expiry_date': 'm.membership_expiry_date',
+      'membership_tier': 'mt.member_tier_name',
       'member_id': 'm.member_id', // Default sorting field
     };
 
@@ -129,6 +132,14 @@ async function getMemberList(c: Context): Promise<{
       whereClauses.push(`mt.member_tier_name IN (${membershipTierPlaceholders})`);
       queryParams.push(...membershipTierParams);
       paramIndex += membershipTierParams.length;
+    }
+
+    // Handle is_active filters
+    if (isActiveFilters && isActiveFilters.length > 0) {
+      const statusPlaceholders = isActiveFilters.map((_, idx) => `$${paramIndex + idx}`).join(', ');
+      whereClauses.push(`m.is_active IN (${statusPlaceholders})`);
+      queryParams.push(...isActiveFilters);
+      paramIndex += isActiveFilters.length;
     }
 
     // Combine WHERE clauses
@@ -195,14 +206,14 @@ async function getMemberList(c: Context): Promise<{
         state_code: row.state_code,
         membership_tier: row.mt_member_tier_id
           ? {
-              member_tier_id: row.mt_member_tier_id,
-              member_tier_name: row.mt_member_tier_name,
-              member_tier_sequence: row.mt_member_tier_sequence,
-              require_point: row.mt_require_point,
-              extend_membership_point: row.mt_extend_membership_point,
-              point_multiplier: row.mt_point_multiplier,
-              membership_period: row.mt_membership_period,
-            }
+            member_tier_id: row.mt_member_tier_id,
+            member_tier_name: row.mt_member_tier_name,
+            member_tier_sequence: row.mt_member_tier_sequence,
+            require_point: row.mt_require_point,
+            extend_membership_point: row.mt_extend_membership_point,
+            point_multiplier: row.mt_point_multiplier,
+            membership_period: row.mt_membership_period,
+          }
           : undefined,
       };
       return member;
