@@ -15,7 +15,8 @@ async function postRedemptionItemSetting(c: Context): Promise<Response> {
       discount_type,
       minimum_spending,
       validity_period,
-      is_active
+      is_active,
+      redeem_point
     } = body;
 
     // Validate common required fields
@@ -25,13 +26,14 @@ async function postRedemptionItemSetting(c: Context): Promise<Response> {
       !['fixed_amount', 'percentage'].includes(discount_type) ||
       typeof minimum_spending !== 'number' ||
       typeof validity_period !== 'number' ||
-      typeof is_active !== 'boolean'
+      typeof is_active !== 'boolean' ||
+      typeof redeem_point !== 'number'
     ) {
       throw new HTTPException(400, { message: 'Invalid input data' });
     }
 
     // Map is_active to status
-    const status = is_active ? 'active' : 'inactive';
+    // const status = is_active ? 'active' : 'inactive';
 
     // Calculate valid_from and valid_until
     const valid_from = new Date();
@@ -80,9 +82,10 @@ async function postRedemptionItemSetting(c: Context): Promise<Response> {
         validity_period,
         valid_from,
         valid_until,
-        status
+        is_active,
+        redeem_point
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
       ) RETURNING redemption_item_id
     `;
 
@@ -96,7 +99,8 @@ async function postRedemptionItemSetting(c: Context): Promise<Response> {
       validity_period,
       valid_from,
       valid_until,
-      status
+      is_active,
+      redeem_point
     ];
 
     // Get a database client from the pool
