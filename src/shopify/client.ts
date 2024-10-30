@@ -22,7 +22,7 @@ export const shopify = shopifyApi({
   apiSecretKey: process.env.SHOPIFY_SECRET!,
   apiVersion: LATEST_API_VERSION,
   isCustomStoreApp: true,
-  adminApiAccessToken: "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",
+  adminApiAccessToken: accessToken,
   // scopes: ['write_price_rules'], // Add other scopes as needed
   hostName: shopDomain,
 
