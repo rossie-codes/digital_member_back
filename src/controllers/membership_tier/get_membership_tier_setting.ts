@@ -4,8 +4,8 @@ import { pool } from '../db';
 import { type Context } from 'hono';
 
 interface MembershipTier {
-  member_tier_name: string;
-  member_tier_sequence: number;
+  membership_tier_name: string;
+  membership_tier_sequence: number;
   require_point: number;
   extend_membership_point: number;
   point_multiplier: number; // Original multiplier
@@ -13,8 +13,8 @@ interface MembershipTier {
 }
 
 interface MembershipTierResponse {
-  member_tier_name: string;
-  member_tier_sequence: number;
+  membership_tier_name: string;
+  membership_tier_sequence: number;
   require_point: number;
   extend_membership_point: number;
   point_multiplier: number; // Multiplier adjusted by /1000
@@ -26,7 +26,7 @@ async function getMembershipTierSetting(): Promise<MembershipTierResponse[]> {
     // Query to fetch all membership tiers sorted by sequence
     console.log('start')
     
-    const data = await pool.query('SELECT * FROM membership_tier ORDER BY member_tier_sequence ASC');
+    const data = await pool.query('SELECT * FROM membership_tier ORDER BY membership_tier_sequence ASC');
 
     console.log("Membership tier settings (sorted):", data.rows);
 

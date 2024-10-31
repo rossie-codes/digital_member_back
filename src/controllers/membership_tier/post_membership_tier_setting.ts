@@ -5,8 +5,8 @@ import { type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception'
 
 interface MembershipTier {
-  member_tier_name: string;
-  member_tier_sequence: number;
+  membership_tier_name: string;
+  membership_tier_sequence: number;
   require_point: number;
   extend_membership_point: number;
   point_multiplier: number;
@@ -30,11 +30,11 @@ async function postMembershipTier(c: Context): Promise<Response> {
       // Upsert the membership_tier records
       const upsertQuery = `
         INSERT INTO membership_tier 
-          (member_tier_name, member_tier_sequence, require_point, extend_membership_point, point_multiplier, membership_period)
+          (membership_tier_name, membership_tier_sequence, require_point, extend_membership_point, point_multiplier, membership_period)
         VALUES 
           ($1, $2, $3, $4, $5, $6)
-        ON CONFLICT (member_tier_sequence) DO UPDATE SET 
-          member_tier_name = EXCLUDED.member_tier_name,
+        ON CONFLICT (membership_tier_sequence) DO UPDATE SET 
+          membership_tier_name = EXCLUDED.membership_tier_name,
           require_point = EXCLUDED.require_point,
           extend_membership_point = EXCLUDED.extend_membership_point,
           point_multiplier = EXCLUDED.point_multiplier,
@@ -44,8 +44,8 @@ async function postMembershipTier(c: Context): Promise<Response> {
       // Upsert each tier
       for (const tier of tiers) {
         await client.query(upsertQuery, [
-          tier.member_tier_name,
-          tier.member_tier_sequence,
+          tier.membership_tier_name,
+          tier.membership_tier_sequence,
           tier.require_point,
           tier.extend_membership_point,
           tier.point_multiplier,
@@ -53,19 +53,19 @@ async function postMembershipTier(c: Context): Promise<Response> {
         ]);
       }
 
-      // Recalculate and update member_tier_id for all members
+      // Recalculate and update membership_tier_id for all members
       const updateMemberTiersQuery = `
         UPDATE member
-        SET member_tier_id = sub.member_tier_id
+        SET membership_tier_id = sub.membership_tier_id
         FROM (
           SELECT
             member_id,
-            mt.member_tier_id
+            mt.membership_tier_id
           FROM
             member m
           JOIN membership_tier mt ON m.point >= mt.require_point
           LEFT JOIN membership_tier mt2 ON mt2.require_point > mt.require_point AND m.point >= mt2.require_point
-          WHERE mt2.member_tier_id IS NULL
+          WHERE mt2.membership_tier_id IS NULL
         ) AS sub
         WHERE member.member_id = sub.member_id
       `;
