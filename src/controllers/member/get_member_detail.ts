@@ -20,6 +20,7 @@ interface DiscountCodeType {
 }
 
 interface RefereeDataType {
+  created_at: string;
   member_phone: string;
   member_name: string;
   purchase_count: number;
@@ -188,6 +189,7 @@ async function getMemberDetail(memberPhone: string): Promise<Member> {
     // Referees
     const refereesQuery = `
       SELECT
+        m.created_at,
         m.member_id,
         m.member_name,
         m.member_phone,
@@ -205,6 +207,7 @@ async function getMemberDetail(memberPhone: string): Promise<Member> {
     const refereesResult = await pool.query(refereesQuery, [memberId]);
 
     const referees = refereesResult.rows.map((referee) => ({
+      created_at: referee.created_at,
       member_phone: referee.member_phone,
       member_name: referee.member_name,
       purchase_count: parseInt(referee.purchase_count, 10) || 0,
