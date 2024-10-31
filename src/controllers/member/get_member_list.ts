@@ -15,7 +15,7 @@ interface Member {
   member_name: string;
   member_referral_code: string;
   point: number;
-  member_tier_id: number | null;
+  membership_tier_id: number | null;
   membership_expiry_date: string;
   referrer_member_id: number | null;
   birthday: string | null;
@@ -25,9 +25,9 @@ interface Member {
   state_code: string | null;
   // Add a nested object to hold membership tier details
   membership_tier?: {
-    member_tier_id: number;
-    member_tier_name: string;
-    member_tier_sequence: number;
+    membership_tier_id: number;
+    membership_tier_name: string;
+    membership_tier_sequence: number;
     require_point: number;
     extend_membership_point: number;
     point_multiplier: number;
@@ -39,7 +39,7 @@ async function getMemberList(c: Context): Promise<{
   data: Member[];
   total: number;
   membership_tiers: string[];
-  member_tier_counts: { [tier: string]: number };
+  membership_tier_counts: { [tier: string]: number };
   expiring_members_count: number;
   birthday_members_count: number;
   new_members_count: number;
@@ -70,7 +70,7 @@ async function getMemberList(c: Context): Promise<{
       'member_phone': 'm.member_phone',
       'point': 'm.point',
       'membership_expiry_date': 'm.membership_expiry_date',
-      'membership_tier': 'mt.member_tier_name',
+      'membership_tier': 'mt.membership_tier_name',
       'member_id': 'm.member_id', // Default sorting field
     };
 
@@ -129,7 +129,7 @@ async function getMemberList(c: Context): Promise<{
     // Handle membership_tier filters
     if (membershipTierParams && membershipTierParams.length > 0) {
       const membershipTierPlaceholders = membershipTierParams.map((_, idx) => `$${paramIndex + idx}`).join(', ');
-      whereClauses.push(`mt.member_tier_name IN (${membershipTierPlaceholders})`);
+      whereClauses.push(`mt.membership_tier_name IN (${membershipTierPlaceholders})`);
       queryParams.push(...membershipTierParams);
       paramIndex += membershipTierParams.length;
     }
@@ -148,7 +148,7 @@ async function getMemberList(c: Context): Promise<{
     // Get total count with filters
     const countQuery = `
       SELECT COUNT(*) FROM member m
-      LEFT JOIN membership_tier mt ON m.member_tier_id = mt.member_tier_id
+      LEFT JOIN membership_tier mt ON m.membership_tier_id = mt.membership_tier_id
       ${whereClause}
     `;
     const countResult = await pool.query(countQuery, queryParams);
@@ -166,9 +166,9 @@ async function getMemberList(c: Context): Promise<{
     const dataQuery = `
       SELECT
         m.*,
-        mt.member_tier_id AS mt_member_tier_id,
-        mt.member_tier_name AS mt_member_tier_name,
-        mt.member_tier_sequence,
+        mt.membership_tier_id AS mt_membership_tier_id,
+        mt.membership_tier_name AS mt_membership_tier_name,
+        mt.membership_tier_sequence,
         mt.require_point,
         mt.extend_membership_point,
         mt.point_multiplier,
@@ -176,7 +176,7 @@ async function getMemberList(c: Context): Promise<{
       FROM
         member m
       LEFT JOIN
-        membership_tier mt ON m.member_tier_id = mt.member_tier_id
+        membership_tier mt ON m.membership_tier_id = mt.membership_tier_id
       ${whereClause}
       ${orderByClause}
       LIMIT $${paramIndex - 2} OFFSET $${paramIndex - 1}
@@ -196,7 +196,7 @@ async function getMemberList(c: Context): Promise<{
         member_name: row.member_name,
         member_referral_code: row.member_referral_code,
         point: row.point,
-        member_tier_id: row.member_tier_id,
+        membership_tier_id: row.membership_tier_id,
         membership_expiry_date: row.membership_expiry_date,
         referrer_member_id: row.referrer_member_id,
         birthday: row.birthday,
@@ -204,11 +204,11 @@ async function getMemberList(c: Context): Promise<{
         member_note: row.member_note,
         member_tag: row.member_tag,
         state_code: row.state_code,
-        membership_tier: row.mt_member_tier_id
+        membership_tier: row.mt_membership_tier_id
           ? {
-            member_tier_id: row.mt_member_tier_id,
-            member_tier_name: row.mt_member_tier_name,
-            member_tier_sequence: row.mt_member_tier_sequence,
+            membership_tier_id: row.mt_membership_tier_id,
+            membership_tier_name: row.mt_membership_tier_name,
+            membership_tier_sequence: row.mt_membership_tier_sequence,
             require_point: row.mt_require_point,
             extend_membership_point: row.mt_extend_membership_point,
             point_multiplier: row.mt_point_multiplier,
@@ -220,28 +220,28 @@ async function getMemberList(c: Context): Promise<{
     });
 
     // Fetch all membership tiers
-    const tiersQuery = `SELECT member_tier_name FROM membership_tier`;
+    const tiersQuery = `SELECT membership_tier_name FROM membership_tier`;
     const tiersResult = await pool.query(tiersQuery);
-    const membershipTiers = tiersResult.rows.map(row => row.member_tier_name);
+    const membershipTiers = tiersResult.rows.map(row => row.membership_tier_name);
 
     // **A. Count of Members in Different Membership Tiers**
     const tierCountsQuery = `
       SELECT
-        COALESCE(mt.member_tier_name, 'No Tier') AS member_tier_name,
+        COALESCE(mt.membership_tier_name, 'No Tier') AS membership_tier_name,
         COUNT(m.member_id) AS member_count
       FROM
         member m
       LEFT JOIN
-        membership_tier mt ON m.member_tier_id = mt.member_tier_id
+        membership_tier mt ON m.membership_tier_id = mt.membership_tier_id
       GROUP BY
-        mt.member_tier_name
+        mt.membership_tier_name
       ORDER BY
-        MAX(mt.member_tier_sequence) -- Ensures correct ordering, handles NULL
+        MAX(mt.membership_tier_sequence) -- Ensures correct ordering, handles NULL
     `;
     const tierCountsResult = await pool.query(tierCountsQuery);
     const memberTierCounts: { [tier: string]: number } = {};
     tierCountsResult.rows.forEach(row => {
-      memberTierCounts[row.member_tier_name || 'No Tier'] = parseInt(row.member_count, 10);
+      memberTierCounts[row.membership_tier_name || 'No Tier'] = parseInt(row.member_count, 10);
     });
 
     // **B. Count of Memberships Expiring in the Current Month**
@@ -288,7 +288,7 @@ async function getMemberList(c: Context): Promise<{
       data: members,
       total: total,
       membership_tiers: membershipTiers,
-      member_tier_counts: memberTierCounts,
+      membership_tier_counts: memberTierCounts,
       expiring_members_count: expiringMembersCount,
       birthday_members_count: birthdayMembersCount,
       new_members_count: newMembersCount,

@@ -97,10 +97,10 @@ async function postNewMember(c: Context): Promise<Response> {
             }
 
             // Determine membership_tier and membership_expiry_date
-            // Get the tier with the lowest member_tier_sequence
+            // Get the tier with the lowest membership_tier_sequence
             // Determine membership_tier and membership_expiry_date based on member's point
             const tierQuery = `
-                SELECT member_tier_id, membership_period
+                SELECT membership_tier_id, membership_period
                 FROM membership_tier
                 WHERE require_point <= $1
                 ORDER BY require_point DESC
@@ -109,13 +109,13 @@ async function postNewMember(c: Context): Promise<Response> {
 
             const tierResult = await client.query(tierQuery, [point]);
 
-            let member_tier_id: number | null = null;
+            let membership_tier_id: number | null = null;
             let membership_expiry_date: string | null = null;
 
             if (tierResult.rows.length > 0) {
-                const { member_tier_id: tierId, membership_period } = tierResult.rows[0];
+                const { membership_tier_id: tierId, membership_period } = tierResult.rows[0];
 
-                member_tier_id = tierId;
+                membership_tier_id = tierId;
 
                 // Set membership_expiry_date based on membership_period
                 const currentDate = new Date();
@@ -139,7 +139,7 @@ async function postNewMember(c: Context): Promise<Response> {
               member_name,
               member_referral_code,
               point,
-              member_tier_id,
+              membership_tier_id,
               membership_expiry_date,
               referrer_member_id,
               birthday,
@@ -155,7 +155,7 @@ async function postNewMember(c: Context): Promise<Response> {
                 member_name,
                 member_referral_code,
                 point,
-                member_tier_id,
+                membership_tier_id,
                 membership_expiry_date,
                 referrer_member_id,
                 birthday,
