@@ -7,8 +7,6 @@ import putShopifyDiscountCodeIsActive from '../../shopify/put_shopify_discount_c
 
 async function putDiscountCodeIsActive(c: Context): Promise<Response> {
   try {
-    console.log('putDiscountCodeIsActive function begin');
-
     const discount_code_id_str = c.req.param('discount_code_id');
     const discount_code_id = parseInt(discount_code_id_str, 10);
     if (isNaN(discount_code_id)) {
@@ -16,17 +14,11 @@ async function putDiscountCodeIsActive(c: Context): Promise<Response> {
     }
 
     const body = await c.req.json();
-
-    console.log('Received body:', body);
-    console.log('Discount code ID:', discount_code_id);
-
     const { is_active } = body;
 
     if (typeof is_active !== 'boolean') {
       throw new HTTPException(400, { message: 'Invalid input: is_active must be a boolean' });
     }
-
-    console.log('Validated is_active:', is_active);
 
     const client = await pool.connect();
 
@@ -41,42 +33,52 @@ async function putDiscountCodeIsActive(c: Context): Promise<Response> {
       const selectResult = await client.query(selectQuery, [discount_code_id]);
 
       if (selectResult.rowCount === 0) {
-        await client.query('ROLLBACK');
         throw new HTTPException(404, { message: 'Discount code not found' });
       }
 
-      const {
-        webstore_discount_code_id,
-        valid_from,
-        valid_until,
-      } = selectResult.rows[0];
+      const { webstore_discount_code_id, valid_from, valid_until } = selectResult.rows[0];
 
       if (!webstore_discount_code_id) {
-        await client.query('ROLLBACK');
-        throw new HTTPException(400, { message: 'No Shopify discount code ID associated with this discount code' });
+        throw new HTTPException(400, {
+          message: 'No Shopify discount code ID associated with this discount code',
+        });
       }
 
-      try {
-        let updatedDiscount;
-        if (is_active) {
-          // Reactivate the discount code with original validity dates
-          updatedDiscount = await putShopifyDiscountCodeIsActive(
-            webstore_discount_code_id,
-            is_active,
-            valid_from.toISOString(),
-            valid_until.toISOString(),
-          );
-        } else {
-          // Deactivate the discount code
-          updatedDiscount = await putShopifyDiscountCodeIsActive(
-            webstore_discount_code_id,
-            is_active,
-          );
+      let isActiveEnumValue = 'suspended';
+
+      if (is_active) {
+        const currentDate = new Date();
+
+        if (currentDate < valid_from) {
+          isActiveEnumValue = 'scheduled';
+        } else if (currentDate >= valid_from && currentDate <= valid_until) {
+          isActiveEnumValue = 'active';
+        } else if (currentDate > valid_until) {
+          isActiveEnumValue = 'expired';
         }
-      } catch (error) {
-        await client.query('ROLLBACK');
-        console.error('Error updating discount code status in Shopify:', error);
-        throw new HTTPException(500, { message: 'Failed to update discount code status in Shopify' });
+
+        try {
+          await putShopifyDiscountCodeIsActive(
+            webstore_discount_code_id,
+            true,
+            valid_from.toISOString(),
+            valid_until.toISOString()
+          );
+        } catch {
+          throw new HTTPException(500, {
+            message: 'Failed to update discount code status in Shopify',
+          });
+        }
+      } else {
+        isActiveEnumValue = 'suspended';
+
+        try {
+          await putShopifyDiscountCodeIsActive(webstore_discount_code_id, false);
+        } catch {
+          throw new HTTPException(500, {
+            message: 'Failed to update discount code status in Shopify',
+          });
+        }
       }
 
       const updateQuery = `
@@ -85,18 +87,15 @@ async function putDiscountCodeIsActive(c: Context): Promise<Response> {
         WHERE discount_code_id = $2
         RETURNING discount_code_id
       `;
-      const values = [is_active, discount_code_id];
+      const values = [isActiveEnumValue, discount_code_id];
 
       const result = await client.query(updateQuery, values);
 
       if (result.rowCount === 0) {
-        await client.query('ROLLBACK');
         throw new HTTPException(404, { message: 'Discount code not found on update' });
       }
 
       await client.query('COMMIT');
-
-      console.log(`Successfully updated discount_code_id: ${discount_code_id} to is_active: ${is_active}`);
 
       return c.json(
         { message: 'Discount code status updated successfully', discount_code_id },
@@ -104,7 +103,6 @@ async function putDiscountCodeIsActive(c: Context): Promise<Response> {
       );
     } catch (error) {
       await client.query('ROLLBACK');
-      console.error('Error updating discount code status:', error);
       if (error instanceof HTTPException) {
         throw error;
       }
@@ -113,7 +111,6 @@ async function putDiscountCodeIsActive(c: Context): Promise<Response> {
       client.release();
     }
   } catch (error) {
-    console.error('Error in putDiscountCodeIsActive:', error);
     if (error instanceof HTTPException) {
       throw error;
     }
