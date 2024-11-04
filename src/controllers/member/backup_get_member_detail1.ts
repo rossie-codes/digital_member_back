@@ -28,9 +28,9 @@ interface RefereeDataType {
 }
 
 interface MemberTier {
-  member_tier_id: number;
-  member_tier_name: string;
-  member_tier_sequence: number;
+  membership_tier_id: number;
+  membership_tier_name: string;
+  membership_tier_sequence: number;
   require_point: number;
   extend_membership_point: number;
   point_multiplier: number;
@@ -47,7 +47,7 @@ interface Member {
   member_name: string;
   member_referral_code: string | null; // Allow for null if no referral code
   point: number;
-  member_tier_id: number | null; // Allow for null if no tier assigned
+  membership_tier_id: number | null; // Allow for null if no tier assigned
   membership_expiry_date: string | null; // Allow for null if no expiry
   referrer_member_id: number | null; // Allow for null if no referrer
   birthday: string | null;  // Assuming date string or null
@@ -76,9 +76,9 @@ async function getMemberDetail(memberPhone: string): Promise<Member> {
     const query = `
       SELECT
         m.*,
-        mt.member_tier_id AS mt_member_tier_id,
-        mt.member_tier_name,
-        mt.member_tier_sequence,
+        mt.membership_tier_id AS mt_membership_tier_id,
+        mt.membership_tier_name,
+        mt.membership_tier_sequence,
         mt.require_point,
         mt.extend_membership_point,
         mt.point_multiplier,
@@ -86,7 +86,7 @@ async function getMemberDetail(memberPhone: string): Promise<Member> {
       FROM
         member m
       LEFT JOIN
-        membership_tier mt ON m.member_tier_id = mt.member_tier_id
+        membership_tier mt ON m.membership_tier_id = mt.membership_tier_id
       WHERE
         m.member_phone = $1
     `;
@@ -109,7 +109,7 @@ async function getMemberDetail(memberPhone: string): Promise<Member> {
       member_name: row.member_name,
       member_referral_code: row.member_referral_code,
       point: row.point,
-      member_tier_id: row.member_tier_id,
+      membership_tier_id: row.membership_tier_id,
       membership_expiry_date: row.membership_expiry_date,
       referrer_member_id: row.referrer_member_id,
       birthday: row.birthday,
@@ -117,11 +117,11 @@ async function getMemberDetail(memberPhone: string): Promise<Member> {
       member_note: row.member_note,
       member_tag: row.member_tag,
       state_code: row.state_code,
-      membership_tier: row.mt_member_tier_id
+      membership_tier: row.mt_membership_tier_id
         ? {
-            member_tier_id: row.mt_member_tier_id,
-            member_tier_name: row.member_tier_name,
-            member_tier_sequence: row.member_tier_sequence,
+            membership_tier_id: row.mt_membership_tier_id,
+            membership_tier_name: row.membership_tier_name,
+            membership_tier_sequence: row.membership_tier_sequence,
             require_point: row.require_point,
             extend_membership_point: row.extend_membership_point,
             point_multiplier: row.point_multiplier,
