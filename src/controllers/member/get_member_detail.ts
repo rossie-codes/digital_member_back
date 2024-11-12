@@ -221,15 +221,15 @@ async function getMemberDetail(memberPhone: string): Promise<Member> {
         rr.received_date,
         ri.redemption_item_name AS code_name,
         rr.redeem_code AS code,
-        ri.discount_type AS type,
-        ri.is_active AS status,
+        ri.redemption_type AS type,
+        ri.redemption_item_status AS status,
         rr.received_date,
         COALESCE(COUNT(od.order_discount_id), 0) AS usage_count
       FROM redemption_record rr
       JOIN redemption_item ri ON rr.redemption_item_id = ri.redemption_item_id
       LEFT JOIN order_discounts od ON od.discount_code = rr.redeem_code
       WHERE rr.member_id = $1
-      GROUP BY rr.redemption_record_id, ri.redemption_item_name, rr.redeem_code, ri.discount_type, ri.is_active, rr.received_date
+      GROUP BY rr.redemption_record_id, ri.redemption_item_name, rr.redeem_code, ri.redemption_type, ri.redemption_item_status, rr.received_date
     `;
 
     const discountCodesResult = await pool.query(discountCodesQuery, [memberId]);
