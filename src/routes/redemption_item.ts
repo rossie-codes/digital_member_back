@@ -4,7 +4,7 @@ import { Hono } from 'hono';
 import { type Context } from 'hono';
 import { authMiddleware } from '../middleware/authMiddleware';
 
-import getRedemptionItemSetting from '../controllers/redemption_item_setting/get_redemption_item_setting';
+import getRedemptionItemList from '../controllers/redemption_item_setting/get_redemption_item_list';
 import getRedemptionItemDetail from '../controllers/redemption_item_setting/get_redemption_item_detail';
 import getDeletedRedemptionItemList from '../controllers/redemption_item_setting/get_deleted_redemption_item_list';
 
@@ -31,7 +31,7 @@ const redemptionItemRouter = new Hono();
 redemptionItemRouter.get('/get_redemption_list', async (c: Context) => {
   try {
     console.log('get_redemption_list route begin');
-    const data = await getRedemptionItemSetting(c)
+    const data = await getRedemptionItemList(c)
     console.log('get_redemption_list route end');
     return c.json(data);
   } catch (error: any) {
