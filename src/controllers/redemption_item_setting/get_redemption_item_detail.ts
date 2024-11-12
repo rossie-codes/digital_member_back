@@ -7,13 +7,13 @@ interface RedemptionItem {
   created_at: string;
   redemption_item_id: number;
   redemption_item_name: string;
-  discount_type: 'fixed_amount' | 'percentage';
+  redemption_type: 'fixed_amount' | 'percentage';
   discount_amount?: number; // For fixed amount discount
   discount_percentage?: number; // For percentage discount
   fixed_discount_cap?: number; // For percentage discount
   minimum_spending: number;
   validity_period: number;
-  is_active: boolean;
+  redemption_item_status: 'expired'| 'active'| 'suspended'| 'scheduled';
 }
 
 async function getRedemptionItemDetail(redemption_item_id: string): Promise<RedemptionItem> {
@@ -23,12 +23,12 @@ async function getRedemptionItemDetail(redemption_item_id: string): Promise<Rede
       SELECT
         redemption_item_id,
         redemption_item_name,
-        discount_type,
+        redemption_type,
         discount_amount,
         fixed_discount_cap,
         minimum_spending,
         validity_period,
-        is_active,
+        redemption_item_status,
         created_at
       FROM redemption_item
       WHERE redemption_item_id = $1
@@ -43,17 +43,17 @@ async function getRedemptionItemDetail(redemption_item_id: string): Promise<Rede
 
     const row = rows[0];
 
-    // Map 'is_active' to 'is_active'
-    const isActive = row.is_active === 'True';
+    // Map 'redemption_item_status' to 'redemption_item_status'
+    // const isActive = row.redemption_item_status === 'True';
 
-    // Depending on 'discount_type', map 'discount_amount' appropriately
+    // Depending on 'redemption_type', map 'discount_amount' appropriately
     let discountAmount: number | undefined = undefined;
     let discountPercentage: number | undefined = undefined;
     let fixedDiscountCap: number | undefined = undefined;
 
-    if (row.discount_type === 'fixed_amount') {
+    if (row.redemption_type === 'fixed_amount') {
       discountAmount = row.discount_amount !== null ? Number(row.discount_amount) : undefined;
-    } else if (row.discount_type === 'percentage') {
+    } else if (row.redemption_type === 'percentage') {
       discountPercentage = row.discount_amount !== null ? Number(row.discount_amount) : undefined;
       fixedDiscountCap = row.fixed_discount_cap !== null ? Number(row.fixed_discount_cap) : undefined;
     }
@@ -62,13 +62,13 @@ async function getRedemptionItemDetail(redemption_item_id: string): Promise<Rede
       redemption_item_id: row.redemption_item_id,
       created_at: row.created_at ? row.created_at.toISOString() : '',
       redemption_item_name: row.redemption_item_name,
-      discount_type: row.discount_type,
+      redemption_type: row.redemption_type,
       discount_amount: discountAmount,
       discount_percentage: discountPercentage,
       fixed_discount_cap: fixedDiscountCap,
       minimum_spending: row.minimum_spending !== null ? Number(row.minimum_spending) : 0,
       validity_period: row.validity_period,
-      is_active: isActive,
+      redemption_item_status: row.redemption_item_status,
     };
 
     console.log(redemptionItem)
