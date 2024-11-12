@@ -17,7 +17,8 @@ interface DiscountCode {
   valid_until?: string;
   created_at: string;
   updated_at: string;
-  is_active: boolean;
+  discount_code_status: 'expired' | 'active' | 'suspended' | 'scheduled';
+  // Remove 'is_active' since it no longer exists
 }
 
 async function getDiscountCodeDetail(discount_code_id: string): Promise<DiscountCode> {
@@ -37,7 +38,7 @@ async function getDiscountCodeDetail(discount_code_id: string): Promise<Discount
         valid_until,
         created_at,
         updated_at,
-        is_active
+        discount_code_status
       FROM discount_code
       WHERE discount_code_id = $1
       LIMIT 1
@@ -77,7 +78,7 @@ async function getDiscountCodeDetail(discount_code_id: string): Promise<Discount
       valid_until: row.valid_until ? row.valid_until.toISOString() : undefined,
       created_at: row.created_at ? row.created_at.toISOString() : '',
       updated_at: row.updated_at ? row.updated_at.toISOString() : '',
-      is_active: row.is_active,
+      discount_code_status: row.discount_code_status,
     };
 
     // Return the discount code
