@@ -1,6 +1,6 @@
 // 完成：Post membership_tier_setting 更改現有各個 tier 的 setting
 
-// 想 submit 更改後，再計算 table member column member_tier_id
+// 想 submit 更改後，再計算 table member column membership_tier_id
 
 
 // // src/controllers/membership_tier/post_membership_tier_setting.ts
@@ -11,8 +11,8 @@
 
 
 // interface MembershipTier {
-//   member_tier_name: string;
-//   member_tier_sequence: number;
+//   membership_tier_name: string;
+//   membership_tier_sequence: number;
 //   require_point: number;
 //   extend_membership_point: number;
 //   point_multiplier: number;
@@ -41,11 +41,11 @@
 
 //     const upsertQuery = `
 //       INSERT INTO membership_tier 
-//         (member_tier_name, member_tier_sequence, require_point, extend_membership_point, point_multiplier, membership_period)
+//         (membership_tier_name, membership_tier_sequence, require_point, extend_membership_point, point_multiplier, membership_period)
 //       VALUES 
 //         ($1, $2, $3, $4, $5, $6)
-//       ON CONFLICT (member_tier_sequence) DO UPDATE SET 
-//         member_tier_name = EXCLUDED.member_tier_name,
+//       ON CONFLICT (membership_tier_sequence) DO UPDATE SET 
+//         membership_tier_name = EXCLUDED.membership_tier_name,
 //         require_point = EXCLUDED.require_point,
 //         extend_membership_point = EXCLUDED.extend_membership_point,
 //         point_multiplier = EXCLUDED.point_multiplier,
@@ -56,8 +56,8 @@
 //     const processBatch = async (batchTiers: MembershipTier[]) => {
 //       const upsertPromises = batchTiers.map(tier =>
 //         client.query(upsertQuery, [
-//           tier.member_tier_name,
-//           tier.member_tier_sequence,
+//           tier.membership_tier_name,
+//           tier.membership_tier_sequence,
 //           tier.require_point,
 //           tier.extend_membership_point,
 //           tier.point_multiplier,

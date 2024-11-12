@@ -101,23 +101,23 @@
 //             }
 
 //             // Determine membership_tier and membership_expiry_date
-//             // Get the tier with the lowest member_tier_sequence
+//             // Get the tier with the lowest membership_tier_sequence
 //             const tierQuery = `
-//             SELECT member_tier_name, membership_period 
+//             SELECT membership_tier_name, membership_period 
 //             FROM membership_tier 
-//             ORDER BY member_tier_sequence ASC 
+//             ORDER BY membership_tier_sequence ASC 
 //             LIMIT 1
 //             `;
 
 //             const tierResult = await client.query(tierQuery);
 
-//             let member_tier_id: number | null = null;
+//             let membership_tier_id: number | null = null;
 //             let membership_expiry_date: string | null = null;
 
 //             if (tierResult.rows.length > 0) {
-//                 const { member_tier_id: tierId, membership_period } = tierResult.rows[0];
+//                 const { membership_tier_id: tierId, membership_period } = tierResult.rows[0];
 
-//                 member_tier_id = tierId;
+//                 membership_tier_id = tierId;
 
 //                 // Set membership_expiry_date based on membership_period
 //                 const currentDate = new Date();
@@ -137,7 +137,7 @@
 //               member_name,
 //               member_referral_code,
 //               point,
-//               member_tier_id,
+//               membership_tier_id,
 //               membership_expiry_date,
 //               referrer_member_id,
 //               birthday,
@@ -153,7 +153,7 @@
 //                 member_name,
 //                 member_referral_code,
 //                 point,
-//                 member_tier_id,
+//                 membership_tier_id,
 //                 membership_expiry_date,
 //                 referrer_member_id,
 //                 birthday,
