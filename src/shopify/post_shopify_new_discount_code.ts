@@ -29,8 +29,6 @@ const CREATE_NEW_DISCOUNT_CODE_MUTATION = `
   }
 `;
 
-
-
 // const CREATE_NEW_DISCOUNT_CODE_MUTATION = `
 //   mutation discountCodeBasicCreate($basicCodeDiscount: DiscountCodeBasicInput!) {
 //     discountCodeBasicCreate(basicCodeDiscount: $basicCodeDiscount) {
@@ -75,7 +73,7 @@ interface DiscountInput {
   discount_amount?: number;
   discount_percentage?: number;
   // fixed_discount_cap?: number;
-  is_active: boolean;
+  // is_active: boolean;
 }
 
 async function createShopifyDiscountCode(input: DiscountInput): Promise<any> {

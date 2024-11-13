@@ -3,6 +3,8 @@
 import { pool } from '../db';
 import type { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
+import putShopifyDiscountCodeDetail from '../../shopify/put_shopify_discount_code_detail';
+
 
 async function putDiscountCodeDetail(c: Context): Promise<Response> {
   try {
@@ -22,7 +24,12 @@ async function putDiscountCodeDetail(c: Context): Promise<Response> {
       discount_type,
       minimum_spending,
       valid_from,
-      valid_until
+      valid_until,
+      discount_code_content,
+      discount_code_term,
+      discount_amount,
+      discount_percentage,
+      use_limit_type
     } = body;
 
     if (
@@ -97,12 +104,61 @@ async function putDiscountCodeDetail(c: Context): Promise<Response> {
     const discountCode = discount_code.trim();
     const minSpending = parseFloat(minimum_spending.toFixed(2));
 
+
+
+
+
     // Get a database client from the pool
     const client = await pool.connect();
 
     try {
       // Start a transaction
       await client.query('BEGIN');
+
+      const selectQuery = `
+      SELECT webstore_discount_code_id
+      FROM discount_code
+      WHERE discount_code_id = $1
+    `;
+      const selectResult = await client.query(selectQuery, [discount_code_id]);
+
+      if (selectResult.rowCount === 0) {
+        throw new HTTPException(404, { message: 'Discount code not found' });
+      }
+
+      const {
+        webstore_discount_code_id,
+      } = selectResult.rows[0];
+
+      if (!webstore_discount_code_id) {
+        throw new HTTPException(400, {
+          message: 'No Shopify discount code ID associated with this discount code',
+        });
+      }
+
+      const input = {
+        shopify_discount_code_id: webstore_discount_code_id,
+        discount_type: discount_type,
+        discount_code_name: discount_code_name,
+        discount_amount: discount_amount,
+        discount_percentage: discount_percentage,
+        use_limit_type: use_limit_type,
+        minimum_spending: minimum_spending,
+        valid_from: valid_from,
+        valid_until: valid_until,
+      }
+
+      try {
+        // Activate the discount code in Shopify
+        console.log(input);
+        await putShopifyDiscountCodeDetail(input);
+      } catch (error) {
+        console.error('Error updating discount code status in Shopify:', error);
+        throw new HTTPException(500, {
+          message: 'Failed to update discount code status in Shopify',
+        });
+      }
+
 
       // Prepare the SQL UPDATE statement
       const updateQuery = `
@@ -112,10 +168,12 @@ async function putDiscountCodeDetail(c: Context): Promise<Response> {
           discount_code = $2,
           discount_type = $3,
           discount_amount = $4,
-          fixed_discount_cap = $5,
+          use_limit_type = $5,
           minimum_spending = $6,
           valid_from = $7,
           valid_until = $8,
+          discount_code_content = $10,
+          discount_code_term = $11,
           updated_at = NOW()
         WHERE discount_code_id = $9
         RETURNING discount_code_id
@@ -126,11 +184,13 @@ async function putDiscountCodeDetail(c: Context): Promise<Response> {
         discountCode,
         discount_type,
         discountAmount,
-        fixedDiscountCap,
+        use_limit_type,
         minSpending,
         validFromDate,
         validUntilDate,
-        discount_code_id
+        discount_code_id,
+        discount_code_content,
+        discount_code_term
       ];
 
       const result = await client.query(updateQuery, values);

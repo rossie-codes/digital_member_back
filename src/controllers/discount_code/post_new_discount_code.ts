@@ -3,8 +3,20 @@
 import { pool } from '../db';
 import type { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
-
 import postShopifyNewDiscountCode from '../../shopify/post_shopify_new_discount_code';
+
+interface DiscountInput {
+  discount_code_name: string;
+  discount_code: string;
+  discount_type: 'fixed_amount' | 'percentage';
+  discount_amount?: number;
+  discount_percentage?: number;
+  minimum_spending: number;
+  fixed_discount_cap?: number;
+  use_limit_type: 'single_use' | 'once_per_customer' | 'unlimited';
+  valid_from: string;
+  valid_until: string;
+}
 
 async function postNewDiscountCode(c: Context): Promise<Response> {
   try {
@@ -24,6 +36,8 @@ async function postNewDiscountCode(c: Context): Promise<Response> {
       discount_amount,
       discount_percentage,
       fixed_discount_cap,
+      discount_code_content,
+      discount_code_term,
     } = body;
 
     // Validate common required fields
@@ -56,86 +70,89 @@ async function postNewDiscountCode(c: Context): Promise<Response> {
       throw new HTTPException(400, { message: 'valid_until must be after valid_from' });
     }
 
-    // Map is_active to status
-    const status = is_active ? 'active' : 'inactive';
+    // Determine discount_code_status based on is_active and dates
+    let discount_code_status: 'active' | 'expired' | 'suspended' | 'scheduled' = 'suspended';
 
-    // Prepare variables for discount_amount and fixed_discount_cap
-    let discountAmount: number | null = null;
-    let fixedDiscountCap: number | null = null;
+    if (is_active) {
+      const currentDate = new Date();
+
+      if (currentDate < validFromDate) {
+        discount_code_status = 'scheduled';
+      } else if (currentDate >= validFromDate && currentDate <= validUntilDate) {
+        discount_code_status = 'active';
+      } else if (currentDate > validUntilDate) {
+        discount_code_status = 'expired';
+      }
+    }
+
+    // Initialize variables
+    let discountAmount: number | undefined;
+    let discountPercentage: number | undefined;
+    let fixedDiscountCap: number | undefined;
 
     // Handle discount types
     if (discount_type === 'fixed_amount') {
       if (typeof discount_amount !== 'number' || discount_amount <= 0) {
-        throw new HTTPException(400, { message: 'Invalid or missing discount_amount for fixed_amount discount type' });
+        throw new HTTPException(400, {
+          message: 'Invalid or missing discount_amount for fixed_amount discount type',
+        });
       }
       discountAmount = parseFloat(discount_amount.toFixed(2));
     } else if (discount_type === 'percentage') {
-      if (typeof discount_percentage !== 'number' || discount_percentage <= 0 || discount_percentage >= 100) {
-        throw new HTTPException(400, { message: 'Invalid or missing discount_percentage for percentage discount type' });
+      if (
+        typeof discount_percentage !== 'number' ||
+        discount_percentage <= 0 ||
+        discount_percentage >= 100
+      ) {
+        throw new HTTPException(400, {
+          message: 'Invalid or missing discount_percentage for percentage discount type',
+        });
       }
-      discountAmount = parseFloat(discount_percentage.toFixed(2));
+      discountPercentage = parseFloat(discount_percentage.toFixed(2));
 
       if (fixed_discount_cap !== undefined && fixed_discount_cap !== null) {
         if (typeof fixed_discount_cap !== 'number' || fixed_discount_cap <= 0) {
-          throw new HTTPException(400, { message: 'Invalid fixed_discount_cap for percentage discount type' });
+          throw new HTTPException(400, {
+            message: 'Invalid fixed_discount_cap for percentage discount type',
+          });
         }
         fixedDiscountCap = parseFloat(fixed_discount_cap.toFixed(2));
       }
     }
 
-    // Map use_limit_type
-    function getUseLimitType(use_limit_type: string): number | undefined {
-      switch (use_limit_type) {
-        case 'single_use':
-          return 1;
-        case 'once_per_customer':
-          return 2;
-        case 'unlimited':
-          return 3;
-        default:
-          return undefined;
-      }
-    }
-
-    const useLimitType = getUseLimitType(use_limit_type);
-
-    if (useLimitType === undefined) {
-      throw new HTTPException(400, { message: 'Invalid use_limit_type' });
-    }
+    // Use use_limit_type directly
+    const useLimitType = use_limit_type; // Since use_limit_type matches ENUM values
 
     // Prepare discount input for Shopify
-    const discountInput = {
+    const discountInput: DiscountInput = {
       discount_code_name,
       discount_code,
       discount_type,
       minimum_spending,
-      use_limit_type,
+      use_limit_type: useLimitType,
       valid_from,
       valid_until,
-      discount_amount,
-      discount_percentage,
-      fixed_discount_cap,
-      is_active,
+      ...(discountAmount !== undefined && { discount_amount: discountAmount }),
+      ...(discountPercentage !== undefined && { discount_percentage: discountPercentage }),
+      ...(fixedDiscountCap !== undefined && { fixed_discount_cap: fixedDiscountCap }),
     };
 
     // Create discount code in Shopify
     const shopifyDiscount = await postShopifyNewDiscountCode(discountInput);
 
     const shopifyId = shopifyDiscount.id;
-    // const match = shopifyId.match(/DiscountCodeNode\/(\d+)/); // Matches "DiscountCodeNode/" followed by digits
-    
-    // const shopify_discount_code_id = match ? match[1] : null;  // Extract the captured group (the digits)
-    // console.log(shopify_discount_code_id);
+    console.log('Shopify discount code ID:', shopifyId);
 
+    // Decode Shopify ID (if necessary)
     function decodeShopifyId(globalId: string): string {
-        const base64Decoded = Buffer.from(globalId, 'base64').toString('utf8');
-        // The decoded string will be in the format like "gid://shopify/DiscountCodeNode/1234567890"
-        const match = base64Decoded.match(/gid:\/\/shopify\/DiscountCodeNode\/(\d+)/);
-        return match ? match[1] : globalId;
-      }
-      
-      const shopify_discount_code_id = decodeShopifyId(shopifyId);
+      const base64Decoded = Buffer.from(globalId, 'base64').toString('utf8');
+      const match = base64Decoded.match(/gid:\/\/shopify\/DiscountCodeNode\/(\d+)/);
+      return match ? match[1] : globalId;
+    }
 
+    const shopify_discount_code_id = decodeShopifyId(shopifyId);
+
+    const discount_amount_to_db = discountAmount || discountPercentage;
     // Save to database if Shopify creation is successful
     const client = await pool.connect();
 
@@ -154,9 +171,11 @@ async function postNewDiscountCode(c: Context): Promise<Response> {
           use_limit_type,
           valid_from,
           valid_until,
-          status
+          discount_code_status,
+          discount_code_content,
+          discount_code_term
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
         ) RETURNING discount_code_id
       `;
 
@@ -165,13 +184,15 @@ async function postNewDiscountCode(c: Context): Promise<Response> {
         discount_code_name.trim(),
         discount_code.trim(),
         discount_type,
-        discountAmount,
+        discount_amount_to_db,
         minimum_spending,
         fixedDiscountCap,
         useLimitType,
         validFromDate,
         validUntilDate,
-        status,
+        discount_code_status,
+        discount_code_content,
+        discount_code_term,
       ];
 
       const result = await client.query(insertQuery, values);

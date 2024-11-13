@@ -18,6 +18,8 @@ interface DiscountCode {
   created_at: string;
   updated_at: string;
   discount_code_status: 'expired' | 'active' | 'suspended' | 'scheduled';
+  discount_code_content: string;
+  discount_code_term: string;
   // Remove 'is_active' since it no longer exists
 }
 
@@ -38,7 +40,9 @@ async function getDiscountCodeDetail(discount_code_id: string): Promise<Discount
         valid_until,
         created_at,
         updated_at,
-        discount_code_status
+        discount_code_status,
+        discount_code_content,
+        discount_code_term
       FROM discount_code
       WHERE discount_code_id = $1
       LIMIT 1
@@ -79,8 +83,11 @@ async function getDiscountCodeDetail(discount_code_id: string): Promise<Discount
       created_at: row.created_at ? row.created_at.toISOString() : '',
       updated_at: row.updated_at ? row.updated_at.toISOString() : '',
       discount_code_status: row.discount_code_status,
+      discount_code_content: row.discount_code_content,
+      discount_code_term: row.discount_code_term,
     };
 
+    console.log('Discount code:', discountCode);
     // Return the discount code
     return discountCode;
 
