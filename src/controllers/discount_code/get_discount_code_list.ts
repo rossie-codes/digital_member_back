@@ -48,6 +48,8 @@ async function getDiscountCodeList(): Promise<{
   discount_types: string[];
   use_limit_types: string[];
   discount_code_status: string[];
+  active_count: number;
+  scheduled_count: number;
 
 }> {
   const query = `
@@ -73,6 +75,10 @@ async function getDiscountCodeList(): Promise<{
   try {
     const { rows } = await pool.query(query);
 
+    let activeCount = 0;
+    let scheduledCount = 0;
+
+
     // Map the data to the DiscountCode interface
     const discountCodes: DiscountCode[] = rows.map((row, index) => {
       // Map 'is_active' (boolean)
@@ -88,6 +94,15 @@ async function getDiscountCodeList(): Promise<{
         discountPercentage = row.discount_amount !== null ? Number(row.discount_amount) : undefined;
         fixedDiscountCap = row.fixed_discount_cap !== null ? Number(row.fixed_discount_cap) : undefined;
       }
+
+
+      // Increment counters based on discount_code_status
+      if (row.discount_code_status === 'active') {
+        activeCount++;
+      } else if (row.discount_code_status === 'scheduled') {
+        scheduledCount++;
+      }
+
 
       const discountCode: DiscountCode = {
         key: index + 1,
@@ -113,7 +128,7 @@ async function getDiscountCodeList(): Promise<{
     // Get allowed options from the database enums
     const discountTypes = await getEnumValues('discount_type_enum');
     const useLimitTypes = await getEnumValues('use_limit_enum');
-    const statusOptions = await getEnumValues('discount_code_is_active_enum');
+    const statusOptions = await getEnumValues('discount_code_status_enum');
 
     // Since 'is_active' is boolean, options are true and false
     const isActiveOptions = [true, false];
@@ -123,6 +138,8 @@ async function getDiscountCodeList(): Promise<{
       discount_types: discountTypes,
       use_limit_types: useLimitTypes,
       discount_code_status: statusOptions,
+      active_count: activeCount,
+      scheduled_count: scheduledCount,
     };
   } catch (error) {
     console.error('Error fetching discount codes:', error);
