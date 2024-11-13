@@ -21,7 +21,7 @@ interface DiscountCode {
     valid_until?: string;
     created_at: string;
     updated_at: string;
-    is_active: boolean;
+    discount_code_status: 'expired' | 'active' | 'suspended' | 'scheduled';
 }
 
 // Optional: Date formatting function
@@ -56,7 +56,7 @@ async function getDeletedDiscountCodeList(c: Context): Promise<DiscountCode[]> {
         valid_until,
         created_at,
         updated_at,
-        is_active
+        discount_code_status
       FROM discount_code
       WHERE deleted_status IS TRUE  -- Add this WHERE clause
       ORDER BY created_at DESC
@@ -67,8 +67,8 @@ async function getDeletedDiscountCodeList(c: Context): Promise<DiscountCode[]> {
 
         // Map the data to the DiscountCode interface
         const discountCodes: DiscountCode[] = rows.map((row, index) => {
-            // Map 'is_active' (boolean)
-            const isActive = row.is_active;
+            // Map 'discount_code_status' (boolean)
+            const isActive = row.discount_code_status;
 
             // Depending on 'discount_type', map 'discount_amount' appropriately
             let discountAmount: number | undefined = undefined;
@@ -98,7 +98,7 @@ async function getDeletedDiscountCodeList(c: Context): Promise<DiscountCode[]> {
                 valid_until: row.valid_until ? formatDate(row.valid_until) : undefined,
                 created_at: row.created_at ? formatDate(row.created_at) : '',
                 updated_at: row.updated_at ? formatDate(row.updated_at) : '',
-                is_active: isActive,
+                discount_code_status: isActive,
             };
 
             return discountCode;

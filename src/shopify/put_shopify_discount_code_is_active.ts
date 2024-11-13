@@ -72,7 +72,33 @@ async function putShopifyDiscountCodeIsActive(
     if (is_active) {
       // Reactivate the discount code
 
-      // First, update the startsAt and endsAt
+      // first, activate the discount code
+      const activateResult: any = await graphqlClient.query({
+        data: {
+          query: ACTIVATE_DISCOUNT_CODE_MUTATION,
+          variables: {
+            id: shopify_discount_code_id,
+          },
+        }
+      });
+
+      const activateResponseData = activateResult.discountCodeActivate;
+
+      if (activateResponseData?.userErrors && activateResponseData.userErrors.length > 0) {
+        const errors = activateResponseData.userErrors.map((error: { message: string }) => error.message).join(', ');
+        throw new Error(`Shopify error during activation: ${errors}`);
+      }
+
+
+      const updatedDiscount = activateResponseData?.codeDiscountNode;
+      console.log('Reactivated Discount:', updatedDiscount);
+
+      // then, update the startsAt and endsAt
+
+      console.log('putShopifyDiscountCodeIsActive function start');
+      console.log('start', valid_from);
+      console.log('end', valid_until);
+
       const updateResult: any = await graphqlClient.query({
         data: {
           query: UPDATE_DISCOUNT_CODE_MUTATION,
@@ -93,25 +119,8 @@ async function putShopifyDiscountCodeIsActive(
         throw new Error(`Shopify error during update: ${errors}`);
       }
 
-      // Then, activate the discount code
-      const activateResult: any = await graphqlClient.query({
-        data: {
-          query: ACTIVATE_DISCOUNT_CODE_MUTATION,
-          variables: {
-            id: shopify_discount_code_id,
-          },
-        }
-      });
 
-      const activateResponseData = activateResult.discountCodeActivate;
 
-      if (activateResponseData?.userErrors && activateResponseData.userErrors.length > 0) {
-        const errors = activateResponseData.userErrors.map((error: { message: string }) => error.message).join(', ');
-        throw new Error(`Shopify error during activation: ${errors}`);
-      }
-
-      const updatedDiscount = activateResponseData?.codeDiscountNode;
-      console.log('Reactivated Discount:', updatedDiscount);
 
       return updatedDiscount;
 
