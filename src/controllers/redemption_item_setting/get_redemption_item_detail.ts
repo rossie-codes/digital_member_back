@@ -12,8 +12,13 @@ interface RedemptionItem {
   discount_percentage?: number; // For percentage discount
   fixed_discount_cap?: number; // For percentage discount
   minimum_spending: number;
+  redeem_point: number;
   validity_period: number;
-  redemption_item_status: 'expired'| 'active'| 'suspended'| 'scheduled';
+  redemption_item_status: 'expired' | 'active' | 'suspended' | 'scheduled';
+  valid_from?: string;
+  valid_until?: string;
+  redemption_content: string;
+  redemption_term: string;
 }
 
 async function getRedemptionItemDetail(redemption_item_id: string): Promise<RedemptionItem> {
@@ -29,7 +34,12 @@ async function getRedemptionItemDetail(redemption_item_id: string): Promise<Rede
         minimum_spending,
         validity_period,
         redemption_item_status,
-        created_at
+        created_at,
+        redeem_point,
+        valid_from,
+        valid_until,
+        redemption_content,
+        redemption_term
       FROM redemption_item
       WHERE redemption_item_id = $1
       LIMIT 1
@@ -69,6 +79,11 @@ async function getRedemptionItemDetail(redemption_item_id: string): Promise<Rede
       minimum_spending: row.minimum_spending !== null ? Number(row.minimum_spending) : 0,
       validity_period: row.validity_period,
       redemption_item_status: row.redemption_item_status,
+      redeem_point: row.redeem_point,
+      valid_from: row.valid_from ? row.valid_from.toISOString() : undefined,
+      valid_until: row.valid_until ? row.valid_until.toISOString() : undefined,
+      redemption_content: row.redemption_content,
+      redemption_term: row.redemption_term,
     };
 
     console.log(redemptionItem)
