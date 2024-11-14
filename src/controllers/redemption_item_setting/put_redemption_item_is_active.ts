@@ -7,9 +7,9 @@ import { HTTPException } from 'hono/http-exception';
 
 async function putRedemptionItemIsActive(c: Context): Promise<Response> {
   try {
-    // Get redemption_item_id from route parameters
     console.log('putRedemptionItemIsActive function begin')
 
+    // Get redemption_item_id from route parameters
     const redemption_item_id_str = c.req.param('redemption_item_id');
     const redemption_item_id = parseInt(redemption_item_id_str, 10);
     if (isNaN(redemption_item_id)) {
@@ -18,17 +18,11 @@ async function putRedemptionItemIsActive(c: Context): Promise<Response> {
 
     // Parse the request body to get is_active
     const body = await c.req.json();
+    const { action } = body;
 
-    console.log('putRedemptionItemIsActive fucntion check body: ', body)
-    console.log('putRedemptionItemIsActive fucntion check id: ', redemption_item_id)
-    const { is_active } = body;
-
-    if (typeof is_active !== 'boolean') {
+    if (action !== 'enable' && action !== 'suspended') {
       throw new HTTPException(400, { message: 'Invalid input: is_active must be a boolean' });
     }
-
-    // Map is_active to status
-    // const is_active = is_active ? 'true' : 'false';
 
     // Get a database client from the pool
     const client = await pool.connect();
@@ -37,14 +31,61 @@ async function putRedemptionItemIsActive(c: Context): Promise<Response> {
       // Start a transaction
       await client.query('BEGIN');
 
+
+      const selectQuery = `
+      SELECT valid_from, valid_until
+      FROM redemption_item
+      WHERE redemption_item_id = $1
+    `;
+      const selectResult = await client.query(selectQuery, [redemption_item_id]);
+
+      if (selectResult.rowCount === 0) {
+        throw new HTTPException(404, { message: 'Discount code not found' });
+      }
+
+      const {
+        valid_from: validFromString,
+        valid_until: validUntilString,
+      } = selectResult.rows[0];
+
+
+      // Convert valid_from and valid_until to Date objects
+      const valid_from = validFromString ? new Date(validFromString) : null;
+      const valid_until = validUntilString ? new Date(validUntilString) : null;
+
+      if (!valid_from || !valid_until) {
+        throw new HTTPException(400, {
+          message: 'Valid from and valid until dates are required',
+        });
+      }
+
+      let newStatus = 'suspended';
+
+      if (action === 'enable') {
+        const currentDate = new Date();
+
+        if (currentDate < valid_from) {
+          newStatus = 'scheduled';
+        } else if (currentDate >= valid_from && currentDate <= valid_until) {
+          newStatus = 'active';
+        } else if (currentDate > valid_until) {
+          newStatus = 'expired';
+        }
+
+      } else if (action === 'suspended') {
+        newStatus = 'suspended';
+        
+      }
+
+      
       // Update the redemption item status
       const updateQuery = `
         UPDATE redemption_item
-        SET is_active = $1, updated_at = NOW()
+        SET redemption_item_status = $1, updated_at = NOW()
         WHERE redemption_item_id = $2
         RETURNING redemption_item_id
       `;
-      const values = [is_active, redemption_item_id];
+      const values = [newStatus, redemption_item_id];
 
       const result = await client.query(updateQuery, values);
 

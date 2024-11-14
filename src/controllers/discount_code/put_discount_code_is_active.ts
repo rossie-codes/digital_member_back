@@ -7,6 +7,10 @@ import putShopifyDiscountCodeIsActive from '../../shopify/put_shopify_discount_c
 
 async function putDiscountCodeIsActive(c: Context): Promise<Response> {
   try {
+
+    console.log('putDiscountCodeIsActive function begin')
+
+
     // Extract discount_code_id from the route parameters
     const discount_code_id_str = c.req.param('discount_code_id');
     const discount_code_id = parseInt(discount_code_id_str, 10);
