@@ -27,7 +27,7 @@ interface RefereeDataType {
   total_purchase_amount: number;
 }
 
-interface MemberTier {
+interface MembershipTier {
   membership_tier_id: number;
   membership_tier_name: string;
   membership_tier_sequence: number;
@@ -55,7 +55,7 @@ interface Member {
   member_note: string | null;
   member_tag: string | null;
   state_code: string | null;
-  membership_tier: MemberTier | undefined;
+  membership_tier: MembershipTier | undefined;
   membership_start_date: string;
   membership_end_date: string | null;
   membership_creation_date: string;

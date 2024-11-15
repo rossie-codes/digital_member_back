@@ -1,4 +1,4 @@
-// src/controllers/admin_setting/post_admin_setting.ts
+// src/controllers/membership_tier/post_membership_basic_setting.ts
 
 import { pool } from '../db';
 import { type Context } from 'hono';
@@ -22,7 +22,7 @@ interface PostMembershipTierRequest {
 
 const BATCH_SIZE = 500; // Define an appropriate batch size based on your system's capacity
 
-async function postAdminSetting(c: Context): Promise<{ message: string }> {
+async function postMembershipBasicSetting(c: Context): Promise<{ message: string }> {
     console.log('post_admin_setting function begin')
     
     try {
@@ -78,4 +78,4 @@ async function postAdminSetting(c: Context): Promise<{ message: string }> {
 }
 
 
-export default postAdminSetting;
+export default postMembershipBasicSetting;

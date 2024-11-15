@@ -2,18 +2,21 @@
 
 import { pool } from '../db';
 import { type Context } from 'hono';
-import { HTTPException } from 'hono/http-exception'
+import { HTTPException } from 'hono/http-exception';
 
 interface MembershipTier {
+  membership_tier_id?: number;
   membership_tier_name: string;
   membership_tier_sequence: number;
   require_point: number;
   extend_membership_point: number;
   point_multiplier: number;
   membership_period: number;
+  original_point?: number;
+  multiplied_point?: number;
 }
 
-async function postMembershipTier(c: Context): Promise<Response> {
+async function postMembershipTierSetting(c: Context): Promise<Response> {
   try {
     // Extract the JSON body from the request
     const tiers: MembershipTier[] = await c.req.json();
@@ -30,19 +33,34 @@ async function postMembershipTier(c: Context): Promise<Response> {
       // Upsert the membership_tier records
       const upsertQuery = `
         INSERT INTO membership_tier 
-          (membership_tier_name, membership_tier_sequence, require_point, extend_membership_point, point_multiplier, membership_period)
+          (membership_tier_name, membership_tier_sequence, require_point, extend_membership_point, point_multiplier, membership_period, original_point, multiplied_point)
         VALUES 
-          ($1, $2, $3, $4, $5, $6)
+          ($1, $2, $3, $4, $5, $6, $7, $8)
         ON CONFLICT (membership_tier_sequence) DO UPDATE SET 
           membership_tier_name = EXCLUDED.membership_tier_name,
           require_point = EXCLUDED.require_point,
           extend_membership_point = EXCLUDED.extend_membership_point,
           point_multiplier = EXCLUDED.point_multiplier,
-          membership_period = EXCLUDED.membership_period
+          membership_period = EXCLUDED.membership_period,
+          original_point = EXCLUDED.original_point,
+          multiplied_point = EXCLUDED.multiplied_point
       `;
 
       // Upsert each tier
       for (const tier of tiers) {
+        // Validate required fields
+        if (
+          !tier.membership_tier_name ||
+          typeof tier.membership_tier_sequence !== 'number' ||
+          typeof tier.require_point !== 'number' ||
+          typeof tier.extend_membership_point !== 'number' ||
+          typeof tier.point_multiplier !== 'number' ||
+          typeof tier.membership_period !== 'number'
+        ) {
+          throw new HTTPException(400, { message: 'Invalid or missing required tier fields.' });
+        }
+
+        // Upsert the tier
         await client.query(upsertQuery, [
           tier.membership_tier_name,
           tier.membership_tier_sequence,
@@ -50,16 +68,18 @@ async function postMembershipTier(c: Context): Promise<Response> {
           tier.extend_membership_point,
           tier.point_multiplier,
           tier.membership_period,
+          tier.original_point || null,
+          tier.multiplied_point || null,
         ]);
       }
 
       // Recalculate and update membership_tier_id for all members
-      const updateMemberTiersQuery = `
+      const updateMembershipTiersQuery = `
         UPDATE member
         SET membership_tier_id = sub.membership_tier_id
         FROM (
           SELECT
-            member_id,
+            m.member_id,
             mt.membership_tier_id
           FROM
             member m
@@ -69,8 +89,7 @@ async function postMembershipTier(c: Context): Promise<Response> {
         ) AS sub
         WHERE member.member_id = sub.member_id
       `;
-
-      await client.query(updateMemberTiersQuery);
+      await client.query(updateMembershipTiersQuery);
 
       await client.query('COMMIT');
       console.log(`Successfully upserted ${tiers.length} membership tiers and updated member tiers.`);
@@ -90,7 +109,7 @@ async function postMembershipTier(c: Context): Promise<Response> {
       client.release();
     }
   } catch (error) {
-    console.error('Error in postMembershipTier:', error);
+    console.error('Error in postMembershipTierSetting:', error);
     if (error instanceof HTTPException) {
       throw error;
     }
@@ -98,4 +117,4 @@ async function postMembershipTier(c: Context): Promise<Response> {
   }
 }
 
-export default postMembershipTier;
+export default postMembershipTierSetting;

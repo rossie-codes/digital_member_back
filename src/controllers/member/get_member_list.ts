@@ -239,9 +239,9 @@ async function getMemberList(c: Context): Promise<{
         MAX(mt.membership_tier_sequence) -- Ensures correct ordering, handles NULL
     `;
     const tierCountsResult = await pool.query(tierCountsQuery);
-    const memberTierCounts: { [tier: string]: number } = {};
+    const membershipTierCounts: { [tier: string]: number } = {};
     tierCountsResult.rows.forEach(row => {
-      memberTierCounts[row.membership_tier_name || 'No Tier'] = parseInt(row.member_count, 10);
+      membershipTierCounts[row.membership_tier_name || 'No Tier'] = parseInt(row.member_count, 10);
     });
 
     // **B. Count of Memberships Expiring in the Current Month**
@@ -288,7 +288,7 @@ async function getMemberList(c: Context): Promise<{
       data: members,
       total: total,
       membership_tiers: membershipTiers,
-      membership_tier_counts: memberTierCounts,
+      membership_tier_counts: membershipTierCounts,
       expiring_members_count: expiringMembersCount,
       birthday_members_count: birthdayMembersCount,
       new_members_count: newMembersCount,

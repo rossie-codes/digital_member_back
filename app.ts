@@ -5,7 +5,7 @@ import { cors } from 'hono/cors';
 import authRouter from './src/routes/auth';
 import memberRouter from './src/routes/member';
 import membershipTierRouter from './src/routes/membership_tier';
-import adminSettingRouter from './src/routes/admin_setting';
+import pointSettingRouter from './src/routes/point_setting';
 import redemptionItemRouter from './src/routes/redemption_item';
 import discountCodeRouter from './src/routes/discount_code';
 import broadcastSettingRouter from './src/routes/broadcast_setting';
@@ -44,7 +44,7 @@ app.onError((err: any, c: Context) => {
 app.route('/auth', authRouter);
 app.route('/member', memberRouter); // Handles /member and nested routes
 app.route('/membership_tier', membershipTierRouter); // Handles /membership_tier and nested routes
-app.route('/admin_setting', adminSettingRouter);
+app.route('/point_setting', pointSettingRouter);
 app.route('/redemption_item', redemptionItemRouter);
 app.route('/discount_code', discountCodeRouter);
 app.route('/broadcast_setting', broadcastSettingRouter);
