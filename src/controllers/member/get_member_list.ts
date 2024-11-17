@@ -19,7 +19,7 @@ interface Member {
   membership_expiry_date: string;
   referrer_member_id: number | null;
   birthday: string | null;
-  is_active: number; // Consider changing to boolean
+  membership_status: 'expired' | 'active' | 'suspended';
   member_note: string | null;
   member_tag: string[] | null; // Adjust type if necessary
   state_code: string | null;
@@ -58,7 +58,7 @@ async function getMemberList(c: Context): Promise<{
     const url = new URL(c.req.url, 'http://localhost'); // Base URL is required for relative URLs
     
     const membershipTierParams: string[] = url.searchParams.getAll('membership_tier') || [];
-    const isActiveFilters: string[] = url.searchParams.getAll('is_active');
+    const isActiveFilters: string[] = url.searchParams.getAll('membership_status');
 
     const page = pageParam ? parseInt(pageParam, 10) : 1;
     const pageSize = pageSizeParam ? parseInt(pageSizeParam, 10) : 10;
@@ -134,10 +134,10 @@ async function getMemberList(c: Context): Promise<{
       paramIndex += membershipTierParams.length;
     }
 
-    // Handle is_active filters
+    // Handle membership_status filters
     if (isActiveFilters && isActiveFilters.length > 0) {
       const statusPlaceholders = isActiveFilters.map((_, idx) => `$${paramIndex + idx}`).join(', ');
-      whereClauses.push(`m.is_active IN (${statusPlaceholders})`);
+      whereClauses.push(`m.membership_status IN (${statusPlaceholders})`);
       queryParams.push(...isActiveFilters);
       paramIndex += isActiveFilters.length;
     }
@@ -200,7 +200,7 @@ async function getMemberList(c: Context): Promise<{
         membership_expiry_date: row.membership_expiry_date,
         referrer_member_id: row.referrer_member_id,
         birthday: row.birthday,
-        is_active: row.is_active,
+        membership_status: row.membership_status,
         member_note: row.member_note,
         member_tag: row.member_tag,
         state_code: row.state_code,

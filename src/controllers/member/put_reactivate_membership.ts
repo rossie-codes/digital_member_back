@@ -38,32 +38,32 @@ async function putReactivateMembership(c: Context): Promise<Response> {
     const currentDate = new Date();
     const expiryDate = new Date(membership_expiry_date);
 
-    let isActive: number;
+    let membershipStatus: "expired" | "active" | "suspended";
 
     if (currentDate <= expiryDate) {
       // Membership is active
-      isActive = 1;
+      membershipStatus = 'active';
     } else {
       // Membership has expired
-      isActive = 0;
+      membershipStatus = 'expired';
     }
 
-    console.log('Calculated is_active value:', isActive);
+    console.log('Calculated membership_status value:', membershipStatus);
 
-    // Update the is_active field in the member table
+    // Update the membership_status field in the member table
     const updateQuery = `
       UPDATE member
-      SET is_active = $1
+      SET membership_status = $1
       WHERE member_phone = $2
     `;
-    const result = await pool.query(updateQuery, [isActive, memberPhone]);
+    const result = await pool.query(updateQuery, [membershipStatus, memberPhone]);
 
     if (result.rowCount === 0) {
       throw new HTTPException(404, { message: 'Member not found' });
     }
 
-    console.log('Membership updated for memberPhone:', memberPhone, 'is_active set to:', isActive);
-    return c.json({ message: 'Membership reactivated successfully', is_active: isActive }, 200);
+    console.log('Membership updated for memberPhone:', memberPhone, 'membership_status set to:', membershipStatus);
+    return c.json({ message: 'Membership reactivated successfully', membership_status: membershipStatus }, 200);
   } catch (error) {
     console.error('Error in putReactivateMembership:', error);
     if (error instanceof HTTPException) {

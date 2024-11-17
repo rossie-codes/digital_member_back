@@ -20,26 +20,26 @@ async function putSuspendMembership(c: Context): Promise<Response> {
 
     // Parse the request body
     const body = await c.req.json();
-    const { is_active } = body;
+    const { membership_status } = body;
 
-    if (typeof is_active !== 'number') {
-      throw new HTTPException(400, { message: 'Invalid is_active value' });
+    if (typeof membership_status !== 'string') {
+      throw new HTTPException(400, { message: 'Invalid membership_status value' });
     }
-    console.log('Received is_active value:', is_active);
+    console.log('Received membership_status value:', membership_status);
 
-    // Update the is_active field in the member table
+    // Update the membership_status field in the member table
     const updateQuery = `
       UPDATE member
-      SET is_active = $1
+      SET membership_status = $1
       WHERE member_phone = $2
     `;
-    const result = await pool.query(updateQuery, [is_active, memberPhone]);
+    const result = await pool.query(updateQuery, [membership_status, memberPhone]);
 
     if (result.rowCount === 0) {
       throw new HTTPException(404, { message: 'Member not found' });
     }
 
-    console.log('Membership updated for member_phone:', memberPhone, 'is_active set to:', is_active);
+    console.log('Membership updated for member_phone:', memberPhone, 'membership_status set to:', membership_status);
     return c.json({ message: 'Membership updated successfully' }, 200);
   } catch (error) {
     console.error('Error in putSuspendMembership:', error);

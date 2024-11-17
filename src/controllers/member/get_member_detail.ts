@@ -51,7 +51,7 @@ interface Member {
   membership_expiry_date: string | null;
   referrer_member_id: number | null;
   birthday: string | null;
-  is_active: boolean;
+  membership_status: 'expired' | 'active' | 'suspended';
   member_note: string | null;
   member_tag: string | null;
   state_code: string | null;
@@ -83,7 +83,8 @@ async function getMemberDetail(memberPhone: string): Promise<Member> {
         mt.require_point,
         mt.extend_membership_point,
         mt.point_multiplier,
-        mt.membership_period
+        mt.membership_period,
+        m.membership_status
       FROM
         member m
       LEFT JOIN
@@ -260,7 +261,7 @@ async function getMemberDetail(memberPhone: string): Promise<Member> {
       membership_expiry_date: row.membership_expiry_date,
       referrer_member_id: row.referrer_member_id,
       birthday: row.birthday,
-      is_active: row.is_active,
+      membership_status: row.membership_status,
       member_note: row.member_note,
       member_tag: row.member_tag,
       state_code: row.state_code,
