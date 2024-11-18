@@ -5,7 +5,8 @@ import { type Context } from 'hono';
 import { authMiddleware } from '../middleware/authMiddleware';
 
 import getBroadcastList from '../controllers/broadcast_setting/get_broadcast_list';
-// import postNewMember from '../controllers/member/post_new_member';
+import getBroadcastMemberList from '../controllers/broadcast_setting/get_broadcast_member_list';
+import postNewBroadcast from '../controllers/broadcast_setting/post_new_broadcast';
 // import getMemberDetail from '../controllers/member/get_member_detail';
 
 
@@ -32,6 +33,20 @@ broadcastSettingRouter.get('/get_broadcast_list', async (c: Context) => {
   }
 });
 
+broadcastSettingRouter.get('/get_broadcast_member_list', async (c: Context) => {
+  try {
+    console.log('get_broadcast_member_list route begin');
+    const data = await getBroadcastMemberList(c);
+    console.log('get_broadcast_member_list route done');
+    return c.json(data);
+  } catch (error) {
+    console.log('get_broadcast_member_list route end in error');
+    // Let Hono’s `onError` handle the error
+    throw error;
+  }
+});
+
+
 // // GET /member/get_member_detail/:memberPhone - Retrieve member details by phone
 // broadcastSettingRouter.get('/get_member_detail/:memberPhone', async (c: Context) => {
 //   try {
@@ -53,18 +68,18 @@ broadcastSettingRouter.get('/get_broadcast_list', async (c: Context) => {
 //   }
 // });
 
-// broadcastSettingRouter.post('/post_new_member', async (c: Context) => {
-//     try {
-//       console.log('post_new_member route begin');
-//       const response = await postNewMember(c);
-//       console.log('post_new_member route done');
+broadcastSettingRouter.post('/post_new_broadcast', async (c: Context) => {
+    try {
+      console.log('post_new_broadcast route begin');
+      const response = await postNewBroadcast(c);
+      console.log('post_new_broadcast route done');
 
-//       return response; // Return the Response directly
-//     } catch (error) {
-//       console.log('post_new_member route end in error');
-//       throw error;
-//     }
-//   });
+      return response; // Return the Response directly
+    } catch (error) {
+      console.log('post_new_broadcast route end in error');
+      throw error;
+    }
+  });
 
 
 

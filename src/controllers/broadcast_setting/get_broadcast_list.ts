@@ -2,13 +2,11 @@
 
 import { pool } from "../db";
 import type { Context } from "hono";
-import { getWatiTemplateList } from "../../wati/get_wati_template_list";
 
 // Define the response interface
 interface GetBroadcastListResponse {
   data: any[];
   total: number;
-  watiTemplateList: string[];
 }
 async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
   try {
@@ -136,15 +134,16 @@ async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
       recipient_count: parseInt(row.recipient_count, 10),
     }));
 
+    console.log("Data:", data);
+
     // Await the asynchronous function
-    const templateNames = await getWatiTemplateList();
 
     // Return the data with the correct watiTemplateList
     return {
       data: data,
       total: total,
-      watiTemplateList: templateNames,
     };
+    
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
