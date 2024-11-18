@@ -3,7 +3,7 @@
 import { pool } from '../db';
 import type { Context } from 'hono';
 
-import getShopifyOrderList from '../../shopify/get_shopify_order_list';
+import { getWatiTemplateList } from "../../wati/get_wati_template_list";
 
 interface Member {
   member_id: number;
@@ -33,6 +33,7 @@ interface Member {
     point_multiplier: number;
     membership_period: number;
   };
+  
 }
 
 async function getMemberList(c: Context): Promise<{
@@ -43,6 +44,7 @@ async function getMemberList(c: Context): Promise<{
   expiring_members_count: number;
   birthday_members_count: number;
   new_members_count: number;
+  watiTemplateList: string[];
 }> {
   // const aaa = await getShopifyOrderList(c)
   // console.log(aaa.json)
@@ -52,7 +54,7 @@ async function getMemberList(c: Context): Promise<{
     const pageSizeParam = c.req.query('pageSize');
     const sortFieldParam = c.req.query('sortField');
     const sortOrderParam = c.req.query('sortOrder');
-    const searchText = c.req.query('searchText') || '';
+    const modalMemberSearchText = c.req.query('modalMemberSearchText') || '';
 
 
     const url = new URL(c.req.url, 'http://localhost'); // Base URL is required for relative URLs
@@ -119,10 +121,10 @@ async function getMemberList(c: Context): Promise<{
 
     let paramIndex = 1;
 
-    // Handle searchText for member_name and member_phone
-    if (searchText) {
+    // Handle modalMemberSearchText for member_name and member_phone
+    if (modalMemberSearchText) {
       whereClauses.push(`(m.member_name ILIKE $${paramIndex} OR m.member_phone::text ILIKE $${paramIndex})`);
-      queryParams.push(`%${searchText}%`);
+      queryParams.push(`%${modalMemberSearchText}%`);
       paramIndex++;
     }
 
@@ -284,6 +286,8 @@ async function getMemberList(c: Context): Promise<{
     const newMembersResult = await pool.query(newMembersQuery);
     const newMembersCount = parseInt(newMembersResult.rows[0].new_members_count, 10);
 
+    const templateNames = await getWatiTemplateList();
+
     return {
       data: members,
       total: total,
@@ -292,7 +296,10 @@ async function getMemberList(c: Context): Promise<{
       expiring_members_count: expiringMembersCount,
       birthday_members_count: birthdayMembersCount,
       new_members_count: newMembersCount,
+      watiTemplateList: templateNames,
     };
+
+
   } catch (error) {
     console.error('Database query error:', error);
     throw new Error('Database query failed');

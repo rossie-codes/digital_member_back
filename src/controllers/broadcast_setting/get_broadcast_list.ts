@@ -1,28 +1,35 @@
-import { pool } from '../db';
-import type { Context } from 'hono';
+// src/controllers/broadcast_setting/get_broadcast_list.ts
 
-async function getBroadcastList(c: Context): Promise<{ data: any[]; total: number }> {
+import { pool } from "../db";
+import type { Context } from "hono";
+
+// Define the response interface
+interface GetBroadcastListResponse {
+  data: any[];
+  total: number;
+}
+async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
   try {
-    const pageParam = c.req.query('page');
-    const pageSizeParam = c.req.query('pageSize');
-    const sortFieldParam = c.req.query('sortField');
-    const sortOrderParam = c.req.query('sortOrder');
+    const pageParam = c.req.query("page");
+    const pageSizeParam = c.req.query("pageSize");
+    const sortFieldParam = c.req.query("sortField");
+    const sortOrderParam = c.req.query("sortOrder");
 
-    const searchText = c.req.query('searchText') || '';
+    const searchText = c.req.query("searchText") || "";
 
     const page = pageParam ? parseInt(pageParam, 10) : 1;
     const pageSize = pageSizeParam ? parseInt(pageSizeParam, 10) : 10;
 
     // Allowed fields for sorting
-    const allowedSortFields = ['scheduled_start', 'recipient_count'];
+    const allowedSortFields = ["scheduled_start", "recipient_count"];
     const sortFieldMapping: { [key: string]: string } = {
-      'scheduled_start': 'b.scheduled_start',
-      'recipient_count': 'recipient_count',
+      scheduled_start: "b.scheduled_start",
+      recipient_count: "recipient_count",
     };
 
     // Default sort field and mapped field
-    const defaultSortField = 'scheduled_start';
-    const defaultMappedSortField = 'b.scheduled_start';
+    const defaultSortField = "scheduled_start";
+    const defaultMappedSortField = "b.scheduled_start";
 
     // Determine sort field
     let sortField: string;
@@ -33,28 +40,29 @@ async function getBroadcastList(c: Context): Promise<{ data: any[]; total: numbe
     }
 
     // Map the sort field to database column
-    const mappedSortField = sortFieldMapping[sortField] || defaultMappedSortField;
+    const mappedSortField =
+      sortFieldMapping[sortField] || defaultMappedSortField;
 
     // Allowed sort orders
-    const allowedSortOrders = ['ascend', 'descend'];
+    const allowedSortOrders = ["ascend", "descend"];
 
     // Default sort order
-    const defaultSortOrder = 'ASC';
+    const defaultSortOrder = "ASC";
 
     // Determine sort order
     let sortOrder: string;
     if (sortOrderParam && allowedSortOrders.includes(sortOrderParam)) {
-      sortOrder = sortOrderParam === 'ascend' ? 'ASC' : 'DESC';
+      sortOrder = sortOrderParam === "ascend" ? "ASC" : "DESC";
     } else {
       sortOrder = defaultSortOrder;
     }
 
     // Validate page and pageSize
     if (isNaN(page) || page < 1) {
-      throw new Error('Invalid page number');
+      throw new Error("Invalid page number");
     }
     if (isNaN(pageSize) || pageSize < 1) {
-      throw new Error('Invalid page size');
+      throw new Error("Invalid page size");
     }
 
     const offset = (page - 1) * pageSize;
@@ -67,7 +75,9 @@ async function getBroadcastList(c: Context): Promise<{ data: any[]; total: numbe
 
     // Handle searchText for broadcast_name and wati_template
     if (searchText) {
-      whereClauses.push(`(b.broadcast_name ILIKE $${paramIndex} OR b.wati_template ILIKE $${paramIndex})`);
+      whereClauses.push(
+        `(b.broadcast_name ILIKE $${paramIndex} OR b.wati_template ILIKE $${paramIndex})`
+      );
       queryParams.push(`%${searchText}%`);
       paramIndex++;
     }
@@ -76,7 +86,8 @@ async function getBroadcastList(c: Context): Promise<{ data: any[]; total: numbe
     whereClauses.push(`b.scheduled_start > NOW()`);
 
     // Combine WHERE clauses
-    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+    const whereClause =
+      whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
 
     // Get total count with filters
     const countQuery = `
@@ -123,13 +134,19 @@ async function getBroadcastList(c: Context): Promise<{ data: any[]; total: numbe
       recipient_count: parseInt(row.recipient_count, 10),
     }));
 
+    console.log("Data:", data);
+
+    // Await the asynchronous function
+
+    // Return the data with the correct watiTemplateList
     return {
       data: data,
       total: total,
     };
+    
   } catch (error) {
-    console.error('Database query error:', error);
-    throw new Error('Database query failed');
+    console.error("Database query error:", error);
+    throw new Error("Database query failed");
   }
 }
 
