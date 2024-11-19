@@ -1,9 +1,10 @@
-// src/controllers/member/get_member_list.ts
+// src/controllers/broadcast_setting/get_broadcast_member_list.ts
 
 import { pool } from '../db';
 import type { Context } from 'hono';
 
-import { getWatiTemplateList } from "../../wati/get_wati_template_list";
+// import { getWatiTemplateList } from "../../wati/get_wati_template_list";
+import { getWatiTemplateDetail } from "../../wati/get_wati_template_detail";
 
 interface Member {
   member_id: number;
@@ -49,6 +50,7 @@ async function getMemberList(c: Context): Promise<{
   // const aaa = await getShopifyOrderList(c)
   // console.log(aaa.json)
 
+  
   try {
     const pageParam = c.req.query('page');
     const pageSizeParam = c.req.query('pageSize');
@@ -75,6 +77,9 @@ async function getMemberList(c: Context): Promise<{
       'membership_tier': 'mt.membership_tier_name',
       'member_id': 'm.member_id', // Default sorting field
     };
+
+
+    const abcd = getWatiTemplateDetail()
 
     // Default sort field and mapped field
     const defaultSortField = 'member_id';
@@ -286,7 +291,11 @@ async function getMemberList(c: Context): Promise<{
     const newMembersResult = await pool.query(newMembersQuery);
     const newMembersCount = parseInt(newMembersResult.rows[0].new_members_count, 10);
 
-    const templateNames = await getWatiTemplateList();
+        // Fetch WATI template names
+        const templateNamesQuery = `SELECT element_name FROM wati_template WHERE wati_template_status = 'APPROVED'`;
+        const templateNamesResult = await pool.query(templateNamesQuery);
+        const templateNames = templateNamesResult.rows.map(row => row.element_name);
+    
 
     return {
       data: members,
