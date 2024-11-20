@@ -1,7 +1,7 @@
 // src/wati/get_wati_template_detail.ts
 
 import { pool } from '../controllers/db'; // Adjusted import path
-import { CronJob } from 'cron';
+// import { CronJob } from 'cron';
 
 const WATI_TOKEN = process.env.WATI_TOKEN;
 const WATI_ENDPOINT = process.env.WATI_ENDPOINT;

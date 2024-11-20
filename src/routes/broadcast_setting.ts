@@ -9,10 +9,12 @@ import getBroadcastHistoryList from '../controllers/broadcast_setting/get_broadc
 import getBroadcastMemberList from '../controllers/broadcast_setting/get_broadcast_member_list';
 import getWatiTemplateDetail from '../controllers/broadcast_setting/get_wati_template_detail';
 
+import getBroadcastDetail from '../controllers/broadcast_setting/get_broadcast_detail';
 
 import postNewBroadcast from '../controllers/broadcast_setting/post_new_broadcast';
 // import getMemberDetail from '../controllers/member/get_member_detail';
 
+import putEditBroadcastDetail from '../controllers/broadcast_setting/put_edit_broadcast_detail';
 
 import { HTTPException } from 'hono/http-exception'
 
@@ -58,6 +60,19 @@ broadcastSettingRouter.get('/get_broadcast_member_list', async (c: Context) => {
     return c.json(data);
   } catch (error) {
     console.log('get_broadcast_member_list route end in error');
+    // Let Hono’s `onError` handle the error
+    throw error;
+  }
+});
+
+broadcastSettingRouter.get('/get_broadcast_detail/:broadcast_id', async (c: Context) => {
+  try {
+    console.log('get_broadcast_detail route begin');
+    const data = await getBroadcastDetail(c);
+    console.log('get_broadcast_detail route done');
+    return c.json(data);
+  } catch (error) {
+    console.log('get_broadcast_detail route end in error');
     // Let Hono’s `onError` handle the error
     throw error;
   }
@@ -112,7 +127,18 @@ broadcastSettingRouter.post('/post_new_broadcast', async (c: Context) => {
   });
 
 
+  broadcastSettingRouter.put('/put_edit_broadcast_detail/:broadcast_id', async (c: Context) => {
+    try {
+      console.log('put_edit_broadcast route begin');
+      const response = await putEditBroadcastDetail(c);
+      console.log('put_edit_broadcast route done');
 
+      return response; // Return the Response directly
+    } catch (error) {
+      console.log('put_edit_broadcast route end in error');
+      throw error;
+    }
+  });
 
 
 export default broadcastSettingRouter;

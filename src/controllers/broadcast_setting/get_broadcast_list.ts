@@ -106,7 +106,7 @@ async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
         b.broadcast_name,
         b.wati_template,
         b.scheduled_start,
-        COUNT(bh.broadcast_history_id) AS recipient_count
+        COUNT(bh.broadcast_history_id) FILTER (WHERE bh.broadcast_history_status = 'pending') AS recipient_count
       FROM
         broadcast b
       LEFT JOIN
