@@ -1,5 +1,5 @@
 // index.ts
-import 'dotenv/config';
+
 import app from './app'
 
 const server = Bun.serve({
