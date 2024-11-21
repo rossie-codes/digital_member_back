@@ -17,7 +17,7 @@
 //   member_name: string;
 //   member_referral_code: string;
 //   point: number;
-//   member_tier_id: number | null;
+//   membership_tier_id: number | null;
 //   membership_expiry_date: string;
 //   referrer_member_id: number | null;
 //   birthday: string | null;
@@ -27,9 +27,9 @@
 //   state_code: string | null;
 //   // Add a nested object to hold membership tier details
 //   membership_tier?: {
-//     member_tier_id: number;
-//     member_tier_name: string;
-//     member_tier_sequence: number;
+//     membership_tier_id: number;
+//     membership_tier_name: string;
+//     membership_tier_sequence: number;
 //     require_point: number;
 //     extend_membership_point: number;
 //     point_multiplier: number;
@@ -106,9 +106,9 @@
 //     const query = `
 //       SELECT
 //         m.*,
-//         mt.member_tier_id AS mt_member_tier_id,
-//         mt.member_tier_name AS mt_member_tier_name,
-//         mt.member_tier_sequence,
+//         mt.membership_tier_id AS mt_membership_tier_id,
+//         mt.membership_tier_name AS mt_membership_tier_name,
+//         mt.membership_tier_sequence,
 //         mt.require_point,
 //         mt.extend_membership_point,
 //         mt.point_multiplier,
@@ -116,7 +116,7 @@
 //       FROM
 //         member m
 //       LEFT JOIN
-//         membership_tier mt ON m.member_tier_id = mt.member_tier_id
+//         membership_tier mt ON m.membership_tier_id = mt.membership_tier_id
 //       ${orderByClause}
 //       LIMIT $1 OFFSET $2
 //     `;
@@ -135,7 +135,7 @@
 //         member_name: row.member_name,
 //         member_referral_code: row.member_referral_code,
 //         point: row.point,
-//         member_tier_id: row.member_tier_id,
+//         membership_tier_id: row.membership_tier_id,
 //         membership_expiry_date: row.membership_expiry_date,
 //         referrer_member_id: row.referrer_member_id,
 //         birthday: row.birthday,
@@ -143,11 +143,11 @@
 //         member_note: row.member_note,
 //         member_tag: row.member_tag,
 //         state_code: row.state_code,
-//         membership_tier: row.mt_member_tier_id
+//         membership_tier: row.mt_membership_tier_id
 //         ? {
-//           member_tier_id: row.mt_member_tier_id,
-//           member_tier_name: row.mt_member_tier_name,
-//           member_tier_sequence: row.mt_member_tier_sequence,
+//           membership_tier_id: row.mt_membership_tier_id,
+//           membership_tier_name: row.mt_membership_tier_name,
+//           membership_tier_sequence: row.mt_membership_tier_sequence,
 //           require_point: row.mt_require_point,
 //           extend_membership_point: row.mt_extend_membership_point,
 //           point_multiplier: row.mt_point_multiplier,

@@ -1,10 +1,10 @@
 // index.ts
-
+import 'dotenv/config';
 import app from './app'
 
 const server = Bun.serve({
   fetch: app.fetch,
-  port: process.env.PORT || 3000,
+  port: process.env.PORT || 3001,
 })
 
 console.log(`Listening on ${server.url}`);

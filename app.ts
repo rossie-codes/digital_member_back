@@ -9,6 +9,7 @@ import pointSettingRouter from './src/routes/point_setting';
 import redemptionItemRouter from './src/routes/redemption_item';
 import discountCodeRouter from './src/routes/discount_code';
 import broadcastSettingRouter from './src/routes/broadcast_setting';
+import dashboardRouter from './src/routes/dashboard';
 
 
 import { config } from './src/config'; // Adjust the path as needed
@@ -48,5 +49,6 @@ app.route('/point_setting', pointSettingRouter);
 app.route('/redemption_item', redemptionItemRouter);
 app.route('/discount_code', discountCodeRouter);
 app.route('/broadcast_setting', broadcastSettingRouter);
+app.route('/dashboard', dashboardRouter);
 
 export default app;

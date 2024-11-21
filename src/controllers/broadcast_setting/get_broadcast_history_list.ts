@@ -8,7 +8,7 @@ interface GetBroadcastListResponse {
   data: any[];
   total: number;
 }
-async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
+async function getBroadcastHistoryList(c: Context): Promise<GetBroadcastListResponse> {
   try {
     const pageParam = c.req.query("page");
     const pageSizeParam = c.req.query("pageSize");
@@ -83,7 +83,7 @@ async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
     }
 
     // Filter broadcasts where scheduled_start is after the current time
-    whereClauses.push(`b.scheduled_start > NOW()`);
+    whereClauses.push(`b.scheduled_start < NOW()`);
 
     // Combine WHERE clauses
     const whereClause =
@@ -106,7 +106,7 @@ async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
         b.broadcast_name,
         b.wati_template,
         b.scheduled_start,
-        COUNT(bh.broadcast_history_id) FILTER (WHERE bh.broadcast_history_status = 'pending') AS recipient_count
+        COUNT(bh.broadcast_history_id) AS recipient_count
       FROM
         broadcast b
       LEFT JOIN
@@ -150,4 +150,4 @@ async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
   }
 }
 
-export default getBroadcastList;
+export default getBroadcastHistoryList;
