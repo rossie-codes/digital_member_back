@@ -11,6 +11,8 @@ import discountCodeRouter from './src/routes/discount_code';
 import broadcastSettingRouter from './src/routes/broadcast_setting';
 import dashboardRouter from './src/routes/dashboard';
 
+import customerAuthRouter from './src/routes/customer_routes/customer_auth';
+
 
 import { config } from './src/config'; // Adjust the path as needed
 
@@ -50,5 +52,7 @@ app.route('/redemption_item', redemptionItemRouter);
 app.route('/discount_code', discountCodeRouter);
 app.route('/broadcast_setting', broadcastSettingRouter);
 app.route('/dashboard', dashboardRouter);
+
+app.route('/customer/customer_auth', customerAuthRouter);
 
 export default app;
