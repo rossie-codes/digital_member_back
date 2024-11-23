@@ -14,8 +14,6 @@ async function loginMember(c: Context) {
   try {
     const { member_phone, member_password } = await c.req.json();
 
-    console.log('loginUser function begin', member_phone, member_password )
-
     if (!member_phone || !member_password) {
       return c.json({ error: 'Phone number and member_password are required' }, 400);
     }
@@ -32,7 +30,6 @@ async function loginMember(c: Context) {
     // Compare the member_password
     const isMatch = await bcrypt.compare(member_password, user.member_password_hash);
 
-    console.log('loginUser function member_phone and member_password passed')
 
     if (!isMatch) {
       // Optionally increment failed login attempts
@@ -43,7 +40,6 @@ async function loginMember(c: Context) {
 
       return c.json({ error: 'Invalid credentials' }, 401);
     }
-    console.log('loginUser function handle token')
     // Generate a JWT token
     const token = jwt.sign({ memberId: user.member_id }, JWT_SECRET, { expiresIn: '1h' });
 
@@ -53,30 +49,27 @@ async function loginMember(c: Context) {
       [user.login_id]
     );
 
-    console.log('loginUser function handle cookies')
-
     // Set the token as an HTTP-only cookie
-    const cookie = serialize('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-      sameSite: 'strict',
-      maxAge: 3600, // 1 hour
-      path: '/',
-    });
-
     // const cookie = serialize('token', token, {
     //   httpOnly: true,
-    //   secure: false, // Set to false if testing over HTTP
-    //   sameSite: 'lax', // Change from 'strict' to 'lax'
+    //   secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    //   sameSite: 'strict',
     //   maxAge: 3600, // 1 hour
     //   path: '/',
     // });
 
+    const cookie = serialize('token', token, {
+      httpOnly: true,
+      secure: false, // Set to false if testing over HTTP
+      sameSite: 'lax', // Change from 'strict' to 'lax'
+      maxAge: 3600, // 1 hour
+      path: '/',
+    });
+
     c.header('Set-Cookie', cookie);
 
-    console.log('loginUser function handle cookies', cookie)
-
-    // Return success response without token in body
+    console.log('loginUser function done')
+    
     return c.json({ message: 'Login successful' }, 200);
   } catch (error) {
     console.error('Login error:', error);
