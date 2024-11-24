@@ -12,7 +12,9 @@ import broadcastSettingRouter from './src/routes/broadcast_setting';
 import dashboardRouter from './src/routes/dashboard';
 
 import customerAuthRouter from './src/routes/customer_routes/customer_auth';
-
+import memberMemberRouter from './src/routes/customer_routes/member_member';
+import memberDiscountCodeRouter from './src/routes/customer_routes/member_discount_code';
+import memberRedemptionItemRouter from './src/routes/customer_routes/member_redemption_item';
 
 import { config } from './src/config'; // Adjust the path as needed
 
@@ -54,5 +56,7 @@ app.route('/broadcast_setting', broadcastSettingRouter);
 app.route('/dashboard', dashboardRouter);
 
 app.route('/customer/customer_auth', customerAuthRouter);
-
+app.route('/customer/member_member', memberMemberRouter);
+app.route('/customer/member_discount_code', memberDiscountCodeRouter);
+app.route('/customer/member_redemption_item', memberRedemptionItemRouter);
 export default app;
