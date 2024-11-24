@@ -21,7 +21,7 @@ export const memberAuthMiddleware = async (c: Context, next: Next) => {
     return c.json({ error: 'Unauthorized' }, 401);
   }
   
-  console.log('token', token);
+  // console.log('token', token);
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     c.set('user', decoded);
