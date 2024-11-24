@@ -4,6 +4,7 @@
 import type { Context } from 'hono';
 
 async function checkAuth(c: Context) {
+  console.log('check auth success');
   return c.json({ message: 'Authenticated' }, 200);
 }
 

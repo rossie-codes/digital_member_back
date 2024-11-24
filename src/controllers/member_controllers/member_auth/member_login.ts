@@ -18,6 +18,7 @@ async function loginMember(c: Context) {
       return c.json({ error: 'Phone number and member_password are required' }, 400);
     }
 
+    console.log('loginUser function begin, member_phone and password exist.')
     // Get the user from the database
     const result = await pool.query('SELECT * FROM member_login WHERE member_phone = $1', [member_phone]);
 
@@ -25,11 +26,15 @@ async function loginMember(c: Context) {
       return c.json({ error: 'Invalid credentials' }, 401);
     }
 
+  
     const user = result.rows[0];
+
+    console.log('loginUser function begin, member_phone exist in db.')
 
     // Compare the member_password
     const isMatch = await bcrypt.compare(member_password, user.member_password_hash);
 
+    console.log('loginUser function begin, member_phone and password correct.')
 
     if (!isMatch) {
       // Optionally increment failed login attempts
