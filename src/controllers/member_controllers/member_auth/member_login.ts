@@ -46,7 +46,7 @@ async function loginMember(c: Context) {
       return c.json({ error: 'Invalid credentials' }, 401);
     }
     // Generate a JWT token
-    const token = jwt.sign({ memberId: user.member_id }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ memberId: user.member_id }, JWT_SECRET, { expiresIn: '10h' });
 
     // Update last_login and reset failed_login_attempts
     await pool.query(
@@ -67,7 +67,7 @@ async function loginMember(c: Context) {
       httpOnly: true,
       secure: false, // Set to false if testing over HTTP
       sameSite: 'lax', // Change from 'strict' to 'lax'
-      maxAge: 3600, // 1 hour
+      maxAge: 36000, // 1 hour
       path: '/',
     });
 
