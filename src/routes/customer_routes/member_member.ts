@@ -7,6 +7,7 @@ import { type Context } from 'hono';
 import {memberAuthMiddleware} from '../../middleware/memberAuthMiddleware';
 
 import getMemberDashboardCard from '../../controllers/member_controllers/member_member/get_member_dashboard_card'; 
+import getMemberRedemptionPageCard from '../../controllers/member_controllers/member_member/get_member_redemption_page_card';
 
 // import postNewMember from '../controllers/member/post_new_member';
 // import getMemberDetail from '../controllers/member/get_member_detail';
@@ -35,6 +36,21 @@ memberMemberRouter.get('/get_member_dashboard_card', memberAuthMiddleware, async
     return c.json(data);
   } catch (error) {
     console.log('get_member_dashboard_card route end in error');
+    // Let Hono’s `onError` handle the error
+    throw error;
+  }
+});
+
+
+memberMemberRouter.get('/get_member_redemption_page_card', memberAuthMiddleware, async (c: Context) => {
+  try {
+    console.log('get_member_redemption_page_card route begin');
+    
+    const data = await getMemberRedemptionPageCard(c);
+    console.log('get_member_redemption_page_card route done');
+    return c.json(data);
+  } catch (error) {
+    console.log('get_member_redemption_page_card route end in error');
     // Let Hono’s `onError` handle the error
     throw error;
   }
