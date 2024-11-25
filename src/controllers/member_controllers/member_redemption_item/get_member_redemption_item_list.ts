@@ -4,7 +4,7 @@ import { pool } from "../../db";
 import type { Context } from "hono";
 
 // Define the response interface
-interface RedemptionItemCode {
+interface RedemptionItem {
   redemption_item_id: number;
   redemption_item_name: string;
   valid_until: string;
@@ -12,7 +12,7 @@ interface RedemptionItemCode {
 
 async function getMemberRedemptionItem(
   c: Context
-): Promise<RedemptionItemCode[]> {
+): Promise<RedemptionItem[]> {
   console.log("getMemberRedemptionItem function begin");
 
   const user = c.get("user"); // Retrieve the user from context
@@ -38,7 +38,7 @@ async function getMemberRedemptionItem(
 
     const result = await pool.query(query, values);
 
-    const memberRedemptionItems: RedemptionItemCode[] = result.rows.map(
+    const memberRedemptionItems: RedemptionItem[] = result.rows.map(
       (row) => ({
         redemption_item_id: row.redemption_item_id,
         redemption_item_name: row.redemption_item_name,

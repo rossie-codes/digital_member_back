@@ -5,10 +5,6 @@ import jwt from 'jsonwebtoken';
 import { validator } from 'hono/validator'
 import { getCookie, setCookie } from 'hono/cookie'
 
-
-
-
-
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 
 export const memberAuthMiddleware = async (c: Context, next: Next) => {

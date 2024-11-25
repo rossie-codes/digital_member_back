@@ -1,76 +1,74 @@
-// src/controllers/member_controllers/member_discount_code/get_member_discount_code_detail.ts
+// src/controllers/member_controllers/member_redemption_item/get_member_redemption_item_detail.ts
 
 import { pool } from "../../db";
 import type { Context } from "hono";
 
 // Define the response interface
-interface MemberDiscountCodeDetail {
-  discount_code_id: number;
-  discount_code_name: string;
-  valid_until: string;
-  discount_code: string;
-  discount_type: string;
+interface MemberRedemptionItemDetail {
+  redemption_item_id: number;
+  redemption_item_name: string;
+  redemption_type: 'fixed_amount' | 'percentage';
   discount_amount: number;
-  discount_code_content: string;
-  discount_code_term: string;
+  validity_period: number;
+  valid_from: string | null;
+  valid_until: string | null;
+  redeem_point: number;
+  redemption_content: string;
+  redemption_term: string;
 }
 
-async function getMemberDiscountCodeDetail(
+async function getMemberRedemptionItemDetail(
   c: Context
-): Promise<MemberDiscountCodeDetail> {
-  console.log("getMemberDiscountCodeDetail function begin");
-
-  const user = c.get("user");
-  console.log("user is:", user);
-  const member_id = user.memberId;
-  console.log("member_id is:", member_id);
-
-  const discountCodeId = c.req.param('discount_code_id');
-  console.log('discount_code_id is:', discountCodeId);
+): Promise<MemberRedemptionItemDetail> {
+  // Retrieve the redemption_item_id from request parameters
+  const redemptionItemId = c.req.param('redemption_item_id');
 
   try {
     const query = `
       SELECT 
-        discount_code_id,
-        discount_code_name,
-        valid_until,
-        discount_code,
-        discount_type::text,
+        redemption_item_id,
+        redemption_item_name,
+        redemption_type,
         discount_amount,
-        discount_code_content,
-        discount_code_term
-      FROM discount_code
-      WHERE discount_code_id = $1
-        AND discount_code_status = 'active'
+        validity_period,
+        valid_from,
+        valid_until,
+        redeem_point,
+        redemption_content,
+        redemption_term
+      FROM redemption_item
+      WHERE redemption_item_id = $1
         AND deleted_status = false
+        AND redemption_item_status = 'active'
     `;
-    const values = [discountCodeId];
+    const values = [redemptionItemId];
 
     const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
-      throw new Error('Discount code not found');
+      throw new Error('Redemption item not found');
     }
 
     const row = result.rows[0];
 
-    const memberDiscountCodeDetail: MemberDiscountCodeDetail = {
-      discount_code_id: row.discount_code_id,
-      discount_code_name: row.discount_code_name,
-      valid_until: row.valid_until.toISOString(),
-      discount_code: row.discount_code,
-      discount_type: row.discount_type,
+    const memberRedemptionItemDetail: MemberRedemptionItemDetail = {
+      redemption_item_id: row.redemption_item_id,
+      redemption_item_name: row.redemption_item_name,
+      redemption_type: row.redemption_type,
       discount_amount: parseFloat(row.discount_amount),
-      discount_code_content: row.discount_code_content,
-      discount_code_term: row.discount_code_term,
+      validity_period: row.validity_period,
+      valid_from: row.valid_from ? row.valid_from.toISOString() : null,
+      valid_until: row.valid_until ? row.valid_until.toISOString() : null,
+      redeem_point: row.redeem_point,
+      redemption_content: row.redemption_content,
+      redemption_term: row.redemption_term,
     };
 
-    console.log("getMemberDiscountCodeDetail function end");
-    return memberDiscountCodeDetail;
+    return memberRedemptionItemDetail;
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
   }
 }
 
-export default getMemberDiscountCodeDetail;
+export default getMemberRedemptionItemDetail;
