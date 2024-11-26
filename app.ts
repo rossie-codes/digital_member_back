@@ -16,6 +16,7 @@ import memberMemberRouter from './src/routes/customer_routes/member_member';
 import memberDiscountCodeRouter from './src/routes/customer_routes/member_discount_code';
 import memberRedemptionItemRouter from './src/routes/customer_routes/member_redemption_item';
 import memberMemberOrderRouter from './src/routes/customer_routes/member_member_order';
+import memberMembershipTierRouter from './src/routes/customer_routes/member_membership_tier';
 
 import { config } from './src/config'; // Adjust the path as needed
 
@@ -61,5 +62,7 @@ app.route('/customer/member_member', memberMemberRouter);
 app.route('/customer/member_discount_code', memberDiscountCodeRouter);
 app.route('/customer/member_redemption_item', memberRedemptionItemRouter);
 app.route('/customer/member_member_order', memberMemberOrderRouter);
+app.route('/customer/member_membership_tier', memberMembershipTierRouter);
+
 
 export default app;
