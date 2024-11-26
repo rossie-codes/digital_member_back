@@ -6,9 +6,13 @@ import { type Context } from 'hono';
 
 import {memberAuthMiddleware} from '../../middleware/memberAuthMiddleware';
 
-import getMemberRedemptionItemList from '../../controllers/member_controllers/member_redemption_item/get_member_redemption_item_list';
-import getMemberRedemptionItemDetail from '../../controllers/member_controllers/member_redemption_item/get_member_redemption_item_detail';
+import getMemberRedemptionItemRecordList from '../../controllers/member_controllers/member_redemption_item/get_member_redemption_item_record_list.ts';
+import getMemberRedemptionItemRecordDetail from '../../controllers/member_controllers/member_redemption_item/get_member_redemption_item_record_detail.ts';
+import getMemberRedemptionItemSettingDetail from '../../controllers/member_controllers/member_redemption_item/get_member_redemption_item_setting_detail.ts';
 import getMemberRedemptionItemSetting from '../../controllers/member_controllers/member_redemption_item/get_member_redemption_item_setting';
+
+
+import postMemberRedemptionItemRedeem from '../../controllers/member_controllers/member_redemption_item/post_member_redemption_item_redeem.ts';
 
 import { HTTPException } from 'hono/http-exception'
 
@@ -20,39 +24,38 @@ memberRedemptionItemRouter.use('*', memberAuthMiddleware); // Protect all member
 
 
 // GET /member - Retrieve all members
-memberRedemptionItemRouter.get('/get_member_redemption_item_list', memberAuthMiddleware, async (c: Context) => {
+memberRedemptionItemRouter.get('/get_member_redemption_item_record_list', memberAuthMiddleware, async (c: Context) => {
   try {
-    console.log('get_member_redemption_item_list route begin');
+    console.log('get_member_redemption_item_record_list route begin');
     
-    const data = await getMemberRedemptionItemList(c);
-    console.log('get_member_redemption_item_list route done');
+    const data = await getMemberRedemptionItemRecordList(c);
+    console.log('get_member_redemption_item_record_list route done');
     return c.json(data);
   } catch (error) {
-    console.log('get_member_redemption_item_list route end in error');
+    console.log('get_member_redemption_item_record_list route end in error');
     // Let Hono’s `onError` handle the error
     throw error;
   }
 });
 
 
-
-// GET /member/get_member_detail/:memberPhone - Retrieve member details by phone
-memberRedemptionItemRouter.get('/get_member_redemption_item_detail/:redemption_item_id',memberAuthMiddleware, async (c: Context) => {
+memberRedemptionItemRouter.get('/get_member_redemption_item_record_detail/:redemption_record_id',memberAuthMiddleware, async (c: Context) => {
   try {
-    console.log('get_member_redemption_item_detail route begin');
+    console.log('get_member_redemption_item_record_detail route begin');
     
 
-    const data = await getMemberRedemptionItemDetail(c);
-    console.log('get_member_redemption_item_detail route done');
+    const data = await getMemberRedemptionItemRecordDetail(c);
+    console.log('get_member_redemption_item_record_detail route done');
     return c.json(data);
   } catch (error: any) {
-    console.log('get_member_redemption_item_detail end in error');
+    console.log('get_member_redemption_item_record_detail end in error');
     if (error.message === 'Member not found') {
       return c.json({ message: 'Member not found' }, 404);
     }
     throw error;
   }
 });
+
 
 
 memberRedemptionItemRouter.get('/get_member_redemption_item_setting', memberAuthMiddleware, async (c: Context) => {
@@ -70,18 +73,39 @@ memberRedemptionItemRouter.get('/get_member_redemption_item_setting', memberAuth
 });
 
 
-// memberDiscountCodeRouter.post('/post_new_member', async (c: Context) => {
-//     try {
-//       console.log('post_new_member route begin');
-//       const response = await postNewMember(c);
-//       console.log('post_new_member route done');
 
-//       return response; // Return the Response directly
-//     } catch (error) {
-//       console.log('post_new_member route end in error');
-//       throw error;
-//     }
-//   });
+// GET /member/get_member_detail/:memberPhone - Retrieve member details by phone
+memberRedemptionItemRouter.get('/get_member_redemption_item_setting_detail/:redemption_item_id',memberAuthMiddleware, async (c: Context) => {
+  try {
+    console.log('get_member_redemption_item_setting_detail route begin');
+    
+
+    const data = await getMemberRedemptionItemSettingDetail(c);
+    console.log('get_member_redemption_item_setting_detail route done');
+    return c.json(data);
+  } catch (error: any) {
+    console.log('get_member_redemption_item_setting_detail end in error');
+    if (error.message === 'Member not found') {
+      return c.json({ message: 'Member not found' }, 404);
+    }
+    throw error;
+  }
+});
+
+
+
+memberRedemptionItemRouter.post('/post_member_redemption_item_redeem',memberAuthMiddleware, async (c: Context) => {
+    try {
+      console.log('post_member_redemption_item_redeem route begin');
+      const response = await postMemberRedemptionItemRedeem(c);
+      console.log('post_member_redemption_item_redeem route done');
+
+      return response; // Return the Response directly
+    } catch (error) {
+      console.log('post_member_redemption_item_redeem route end in error');
+      throw error;
+    }
+  });
 
 //   memberDiscountCodeRouter.put('/put_suspend_membership/:memberPhone', async (c: Context) => {
 //     try {
