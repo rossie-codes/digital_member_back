@@ -9,7 +9,7 @@ async function logoutMember(c: Context) {
   // // Clear the token cookie
   // const cookie = serialize('token', '', {
   //   httpOnly: true,
-  //   secure: process.env.NODE_ENV === 'production',
+    // secure: process.env.NODE_ENV === 'production',
   //   sameSite: 'strict',
   //   expires: new Date(0), // Set expiry date in the past
   //   path: '/',
@@ -17,10 +17,11 @@ async function logoutMember(c: Context) {
 
   const cookie = serialize('token', '', {
     httpOnly: true,
-    secure: false, // Set to false if testing over HTTP
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax', // Change from 'strict' to 'lax'
     maxAge: 3600, // 1 hour
     path: '/',
+    domain: process.env.NODE_ENV === 'production' ? '.up.railway.app' : undefined,
   });
 
 
