@@ -57,7 +57,7 @@ async function loginMember(c: Context) {
     // Set the token as an HTTP-only cookie
     // const cookie = serialize('token', token, {
     //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+      // secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
     //   sameSite: 'strict',
     //   maxAge: 3600, // 1 hour
     //   path: '/',
@@ -65,7 +65,7 @@ async function loginMember(c: Context) {
 
     const cookie = serialize('token', token, {
       httpOnly: true,
-      secure: false, // Set to false if testing over HTTP
+      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
       sameSite: 'lax', // Change from 'strict' to 'lax'
       maxAge: 36000, // 1 hour
       path: '/',
