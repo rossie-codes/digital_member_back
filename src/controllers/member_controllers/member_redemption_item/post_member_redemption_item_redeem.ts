@@ -31,7 +31,7 @@ async function postMemberRedemptionItemRedeem(c: Context): Promise<Response> {
 
       // Get member's current points and member_phone
       const memberQuery = `
-        SELECT point, member_phone
+        SELECT points_balance, member_phone
         FROM member
         WHERE member_id = $1
         FOR UPDATE
@@ -40,7 +40,7 @@ async function postMemberRedemptionItemRedeem(c: Context): Promise<Response> {
       if (memberResult.rows.length === 0) {
         throw new Error('Member not found');
       }
-      const memberPoint = parseInt(memberResult.rows[0].point, 10);
+      const memberPoint = parseInt(memberResult.rows[0].points_balance, 10);
       const member_phone = memberResult.rows[0].member_phone;
 
       // Get redemption_item details
@@ -105,7 +105,7 @@ async function postMemberRedemptionItemRedeem(c: Context): Promise<Response> {
       // Deduct points from member
       const updateMemberQuery = `
         UPDATE member
-        SET point = point - $1
+        SET points_balance = points_balance - $1
         WHERE member_id = $2
       `;
       await client.query(updateMemberQuery, [redeemPointRequired, member_id]);

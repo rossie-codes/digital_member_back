@@ -83,8 +83,8 @@ async function postMembershipTierSetting(c: Context): Promise<Response> {
             mt.membership_tier_id
           FROM
             member m
-          JOIN membership_tier mt ON m.point >= mt.require_point
-          LEFT JOIN membership_tier mt2 ON mt2.require_point > mt.require_point AND m.point >= mt2.require_point
+          JOIN membership_tier mt ON m.points_balance >= mt.require_point
+          LEFT JOIN membership_tier mt2 ON mt2.require_point > mt.require_point AND m.points_balance >= mt2.require_point
           WHERE mt2.membership_tier_id IS NULL
         ) AS sub
         WHERE member.member_id = sub.member_id

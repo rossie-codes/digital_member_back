@@ -8,6 +8,8 @@ import {memberAuthMiddleware} from '../../middleware/memberAuthMiddleware';
 
 import getMemberRedemptionItemRecordList from '../../controllers/member_controllers/member_redemption_item/get_member_redemption_item_record_list.ts';
 import getMemberRedemptionItemRecordDetail from '../../controllers/member_controllers/member_redemption_item/get_member_redemption_item_record_detail.ts';
+import getMemberExpiredRedemptionItemRecordList from '../../controllers/member_controllers/member_redemption_item/get_member_expired_redemption_item_record_list.ts';
+import getMemberExpiredRedemptionItemRecordDetail from '../../controllers/member_controllers/member_redemption_item/get_member_expired_redemption_item_record_detail.ts';
 import getMemberRedemptionItemSettingDetail from '../../controllers/member_controllers/member_redemption_item/get_member_redemption_item_setting_detail.ts';
 import getMemberRedemptionItemSetting from '../../controllers/member_controllers/member_redemption_item/get_member_redemption_item_setting';
 
@@ -39,6 +41,7 @@ memberRedemptionItemRouter.get('/get_member_redemption_item_record_list', member
 });
 
 
+
 memberRedemptionItemRouter.get('/get_member_redemption_item_record_detail/:redemption_record_id',memberAuthMiddleware, async (c: Context) => {
   try {
     console.log('get_member_redemption_item_record_detail route begin');
@@ -56,6 +59,37 @@ memberRedemptionItemRouter.get('/get_member_redemption_item_record_detail/:redem
   }
 });
 
+
+memberRedemptionItemRouter.get('/get_member_expired_redemption_item_record_list', memberAuthMiddleware, async (c: Context) => {
+  try {
+    console.log('get_member_expired_redemption_item_record_list route begin');
+    
+    const data = await getMemberExpiredRedemptionItemRecordList(c);
+    console.log('get_member_expired_redemption_item_record_list route done');
+    return c.json(data);
+  } catch (error) {
+    console.log('get_member_expired_redemption_item_record_list route end in error');
+    // Let Hono’s `onError` handle the error
+    throw error;
+  }
+});
+
+memberRedemptionItemRouter.get('/get_member_expired_redemption_item_record_detail/:redemption_record_id',memberAuthMiddleware, async (c: Context) => {
+  try {
+    console.log('get_member_expired_redemption_item_record_detail route begin');
+    
+
+    const data = await getMemberExpiredRedemptionItemRecordDetail(c);
+    console.log('get_member_expired_redemption_item_record_detail route done');
+    return c.json(data);
+  } catch (error: any) {
+    console.log('get_member_expired_redemption_item_record_detail end in error');
+    if (error.message === 'Member not found') {
+      return c.json({ message: 'Member not found' }, 404);
+    }
+    throw error;
+  }
+});
 
 
 memberRedemptionItemRouter.get('/get_member_redemption_item_setting', memberAuthMiddleware, async (c: Context) => {

@@ -96,7 +96,7 @@ async function getMemberMemberOrderDetail(c: Context): Promise<MemberOrderDetail
 
     const orderRow = orderResult.rows[0];
 
-    // Get point earning information
+    // Get points_balance earning information
     const pointEarningQuery = `
       SELECT
         point_earning_id,

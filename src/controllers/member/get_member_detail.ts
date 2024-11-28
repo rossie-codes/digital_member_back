@@ -46,7 +46,7 @@ interface Member {
   member_phone: string;
   member_name: string;
   member_referral_code: string | null;
-  point: number;
+  points_balance: number;
   membership_tier_id: number | null;
   membership_expiry_date: string | null;
   referrer_member_id: number | null;
@@ -256,7 +256,7 @@ async function getMemberDetail(memberPhone: string): Promise<Member> {
       member_phone: row.member_phone,
       member_name: row.member_name,
       member_referral_code: row.member_referral_code,
-      point: row.point,
+      points_balance: row.points_balance,
       membership_tier_id: row.membership_tier_id,
       membership_expiry_date: row.membership_expiry_date,
       referrer_member_id: row.referrer_member_id,

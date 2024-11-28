@@ -8,7 +8,7 @@ interface MemberRedemptionPageCard {
   member_name: string;
   membership_tier_id: number;
   membership_tier_name: string;
-  point: number;
+  points_balance: number;
   next_membership_tier_id: number | null;
   next_membership_tier_name: string | null;
   next_membership_tier_point: number | null;
@@ -29,7 +29,7 @@ async function getMemberRedemptionPageCard(
         m.membership_tier_id, 
         mt.membership_tier_name, 
         mt.membership_tier_sequence,
-        m.point
+        m.points_balance
       FROM member m
       LEFT JOIN membership_tier mt ON m.membership_tier_id = mt.membership_tier_id
       WHERE m.member_id = $1
@@ -67,14 +67,14 @@ async function getMemberRedemptionPageCard(
     }
 
     const point_to_next_tier = nextTierRow
-      ? Math.max(0, nextTierRow.require_point - memberRow.point)
+      ? Math.max(0, nextTierRow.require_point - memberRow.points_balance)
       : null;
 
     const memberRedemptionPageCard: MemberRedemptionPageCard = {
       member_name: memberRow.member_name,
       membership_tier_id: memberRow.membership_tier_id,
       membership_tier_name: memberRow.membership_tier_name,
-      point: memberRow.point,
+      points_balance: memberRow.points_balance,
       next_membership_tier_id: nextTierRow ? nextTierRow.membership_tier_id : null,
       next_membership_tier_name: nextTierRow ? nextTierRow.membership_tier_name : null,
       next_membership_tier_point: nextTierRow ? nextTierRow.require_point : null,

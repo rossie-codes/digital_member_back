@@ -8,7 +8,7 @@ interface MemberDashboardCard {
   member_name: string;
   membership_tier_id: number;
   membership_tier_name: string;
-  point: number;
+  points_balance: number;
   membership_expiry_date: string;
 }
 
@@ -27,7 +27,7 @@ async function getMemberDashboardCard(c: Context): Promise<MemberDashboardCard> 
         m.member_name, 
         m.membership_tier_id, 
         mt.membership_tier_name, 
-        m.point,
+        m.points_balance,
         m.membership_expiry_date
       FROM member m
       LEFT JOIN membership_tier mt ON m.membership_tier_id = mt.membership_tier_id
@@ -47,7 +47,7 @@ async function getMemberDashboardCard(c: Context): Promise<MemberDashboardCard> 
       member_name: row.member_name,
       membership_tier_id: row.membership_tier_id,
       membership_tier_name: row.membership_tier_name,
-      point: row.point,
+      points_balance: row.points_balance,
       membership_expiry_date: row.membership_expiry_date.toISOString(), // Adjust as needed
     };
 

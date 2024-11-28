@@ -14,16 +14,18 @@ interface Member {
   member_phone: string;
   member_name: string;
   member_referral_code: string;
-  point: number;
+  points_balance: number;
+  total_order_amount: number;
+  total_point_earn: number; // New field
+  membership_period_point_earn: number; // New field
   membership_tier_id: number | null;
   membership_expiry_date: string;
   referrer_member_id: number | null;
   birthday: string | null;
   membership_status: 'expired' | 'active' | 'suspended';
   member_note: string | null;
-  member_tag: string[] | null; // Adjust type if necessary
+  member_tag: string[] | null;
   state_code: string | null;
-  // Add a nested object to hold membership tier details
   membership_tier?: {
     membership_tier_id: number;
     membership_tier_name: string;
@@ -64,11 +66,11 @@ async function getMemberList(c: Context): Promise<{
     const pageSize = pageSizeParam ? parseInt(pageSizeParam, 10) : 10;
 
     // Allowed fields for sorting
-    const allowedSortFields = ['member_name', 'member_phone', 'point', 'membership_expiry_date', 'membership_tier'];
+    const allowedSortFields = ['member_name', 'member_phone', 'points_balance', 'membership_expiry_date', 'membership_tier'];
     const sortFieldMapping: { [key: string]: string } = {
       'member_name': 'm.member_name',
       'member_phone': 'm.member_phone',
-      'point': 'm.point',
+      'points_balance': 'm.points_balance',
       'membership_expiry_date': 'm.membership_expiry_date',
       'membership_tier': 'mt.membership_tier_name',
       'member_id': 'm.member_id', // Default sorting field
@@ -164,23 +166,23 @@ async function getMemberList(c: Context): Promise<{
 
     // Data query with LIMIT and OFFSET
     const dataQuery = `
-      SELECT
-        m.*,
-        mt.membership_tier_id AS mt_membership_tier_id,
-        mt.membership_tier_name AS mt_membership_tier_name,
-        mt.membership_tier_sequence,
-        mt.require_point,
-        mt.extend_membership_point,
-        mt.point_multiplier,
-        mt.membership_period
-      FROM
-        member m
-      LEFT JOIN
-        membership_tier mt ON m.membership_tier_id = mt.membership_tier_id
-      ${whereClause}
-      ${orderByClause}
-      LIMIT $${paramIndex - 2} OFFSET $${paramIndex - 1}
-    `;
+    SELECT
+      m.*,
+      mt.membership_tier_id AS mt_membership_tier_id,
+      mt.membership_tier_name AS mt_membership_tier_name,
+      mt.membership_tier_sequence AS mt_membership_tier_sequence,
+      mt.require_point AS mt_require_point,
+      mt.extend_membership_point AS mt_extend_membership_point,
+      mt.point_multiplier AS mt_point_multiplier,
+      mt.membership_period AS mt_membership_period
+    FROM
+      member m
+    LEFT JOIN
+      membership_tier mt ON m.membership_tier_id = mt.membership_tier_id
+    ${whereClause}
+    ${orderByClause}
+    LIMIT $${paramIndex - 2} OFFSET $${paramIndex - 1}
+  `;
 
     const data = await pool.query(dataQuery, queryParams);
 
@@ -195,7 +197,10 @@ async function getMemberList(c: Context): Promise<{
         member_phone: row.member_phone,
         member_name: row.member_name,
         member_referral_code: row.member_referral_code,
-        point: row.point,
+        points_balance: row.points_balance,
+        total_order_amount: row.total_order_amount,
+        total_point_earn: row.total_point_earn, // New field
+        membership_period_point_earn: row.membership_period_point_earn, // New field
         membership_tier_id: row.membership_tier_id,
         membership_expiry_date: row.membership_expiry_date,
         referrer_member_id: row.referrer_member_id,
@@ -206,14 +211,14 @@ async function getMemberList(c: Context): Promise<{
         state_code: row.state_code,
         membership_tier: row.mt_membership_tier_id
           ? {
-            membership_tier_id: row.mt_membership_tier_id,
-            membership_tier_name: row.mt_membership_tier_name,
-            membership_tier_sequence: row.mt_membership_tier_sequence,
-            require_point: row.mt_require_point,
-            extend_membership_point: row.mt_extend_membership_point,
-            point_multiplier: row.mt_point_multiplier,
-            membership_period: row.mt_membership_period,
-          }
+              membership_tier_id: row.mt_membership_tier_id,
+              membership_tier_name: row.mt_membership_tier_name,
+              membership_tier_sequence: row.mt_membership_tier_sequence,
+              require_point: row.mt_require_point,
+              extend_membership_point: row.mt_extend_membership_point,
+              point_multiplier: row.mt_point_multiplier,
+              membership_period: row.mt_membership_period,
+            }
           : undefined,
       };
       return member;

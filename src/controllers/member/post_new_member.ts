@@ -10,7 +10,7 @@ interface NewMember {
     member_phone: number
     birthday: string | null
     referrer_phone: number | null
-    point: number
+    points_balance: number
 }
 
 
@@ -33,7 +33,7 @@ async function postNewMember(c: Context): Promise<Response> {
         const body: NewMember = await c.req.json();
 
         // Destructure the data
-        const { member_name, member_phone, birthday, referrer_phone, point } = body;
+        const { member_name, member_phone, birthday, referrer_phone, points_balance } = body;
         console.log(body)
         // Get a database client from the pool
         const client = await pool.connect();
@@ -98,7 +98,7 @@ async function postNewMember(c: Context): Promise<Response> {
 
             // Determine membership_tier and membership_expiry_date
             // Get the tier with the lowest membership_tier_sequence
-            // Determine membership_tier and membership_expiry_date based on member's point
+            // Determine membership_tier and membership_expiry_date based on member's points_balance
             const tierQuery = `
                 SELECT membership_tier_id, membership_period
                 FROM membership_tier
@@ -107,7 +107,7 @@ async function postNewMember(c: Context): Promise<Response> {
                 LIMIT 1
                 `;
 
-            const tierResult = await client.query(tierQuery, [point]);
+            const tierResult = await client.query(tierQuery, [points_balance]);
 
             let membership_tier_id: number | null = null;
             let membership_expiry_date: string | null = null;
@@ -128,7 +128,7 @@ async function postNewMember(c: Context): Promise<Response> {
             } else {
                 // Handle case when no tier is matched
                 // You may set a default tier or handle it as needed
-                console.warn('No matching membership tier found for the given point value.');
+                console.warn('No matching membership tier found for the given points_balance value.');
             }
 
             // Insert the new member
@@ -138,7 +138,7 @@ async function postNewMember(c: Context): Promise<Response> {
               member_phone,
               member_name,
               member_referral_code,
-              point,
+              points_balance,
               membership_tier_id,
               membership_expiry_date,
               referrer_member_id,
@@ -154,7 +154,7 @@ async function postNewMember(c: Context): Promise<Response> {
                 member_phone,
                 member_name,
                 member_referral_code,
-                point,
+                points_balance,
                 membership_tier_id,
                 membership_expiry_date,
                 referrer_member_id,

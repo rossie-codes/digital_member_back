@@ -9,6 +9,9 @@ import {memberAuthMiddleware} from '../../middleware/memberAuthMiddleware';
 import getMemberDashboardCard from '../../controllers/member_controllers/member_member/get_member_dashboard_card'; 
 import getMemberRedemptionPageCard from '../../controllers/member_controllers/member_member/get_member_redemption_page_card';
 
+import getMemberProfileDetail from '../../controllers/member_controllers/member_member/get_member_profile_detail';
+import putMemberUpdateProfileDetail from '../../controllers/member_controllers/member_member/put_member_update_profile_detail';
+
 // import postNewMember from '../controllers/member/post_new_member';
 // import getMemberDetail from '../controllers/member/get_member_detail';
 // import putSuspendMembership from '../controllers/member/put_suspend_membership';
@@ -55,6 +58,41 @@ memberMemberRouter.get('/get_member_redemption_page_card', memberAuthMiddleware,
     throw error;
   }
 });
+
+
+memberMemberRouter.get('/get_member_profile_detail', memberAuthMiddleware, async (c: Context) => {
+  try {
+    console.log('get_member_profile_detail route begin');
+    
+    const data = await getMemberProfileDetail(c);
+    console.log('get_member_profile_detail route done');
+    return c.json(data);
+  } catch (error) {
+    console.log('get_member_profile_detail route end in error');
+    // Let Hono’s `onError` handle the error
+    throw error;
+  }
+});
+
+memberMemberRouter.put('/put_member_update_profile_detail', memberAuthMiddleware, async (c: Context) => {
+  try {
+    console.log('put_member_update_profile_detail route begin');
+    
+    const data = await putMemberUpdateProfileDetail(c);
+    console.log('put_member_update_profile_detail route done');
+    return c.json(data);
+  } catch (error) {
+    console.log('put_member_update_profile_detail route end in error');
+    // Let Hono’s `onError` handle the error
+    throw error;
+  }
+});
+
+
+
+
+
+
 
 // // GET /member/get_member_detail/:memberPhone - Retrieve member details by phone
 // memberMemberRouter.get('/get_member_detail/:memberPhone', async (c: Context) => {

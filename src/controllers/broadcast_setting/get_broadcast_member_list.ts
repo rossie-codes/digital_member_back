@@ -15,7 +15,7 @@ interface Member {
   member_phone: string;
   member_name: string;
   member_referral_code: string;
-  point: number;
+  points_balance: number;
   membership_tier_id: number | null;
   membership_expiry_date: string;
   referrer_member_id: number | null;
@@ -68,11 +68,11 @@ async function getMemberList(c: Context): Promise<{
     const pageSize = pageSizeParam ? parseInt(pageSizeParam, 10) : 10;
 
     // Allowed fields for sorting
-    const allowedSortFields = ['member_name', 'member_phone', 'point', 'membership_expiry_date', 'membership_tier'];
+    const allowedSortFields = ['member_name', 'member_phone', 'points_balance', 'membership_expiry_date', 'membership_tier'];
     const sortFieldMapping: { [key: string]: string } = {
       'member_name': 'm.member_name',
       'member_phone': 'm.member_phone',
-      'point': 'm.point',
+      'points_balance': 'm.points_balance',
       'membership_expiry_date': 'm.membership_expiry_date',
       'membership_tier': 'mt.membership_tier_name',
       'member_id': 'm.member_id', // Default sorting field
@@ -202,7 +202,7 @@ async function getMemberList(c: Context): Promise<{
         member_phone: row.member_phone,
         member_name: row.member_name,
         member_referral_code: row.member_referral_code,
-        point: row.point,
+        points_balance: row.points_balance,
         membership_tier_id: row.membership_tier_id,
         membership_expiry_date: row.membership_expiry_date,
         referrer_member_id: row.referrer_member_id,
