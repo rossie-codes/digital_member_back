@@ -10,7 +10,7 @@ import getMemberMemberOrderList from '../../controllers/member_controllers/membe
 import getMemberMemberOrderCard from '../../controllers/member_controllers/member_member_order/get_member_member_order_card.ts';
 import getMemberMemberOrderDetail from '../../controllers/member_controllers/member_member_order/get_member_member_order_detail.ts';
 
-import getMemberRedemptionItemDetail from '../../controllers/member_controllers/member_redemption_item/get_member_redemption_item_detail';
+import getMemberRedemptionItemDetail from '../../controllers/member_controllers/member_redemption_item/get_member_redemption_item_setting_detail.ts';
 import getMemberRedemptionItemSetting from '../../controllers/member_controllers/member_redemption_item/get_member_redemption_item_setting';
 
 import { HTTPException } from 'hono/http-exception'
