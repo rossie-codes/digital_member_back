@@ -21,7 +21,7 @@ async function logoutMember(c: Context) {
     sameSite: 'lax', // Change from 'strict' to 'lax'
     maxAge: 3600, // 1 hour
     path: '/',
-    domain: process.env.NODE_ENV === 'production' ? '.up.railway.app' : undefined,
+  
   });
 
 

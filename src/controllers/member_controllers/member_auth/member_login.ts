@@ -69,6 +69,7 @@ async function loginMember(c: Context) {
       sameSite: 'lax', // Change from 'strict' to 'lax'
       maxAge: 36000, // 1 hour
       path: '/',
+      domain: process.env.NODE_ENV === 'production' ? '.up.railway.app' : undefined,
     });
 
     c.header('Set-Cookie', cookie);
