@@ -4,7 +4,7 @@ import { Hono } from 'hono';
 import { type Context } from 'hono';
 import { authMiddleware } from '../middleware/authMiddleware';
 
-import getDashboardInfo from '../controllers/report/dashboard/get_dashboard_info';
+import getDashboardInfo from '../controllers/admin_controllers/report/dashboard/get_dashboard_info';
 
 
 

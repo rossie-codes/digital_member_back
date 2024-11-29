@@ -4,10 +4,10 @@ import { Hono } from 'hono';
 import { type Context } from 'hono';
 import { authMiddleware } from '../middleware/authMiddleware';
 
-import getMemberPointRule from '../controllers/point_setting/get_member_point_rule';
+import getMemberPointRule from '../controllers/admin_controllers/point_setting/get_member_point_rule';
 
-import postMembershipBasicSetting from '../controllers/membership_tier/post_membership_basic_setting';
-import postMemberPointRule from '../controllers/point_setting/post_member_point_rule';
+import postMembershipBasicSetting from '../controllers/admin_controllers/membership_tier/post_membership_basic_setting';
+import postMemberPointRule from '../controllers/admin_controllers/point_setting/post_member_point_rule';
 // Import other controllers as needed
 
 const pointSettingRouter = new Hono();

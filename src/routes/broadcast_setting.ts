@@ -4,17 +4,17 @@ import { Hono } from 'hono';
 import { type Context } from 'hono';
 import { authMiddleware } from '../middleware/authMiddleware';
 
-import getBroadcastList from '../controllers/broadcast_setting/get_broadcast_list';
-import getBroadcastHistoryList from '../controllers/broadcast_setting/get_broadcast_history_list'
-import getBroadcastMemberList from '../controllers/broadcast_setting/get_broadcast_member_list';
-import getWatiTemplateDetail from '../controllers/broadcast_setting/get_wati_template_detail';
+import getBroadcastList from '../controllers/admin_controllers/broadcast_setting/get_broadcast_list';
+import getBroadcastHistoryList from '../controllers/admin_controllers/broadcast_setting/get_broadcast_history_list'
+import getBroadcastMemberList from '../controllers/admin_controllers/broadcast_setting/get_broadcast_member_list';
+import getWatiTemplateDetail from '../controllers/admin_controllers/broadcast_setting/get_wati_template_detail';
 
-import getBroadcastDetail from '../controllers/broadcast_setting/get_broadcast_detail';
+import getBroadcastDetail from '../controllers/admin_controllers/broadcast_setting/get_broadcast_detail';
 
-import postNewBroadcast from '../controllers/broadcast_setting/post_new_broadcast';
-// import getMemberDetail from '../controllers/member/get_member_detail';
+import postNewBroadcast from '../controllers/admin_controllers/broadcast_setting/post_new_broadcast';
+// import getMemberDetail from '..//admin_controllerscontrollers/member/get_member_detail';
 
-import putEditBroadcastDetail from '../controllers/broadcast_setting/put_edit_broadcast_detail';
+import putEditBroadcastDetail from '../controllers/admin_controllers/broadcast_setting/put_edit_broadcast_detail';
 
 import { HTTPException } from 'hono/http-exception'
 

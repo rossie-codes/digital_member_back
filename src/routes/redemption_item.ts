@@ -4,17 +4,17 @@ import { Hono } from 'hono';
 import { type Context } from 'hono';
 import { authMiddleware } from '../middleware/authMiddleware';
 
-import getRedemptionItemList from '../controllers/redemption_item_setting/get_redemption_item_list';
-import getRedemptionItemDetail from '../controllers/redemption_item_setting/get_redemption_item_detail';
-import getDeletedRedemptionItemList from '../controllers/redemption_item_setting/get_deleted_redemption_item_list';
+import getRedemptionItemList from '../controllers/admin_controllers/redemption_item_setting/get_redemption_item_list';
+import getRedemptionItemDetail from '../controllers/admin_controllers/redemption_item_setting/get_redemption_item_detail';
+import getDeletedRedemptionItemList from '../controllers/admin_controllers/redemption_item_setting/get_deleted_redemption_item_list';
 
-import postRedemptionItemSetting from '../controllers/redemption_item_setting/post_redemption_item_setting';
+import postRedemptionItemSetting from '../controllers/admin_controllers/redemption_item_setting/post_redemption_item_setting';
 
-import putRedemptionItemIsActive from '../controllers/redemption_item_setting/put_redemption_item_is_active';
-import putRedemptionItemDetail from '../controllers/redemption_item_setting/put_redemption_item_detail';
+import putRedemptionItemIsActive from '../controllers/admin_controllers/redemption_item_setting/put_redemption_item_is_active';
+import putRedemptionItemDetail from '../controllers/admin_controllers/redemption_item_setting/put_redemption_item_detail';
 
-import deleteRedemptionItem from '../controllers/redemption_item_setting/delete_redemption_item';
-import restoreRedemptionItem from '../controllers/redemption_item_setting/restore_redemption_item';
+import deleteRedemptionItem from '../controllers/admin_controllers/redemption_item_setting/delete_redemption_item';
+import restoreRedemptionItem from '../controllers/admin_controllers/redemption_item_setting/restore_redemption_item';
 
 
 // Import other controllers as needed

@@ -4,11 +4,11 @@ import { Hono } from 'hono';
 import { type Context } from 'hono';
 import { authMiddleware } from '../middleware/authMiddleware';
 
-import getMembershipTierSetting from '../controllers/membership_tier/get_membership_tier_setting';
-import getMembershipBasicSetting from '../controllers/membership_tier/get_membership_basic_setting';
+import getMembershipTierSetting from '../controllers/admin_controllers/membership_tier/get_membership_tier_setting';
+import getMembershipBasicSetting from '../controllers/admin_controllers/membership_tier/get_membership_basic_setting';
 
-import postMembershipTierSetting from '../controllers/membership_tier/post_membership_tier_setting';
-import postMembershipBasicSetting from '../controllers/membership_tier/post_membership_basic_setting';
+import postMembershipTierSetting from '../controllers/admin_controllers/membership_tier/post_membership_tier_setting';
+import postMembershipBasicSetting from '../controllers/admin_controllers/membership_tier/post_membership_basic_setting';
 
 // Import other controllers as needed
 

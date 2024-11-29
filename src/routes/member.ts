@@ -4,12 +4,13 @@ import { Hono } from 'hono';
 import { type Context } from 'hono';
 import { authMiddleware } from '../middleware/authMiddleware';
 
-import getMemberList from '../controllers/member/get_member_list';
-import postNewMember from '../controllers/member/post_new_member';
-import getMemberDetail from '../controllers/member/get_member_detail';
-import putSuspendMembership from '../controllers/member/put_suspend_membership';
-import putReactivateMembership from '../controllers/member/put_reactivate_membership';
-import putChangeMemberDetail from '../controllers/member/put_change_member_detail';
+import getMemberList from '../controllers/admin_controllers/member/get_member_list';
+import getBirthdayMemberIds from '../controllers/admin_controllers/member/get_birthday_member_ids';
+import postNewMember from '../controllers/admin_controllers/member/post_new_member';
+import getMemberDetail from '../controllers/admin_controllers/member/get_member_detail';
+import putSuspendMembership from '../controllers/admin_controllers/member/put_suspend_membership';
+import putReactivateMembership from '../controllers/admin_controllers/member/put_reactivate_membership';
+import putChangeMemberDetail from '../controllers/admin_controllers/member/put_change_member_detail';
 
 
 
@@ -31,6 +32,19 @@ memberRouter.get('/get_member_list', async (c: Context) => {
     return c.json(data);
   } catch (error) {
     console.log('get_member_list route end in error');
+    // Let Hono’s `onError` handle the error
+    throw error;
+  }
+});
+
+memberRouter.get('/get_birthday_member_ids', async (c: Context) => {
+  try {
+    console.log('get_birthday_member_ids route begin');
+    const data = await getBirthdayMemberIds(c);
+    console.log('get_birthday_member_ids route done');
+    return c.json(data);
+  } catch (error) {
+    console.log('get_birthday_member_ids route end in error');
     // Let Hono’s `onError` handle the error
     throw error;
   }
