@@ -80,7 +80,7 @@ async function postNewBroadcast(c: Context): Promise<Response> {
       const broadcast_id = result.rows[0].broadcast_id;
 
       const memberInsertQuery = `
-        INSERT INTO broadcast_history (broadcast_id, member_id, delivery_status)
+        INSERT INTO broadcast_history (broadcast_id, member_id, broadcast_history_status)
         VALUES ${member_ids
           .map((_, i) => `($1, $${i + 2}, 'pending')`)
           .join(', ')}

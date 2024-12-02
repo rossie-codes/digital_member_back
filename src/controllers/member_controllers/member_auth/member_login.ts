@@ -46,6 +46,7 @@ async function loginMember(c: Context) {
       return c.json({ error: 'Invalid credentials' }, 401);
     }
     // Generate a JWT token
+    // const token = jwt.sign({ memberId: user.member_id }, JWT_SECRET, { expiresIn: '10h' });
     const token = jwt.sign({ memberId: user.member_id }, JWT_SECRET, { expiresIn: '10h' });
 
     // Update last_login and reset failed_login_attempts
@@ -67,7 +68,8 @@ async function loginMember(c: Context) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
       sameSite: 'lax', // Change from 'strict' to 'lax'
-      maxAge: 36000, // 1 hour
+      maxAge: 36000, // 10 hour
+      // maxAge: 30, // 1 hour
       path: '/',
       domain: process.env.NODE_ENV === 'production' ? '.up.railway.app' : undefined,
     });

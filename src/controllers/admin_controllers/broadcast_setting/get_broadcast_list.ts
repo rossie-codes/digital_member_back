@@ -10,6 +10,9 @@ interface GetBroadcastListResponse {
 }
 async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
   try {
+
+    console.log("getBroadcastList function begin");
+    
     const pageParam = c.req.query("page");
     const pageSizeParam = c.req.query("pageSize");
     const sortFieldParam = c.req.query("sortField");
