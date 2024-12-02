@@ -2,7 +2,6 @@
 
 import { pool } from '../../db';
 import { type Context } from 'hono';
-import { HTTPException } from 'hono/http-exception';
 
 interface MembershipTier {
   membership_tier_id?: number;
@@ -16,28 +15,66 @@ interface MembershipTier {
   multiplied_point?: number;
 }
 
+interface AdminSetting {
+  membership_extend_method: number;
+  membership_end_result: number;
+  membership_period: number;
+}
+
+interface Payload {
+  membership_period: string;
+  membership_extend_method: string;
+  membership_end_result: string;
+  membership_tiers: MembershipTier[];
+}
+
 async function postMembershipTierSetting(c: Context): Promise<Response> {
   try {
     // Extract the JSON body from the request
-    const tiers: MembershipTier[] = await c.req.json();
+    const payload: Payload = await c.req.json();
+
+    const {
+      membership_period,
+      membership_extend_method,
+      membership_end_result,
+      membership_tiers,
+    } = payload;
 
     // Input Validation
-    if (!tiers || !Array.isArray(tiers)) {
-      throw new HTTPException(400, { message: 'Invalid input: tiers should be an array.' });
+    if (!membership_tiers || !Array.isArray(membership_tiers)) {
+      return c.json({ message: 'Invalid input: membership_tiers should be an array.' }, 400);
     }
 
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
 
-      // Upsert the membership_tier records
-      const upsertQuery = `
-        INSERT INTO membership_tier 
-          (membership_tier_name, membership_tier_sequence, require_point, extend_membership_point, point_multiplier, membership_period, original_point, multiplied_point)
+      // Upsert the admin_setting record
+      const upsertAdminSettingQuery = `
+        INSERT INTO admin_setting 
+          (membership_extend_method, membership_end_result, membership_period)
         VALUES 
-          ($1, $2, $3, $4, $5, $6, $7, $8)
-        ON CONFLICT (membership_tier_sequence) DO UPDATE SET 
+          ($1, $2, $3)
+        ON CONFLICT (admin_setting_id) DO UPDATE SET 
+          membership_extend_method = EXCLUDED.membership_extend_method,
+          membership_end_result = EXCLUDED.membership_end_result,
+          membership_period = EXCLUDED.membership_period
+      `;
+      await client.query(upsertAdminSettingQuery, [
+        parseInt(membership_extend_method, 10),
+        parseInt(membership_end_result, 10),
+        parseInt(membership_period, 10),
+      ]);
+
+      // Upsert the membership_tier records
+      const upsertMembershipTierQuery = `
+        INSERT INTO membership_tier 
+          (membership_tier_id, membership_tier_name, membership_tier_sequence, require_point, extend_membership_point, point_multiplier, membership_period, original_point, multiplied_point)
+        VALUES 
+          ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        ON CONFLICT (membership_tier_id) DO UPDATE SET 
           membership_tier_name = EXCLUDED.membership_tier_name,
+          membership_tier_sequence = EXCLUDED.membership_tier_sequence,
           require_point = EXCLUDED.require_point,
           extend_membership_point = EXCLUDED.extend_membership_point,
           point_multiplier = EXCLUDED.point_multiplier,
@@ -46,74 +83,33 @@ async function postMembershipTierSetting(c: Context): Promise<Response> {
           multiplied_point = EXCLUDED.multiplied_point
       `;
 
-      // Upsert each tier
-      for (const tier of tiers) {
-        // Validate required fields
-        if (
-          !tier.membership_tier_name ||
-          typeof tier.membership_tier_sequence !== 'number' ||
-          typeof tier.require_point !== 'number' ||
-          typeof tier.extend_membership_point !== 'number' ||
-          typeof tier.point_multiplier !== 'number' ||
-          typeof tier.membership_period !== 'number'
-        ) {
-          throw new HTTPException(400, { message: 'Invalid or missing required tier fields.' });
-        }
-
-        // Upsert the tier
-        await client.query(upsertQuery, [
+      for (const tier of membership_tiers) {
+        await client.query(upsertMembershipTierQuery, [
+          tier.membership_tier_id,
           tier.membership_tier_name,
           tier.membership_tier_sequence,
           tier.require_point,
           tier.extend_membership_point,
           tier.point_multiplier,
           tier.membership_period,
-          tier.original_point || null,
-          tier.multiplied_point || null,
+          tier.original_point,
+          tier.multiplied_point,
         ]);
       }
 
-      // Recalculate and update membership_tier_id for all members
-      const updateMembershipTiersQuery = `
-        UPDATE member
-        SET membership_tier_id = sub.membership_tier_id
-        FROM (
-          SELECT
-            m.member_id,
-            mt.membership_tier_id
-          FROM
-            member m
-          JOIN membership_tier mt ON m.points_balance >= mt.require_point
-          LEFT JOIN membership_tier mt2 ON mt2.require_point > mt.require_point AND m.points_balance >= mt2.require_point
-          WHERE mt2.membership_tier_id IS NULL
-        ) AS sub
-        WHERE member.member_id = sub.member_id
-      `;
-      await client.query(updateMembershipTiersQuery);
-
       await client.query('COMMIT');
-      console.log(`Successfully upserted ${tiers.length} membership tiers and updated member tiers.`);
 
-      // Return a success response
-      return c.json(
-        {
-          message: `Successfully upserted ${tiers.length} membership tiers and updated member tiers.`,
-        },
-        200
-      );
+      return c.json({ message: 'Membership tier settings updated successfully' }, 200);
     } catch (error) {
       await client.query('ROLLBACK');
-      console.error('Error setting membership tiers:', error);
-      throw new HTTPException(500, { message: 'Internal Server Error' });
+      console.error('Error updating membership tier settings:', error);
+      return c.json({ message: 'Failed to update membership tier settings' }, 500);
     } finally {
       client.release();
     }
   } catch (error) {
-    console.error('Error in postMembershipTierSetting:', error);
-    if (error instanceof HTTPException) {
-      throw error;
-    }
-    throw new HTTPException(500, { message: 'Internal Server Error' });
+    console.error('Error parsing request:', error);
+    return c.json({ message: 'Invalid request' }, 400);
   }
 }
 
