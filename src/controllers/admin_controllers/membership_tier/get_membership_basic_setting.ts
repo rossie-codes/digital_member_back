@@ -3,48 +3,45 @@
 import { pool } from '../../db';
 import { type Context } from 'hono';
 
-interface MembershipTier {
-  membership_tier_name: string;
-  membership_tier_sequence: number;
-  require_point: number;
-  extend_membership_point: number;
-  point_multiplier: number; // Original multiplier
+interface getMembershipBasicSetting {
+  membership_extend_method: number;
+  membership_end_result: number;
   membership_period: number;
 }
 
-interface MembershipTierResponse {
-  membership_tier_name: string;
-  membership_tier_sequence: number;
-  require_point: number;
-  extend_membership_point: number;
-  point_multiplier: number; // Multiplier adjusted by /1000
-  membership_period: number;
-}
-
-async function getMembershipBasicSetting(): Promise<MembershipTierResponse[]> {
+async function getMembershipBasicSetting(c: Context): Promise<getMembershipBasicSetting> {
   try {
-    // Query to fetch all membership tiers sorted by sequence
-    console.log('start')
-    
-    const data = await pool.query('SELECT * FROM membership_tier ORDER BY membership_tier_sequence ASC');
+    // Query to fetch membership basic settings
+    console.log('getMembershipBasicSetting function begin');
 
-    console.log("Membership tier settings (sorted):", data.rows);
+    const query = `
+      SELECT
+        membership_extend_method,
+        membership_end_result,
+        membership_period
+      FROM admin_setting
+      LIMIT 1
+    `;
 
-    const result: MembershipTier[] = data.rows as MembershipTier[];
+    const result = await pool.query(query);
 
-    console.log("Processed membership tier settings:", result);
+    if (result.rows.length === 0) {
+      throw new Error('Membership basic settings not found');
+    }
 
-    // Process each tier to adjust point_multiplier
-    const processedResult: MembershipTierResponse[] = result.map(tier => ({
-      ...tier,
-      point_multiplier: tier.point_multiplier / 1000, // Adjusting the multiplier
-    }));
+    const row = result.rows[0];
 
-    console.log("Processed membership tier settings:", processedResult);
+    const membershipBasicSetting: getMembershipBasicSetting = {
+      membership_extend_method: row.membership_extend_method,
+      membership_end_result: row.membership_end_result,
+      membership_period: row.membership_period,
+    };
 
-    return processedResult as MembershipTierResponse[];
+    console.log('getMembershipBasicSetting function done');
+
+    return membershipBasicSetting;
   } catch (error) {
-    console.error("Error fetching membership tier settings:", error);
+    console.error("Error fetching membership basic settings:", error);
     throw error; // Re-throw the error to be handled by the caller
   }
 }

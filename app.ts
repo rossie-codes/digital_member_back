@@ -2,14 +2,16 @@
 
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
-import authRouter from './src/routes/auth';
-import memberRouter from './src/routes/member';
-import membershipTierRouter from './src/routes/membership_tier';
-import pointSettingRouter from './src/routes/point_setting';
-import redemptionItemRouter from './src/routes/redemption_item';
-import discountCodeRouter from './src/routes/discount_code';
-import broadcastSettingRouter from './src/routes/broadcast_setting';
-import dashboardRouter from './src/routes/dashboard';
+import authRouter from './src/routes/admin_routes/auth';
+import memberRouter from './src/routes/admin_routes/member';
+import membershipTierRouter from './src/routes/admin_routes/membership_tier';
+import pointSettingRouter from './src/routes/admin_routes/point_setting';
+import pointEarningRecordRouter from './src/routes/admin_routes/point_earning_record';
+import redemptionItemRouter from './src/routes/admin_routes/redemption_item';
+import discountCodeRouter from './src/routes/admin_routes/discount_code';
+import broadcastSettingRouter from './src/routes/admin_routes/broadcast_setting';
+import dashboardRouter from './src/routes/admin_routes/dashboard';
+
 
 import customerAuthRouter from './src/routes/customer_routes/customer_auth';
 import memberMemberRouter from './src/routes/customer_routes/member_member';
@@ -52,6 +54,7 @@ app.route('/auth', authRouter);
 app.route('/member', memberRouter); // Handles /member and nested routes
 app.route('/membership_tier', membershipTierRouter); // Handles /membership_tier and nested routes
 app.route('/point_setting', pointSettingRouter);
+app.route('/point_earning_record', pointEarningRecordRouter);
 app.route('/redemption_item', redemptionItemRouter);
 app.route('/discount_code', discountCodeRouter);
 app.route('/broadcast_setting', broadcastSettingRouter);

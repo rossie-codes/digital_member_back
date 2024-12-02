@@ -2,15 +2,15 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-import { authMiddleware } from '../middleware/authMiddleware';
+import { authMiddleware } from '../../middleware/authMiddleware';
 
-import getMemberList from '../controllers/admin_controllers/member/get_member_list';
-import getBirthdayMemberIds from '../controllers/admin_controllers/member/get_birthday_member_ids';
-import postNewMember from '../controllers/admin_controllers/member/post_new_member';
-import getMemberDetail from '../controllers/admin_controllers/member/get_member_detail';
-import putSuspendMembership from '../controllers/admin_controllers/member/put_suspend_membership';
-import putReactivateMembership from '../controllers/admin_controllers/member/put_reactivate_membership';
-import putChangeMemberDetail from '../controllers/admin_controllers/member/put_change_member_detail';
+import getMemberList from '../../controllers/admin_controllers/member/get_member_list';
+import getBirthdayMemberIds from '../../controllers/admin_controllers/member/get_birthday_member_ids';
+import postNewMember from '../../controllers/admin_controllers/member/post_new_member';
+import getMemberDetail from '../../controllers/admin_controllers/member/get_member_detail';
+import putSuspendMembership from '../../controllers/admin_controllers/member/put_suspend_membership';
+import putReactivateMembership from '../../controllers/admin_controllers/member/put_reactivate_membership';
+import putChangeMemberDetail from '../../controllers/admin_controllers/member/put_change_member_detail';
 
 
 

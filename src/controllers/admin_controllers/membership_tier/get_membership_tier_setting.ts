@@ -24,15 +24,12 @@ interface MembershipTierResponse {
 async function getMembershipTierSetting(): Promise<MembershipTierResponse[]> {
   try {
     // Query to fetch all membership tiers sorted by sequence
-    console.log('start')
-    
+    console.log('getMembershipTierSetting function start')
+
     const data = await pool.query('SELECT * FROM membership_tier ORDER BY membership_tier_sequence ASC');
 
-    console.log("Membership tier settings (sorted):", data.rows);
 
     const result: MembershipTier[] = data.rows as MembershipTier[];
-
-    console.log("Processed membership tier settings:", result);
 
     // Process each tier to adjust point_multiplier
     const processedResult: MembershipTierResponse[] = result.map(tier => ({
@@ -40,7 +37,7 @@ async function getMembershipTierSetting(): Promise<MembershipTierResponse[]> {
       point_multiplier: tier.point_multiplier / 1000, // Adjusting the multiplier
     }));
 
-    console.log("Processed membership tier settings:", processedResult);
+    console.log('getMembershipTierSetting function done')
 
     return processedResult as MembershipTierResponse[];
   } catch (error) {
