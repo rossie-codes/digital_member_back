@@ -2,7 +2,7 @@
 
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
-import authRouter from './src/routes/admin_routes/auth';
+import adminAuthRouter from './src/routes/admin_routes/admin_auth';
 import memberRouter from './src/routes/admin_routes/member';
 import membershipTierRouter from './src/routes/admin_routes/membership_tier';
 import pointSettingRouter from './src/routes/admin_routes/point_setting';
@@ -50,7 +50,7 @@ app.onError((err: any, c: Context) => {
 });
 
 // Mount sub-routers
-app.route('/auth', authRouter);
+app.route('/admin_auth', adminAuthRouter);
 app.route('/member', memberRouter); // Handles /member and nested routes
 app.route('/membership_tier', membershipTierRouter); // Handles /membership_tier and nested routes
 app.route('/point_setting', pointSettingRouter);

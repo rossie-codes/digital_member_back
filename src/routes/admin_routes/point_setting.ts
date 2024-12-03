@@ -2,7 +2,7 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-import { authMiddleware } from '../../middleware/authMiddleware';
+import { authMiddleware } from '../../middleware/adminAuthMiddleware';
 
 import getMemberPointRule from '../../controllers/admin_controllers/point_setting/get_member_point_rule';
 

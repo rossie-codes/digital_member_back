@@ -1,4 +1,4 @@
-// src/middleware/memberAuthMiddleware.ts
+// src/middleware/adminAuthMiddleware.ts
 
 import type { Context, Next } from 'hono';
 import jwt from 'jsonwebtoken';

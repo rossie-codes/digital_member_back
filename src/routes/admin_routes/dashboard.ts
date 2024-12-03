@@ -2,7 +2,7 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-import { authMiddleware } from '../../middleware/authMiddleware';
+import { authMiddleware } from '../../middleware/adminAuthMiddleware';
 
 import getDashboardInfo from '../../controllers/admin_controllers/report/dashboard/get_dashboard_info';
 

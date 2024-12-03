@@ -2,7 +2,7 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-import { authMiddleware } from '../../middleware/authMiddleware';
+import { authMiddleware } from '../../middleware/adminAuthMiddleware';
 
 import getRedemptionItemList from '../../controllers/admin_controllers/redemption_item_setting/get_redemption_item_list';
 import getRedemptionItemDetail from '../../controllers/admin_controllers/redemption_item_setting/get_redemption_item_detail';

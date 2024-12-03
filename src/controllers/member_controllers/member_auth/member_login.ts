@@ -2,14 +2,15 @@
 
 import type { Context } from 'hono';
 import { pool } from '../../db';
-import bcrypt from 'bcryptjs';
+// import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key'; // Replace with your secret key
 
 async function loginMember(c: Context) {
-  console.log('loginUser function begin')
+  console.log('loginMember function begin')
   
   try {
     const { member_phone, member_password } = await c.req.json();
@@ -18,7 +19,7 @@ async function loginMember(c: Context) {
       return c.json({ error: 'Phone number and member_password are required' }, 400);
     }
 
-    console.log('loginUser function begin, member_phone and password exist.')
+    console.log('loginMember function begin, member_phone and password exist.')
     // Get the user from the database
     const result = await pool.query('SELECT * FROM member_login WHERE member_phone = $1', [member_phone]);
 
@@ -29,12 +30,12 @@ async function loginMember(c: Context) {
   
     const user = result.rows[0];
 
-    console.log('loginUser function begin, member_phone exist in db.')
+    console.log('loginMember function begin, member_phone exist in db.')
 
     // Compare the member_password
     const isMatch = await bcrypt.compare(member_password, user.member_password_hash);
 
-    console.log('loginUser function begin, member_phone and password correct.')
+    console.log('loginMember function begin, member_phone and password correct.')
 
     if (!isMatch) {
       // Optionally increment failed login attempts
@@ -76,7 +77,7 @@ async function loginMember(c: Context) {
 
     c.header('Set-Cookie', cookie);
 
-    console.log('loginUser function done')
+    console.log('loginMember function done')
     
     return c.json({ message: 'Login successful' }, 200);
   } catch (error) {

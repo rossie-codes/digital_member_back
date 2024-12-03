@@ -2,7 +2,7 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-import { authMiddleware } from '../../middleware/authMiddleware';
+import { authMiddleware } from '../../middleware/adminAuthMiddleware';
 
 import getDiscountCodeList from '../../controllers/admin_controllers/discount_code/get_discount_code_list';
 import getDiscountCodeDetail from '../../controllers/admin_controllers/discount_code/get_discount_code_detail';

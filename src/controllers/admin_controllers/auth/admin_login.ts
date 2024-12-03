@@ -1,49 +1,55 @@
+// src/controllers/admin_controllers/auth/admin_login.ts
+
 import type { Context } from 'hono';
 import { pool } from '../../db';
-import bcrypt from 'bcryptjs';
+// import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key'; // Replace with your secret key
 
-export async function loginUser(c: Context) {
-  console.log('loginUser function begin')
+export async function loginAdmin(c: Context) {
+  console.log('loginAdmin function begin')
   
   try {
-    const { admin_phone, password } = await c.req.json();
+    const { admin_name, admin_password } = await c.req.json();
 
-    console.log('loginUser function begin', admin_phone, password )
+    console.log('loginAdmin function begin', admin_name, admin_password )
 
-    if (!admin_phone || !password) {
+    if (!admin_name || !admin_password) {
       return c.json({ error: 'Phone number and password are required' }, 400);
     }
 
     // Get the user from the database
-    const result = await pool.query('SELECT * FROM admin_login WHERE admin_phone = $1', [admin_phone]);
+    const result = await pool.query('SELECT * FROM admin_login WHERE admin_name = $1', [admin_name]);
 
     if (result.rows.length === 0) {
+      console.log('loginAdmin function admin_name not found')
       return c.json({ error: 'Invalid credentials' }, 401);
     }
 
     const user = result.rows[0];
 
-    // Compare the password
-    const isMatch = await bcrypt.compare(password, user.password_hash);
+    console.log('loginAdmin function admin_name found', user)
 
-    console.log('loginUser function admin_phone and password passed')
+    // Compare the password
+    const isMatch = await bcrypt.compare(admin_password, user.admin_password_hash);
+
+    console.log('loginAdmin function admin_name and password passed')
 
     if (!isMatch) {
       // Optionally increment failed login attempts
       await pool.query(
-        'UPDATE member_login SET failed_login_attempts = failed_login_attempts + 1 WHERE login_id = $1',
+        'UPDATE admin_login SET failed_login_attempts = failed_login_attempts + 1 WHERE login_id = $1',
         [user.login_id]
       );
 
       return c.json({ error: 'Invalid credentials' }, 401);
     }
-    console.log('loginUser function handle token')
+    console.log('loginAdmin function handle token')
     // Generate a JWT token
-    const token = jwt.sign({ memberId: user.member_id }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ adminId: user.admin_id }, JWT_SECRET, { expiresIn: '10h' });
 
     // Update last_login and reset failed_login_attempts
     await pool.query(
@@ -51,20 +57,20 @@ export async function loginUser(c: Context) {
       [user.login_id]
     );
 
-    console.log('loginUser function handle cookies')
-
     // Set the token as an HTTP-only cookie
     const cookie = serialize('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-      sameSite: 'strict',
-      maxAge: 60, // 1 hour
+      sameSite: 'lax', // Change from 'strict' to 'lax'
+      maxAge: 36000, // 10 hour
+      // maxAge: 30, // 1 hour
       path: '/',
+      domain: process.env.NODE_ENV === 'production' ? '.up.railway.app' : undefined,
     });
 
     c.header('Set-Cookie', cookie);
 
-    console.log('loginUser function handle cookies', cookie)
+    console.log('loginAdmin function done cookies', cookie)
 
     // Return success response without token in body
     return c.json({ message: 'Login successful' }, 200);

@@ -2,7 +2,7 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-import { authMiddleware } from '../../middleware/authMiddleware';
+// import { adminAuthMiddleware } from '../../middleware/adminAuthMiddleware';
 
 import getMemberList from '../../controllers/admin_controllers/member/get_member_list';
 import getBirthdayMemberIds from '../../controllers/admin_controllers/member/get_birthday_member_ids';
