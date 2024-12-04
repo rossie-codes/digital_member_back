@@ -34,7 +34,10 @@ export async function loginAdmin(c: Context) {
     console.log('loginAdmin function admin_name found', user)
 
     // Compare the password
-    const isMatch = await bcrypt.compare(admin_password, user.admin_password_hash);
+    // const isMatch = await bcrypt.compare(admin_password, user.admin_password_hash);
+
+    const isMatch = await Bun.password.verify(admin_password, user.admin_password_hash);
+
 
     console.log('loginAdmin function admin_name and password passed')
 

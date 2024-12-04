@@ -27,8 +27,10 @@ export async function signupAdmin(c: Context) {
     }
 
     // Hash the password
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password, salt);
+    // const salt = await bcrypt.genSalt(10);
+    // const passwordHash = await bcrypt.hash(password, salt);
+
+    const passwordHash = await Bun.password.hash(password);
 
     // Insert the admin into the database
     const result = await pool.query(

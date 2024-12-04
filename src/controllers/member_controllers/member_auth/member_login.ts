@@ -33,7 +33,8 @@ async function loginMember(c: Context) {
     console.log('loginMember function begin, member_phone exist in db.')
 
     // Compare the member_password
-    const isMatch = await bcrypt.compare(member_password, user.member_password_hash);
+    // const isMatch = await bcrypt.compare(member_password, user.member_password_hash);
+    const isMatch = await Bun.password.verify(member_password, user.member_password_hash);
 
     console.log('loginMember function begin, member_phone and password correct.')
 

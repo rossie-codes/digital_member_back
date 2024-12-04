@@ -26,8 +26,12 @@ async function signupMember(c: Context) {
     }
 
     // Hash the member_password
-    const saltRounds = await bcrypt.genSalt(10);
-    const member_password_hash = await bcrypt.hash(member_password, saltRounds);
+    // const saltRounds = await bcrypt.genSalt(10);
+    // const member_password_hash = await bcrypt.hash(member_password, saltRounds);
+
+    const member_password_hash = await Bun.password.hash(member_password);
+
+
 
     // Start transaction
     const client = await pool.connect();
