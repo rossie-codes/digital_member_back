@@ -7,7 +7,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key'; // Replace with your secret key
+const MEMBI_ADMIN_SECRET = process.env.MEMBI_ADMIN_SECRET || 'MEMBI_ADMIN_SECRET'; // Replace with your secret key
 
 export async function loginAdmin(c: Context) {
   console.log('loginAdmin function begin')
@@ -50,9 +50,9 @@ export async function loginAdmin(c: Context) {
 
       return c.json({ error: 'Invalid credentials' }, 401);
     }
-    console.log('loginAdmin function handle token')
-    // Generate a JWT token
-    const token = jwt.sign({ adminId: user.admin_id }, JWT_SECRET, { expiresIn: '10h' });
+    console.log('loginAdmin function handle membi_admin_token')
+    // Generate a JWT membi_admin_token
+    const membi_admin_token = jwt.sign({ adminId: user.admin_id }, MEMBI_ADMIN_SECRET, { expiresIn: '10h' });
 
     // Update last_login and reset failed_login_attempts
     await pool.query(
@@ -60,8 +60,8 @@ export async function loginAdmin(c: Context) {
       [user.login_id]
     );
 
-    // Set the token as an HTTP-only cookie
-    const cookie = serialize('token', token, {
+    // Set the membi_admin_token as an HTTP-only cookie
+    const cookie = serialize('membi_admin_token', membi_admin_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
       sameSite: 'lax', // Change from 'strict' to 'lax'
@@ -72,10 +72,11 @@ export async function loginAdmin(c: Context) {
     });
 
     c.header('Set-Cookie', cookie);
+    
 
     console.log('loginAdmin function done cookies', cookie)
 
-    // Return success response without token in body
+    // Return success response without membi_admin_token in body
     return c.json({ message: 'Login successful' }, 200);
   } catch (error) {
     console.error('Login error:', error);

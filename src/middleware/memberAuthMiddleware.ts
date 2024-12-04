@@ -5,21 +5,21 @@ import jwt from 'jsonwebtoken';
 import { validator } from 'hono/validator'
 import { getCookie, setCookie } from 'hono/cookie'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
+const MEMBI_CUSTOMER_SECRET = process.env.MEMBI_CUSTOMER_SECRET || 'customer';
 
 export const memberAuthMiddleware = async (c: Context, next: Next) => {
 
-  // const token = c.req.cookie('token');
+  // const membi_m_token = c.req.cookie('membi_m_token');
 
-  const token = getCookie(c, 'token');
+  const membi_m_token = getCookie(c, 'membi_m_token');
 
-  if (!token) {
+  if (!membi_m_token) {
     return c.json({ error: 'Unauthorized' }, 401);
   }
   
-  // console.log('token', token);
+  // console.log('membi_m_token', membi_m_token);
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(membi_m_token, MEMBI_CUSTOMER_SECRET);
     c.set('user', decoded);
 
     console.log('decoded', decoded);

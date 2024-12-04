@@ -7,8 +7,8 @@ async function logoutMember(c: Context) {
   
   console.log('Logging out member...');
   
-  // // Clear the token cookie
-  // const cookie = serialize('token', '', {
+  // // Clear the membi_m_token cookie
+  // const cookie = serialize('membi_m_token', '', {
   //   httpOnly: true,
     // secure: process.env.NODE_ENV === 'production',
   //   sameSite: 'strict',
@@ -16,7 +16,7 @@ async function logoutMember(c: Context) {
   //   path: '/',
   // });
 
-  const cookie = serialize('token', '', {
+  const cookie = serialize('membi_m_token', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax', // Change from 'strict' to 'lax'

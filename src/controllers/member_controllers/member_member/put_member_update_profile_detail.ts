@@ -76,10 +76,11 @@ async function putMemberUpdateProfileDetail(c: Context): Promise<Response> {
         console.log("Stored hash:", storedHash);
         console.log("Current password:", current_password);
         // Compare current_password with stored hash
-        const passwordMatch = await bcrypt.compare(
-          current_password,
-          storedHash
-        );
+        const passwordMatch = await Bun.password.verify(current_password, storedHash);
+        // const passwordMatch = await bcrypt.compare(
+        //   current_password,
+        //   storedHash
+        // );
 
         console.log("Password match:", passwordMatch);
 
@@ -90,8 +91,10 @@ async function putMemberUpdateProfileDetail(c: Context): Promise<Response> {
         }
 
         // Hash the new password
-        const saltRounds = await bcrypt.genSalt(10);
-        const newPasswordHash = await bcrypt.hash(new_password, saltRounds);
+        const newPasswordHash = await Bun.password.hash(new_password);
+
+        // const saltRounds = await bcrypt.genSalt(10);
+        // const newPasswordHash = await bcrypt.hash(new_password, saltRounds);
 
         console.log("trying to update password");
 

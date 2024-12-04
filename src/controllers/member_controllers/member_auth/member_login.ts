@@ -7,7 +7,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key'; // Replace with your secret key
+const MEMBI_CUSTOMER_SECRET = process.env.MEMBI_CUSTOMER_SECRET || 'MEMBI_CUSTOMER_SECRET'; // Replace with your secret key
 
 async function loginMember(c: Context) {
   console.log('loginMember function begin')
@@ -47,9 +47,9 @@ async function loginMember(c: Context) {
 
       return c.json({ error: 'Invalid credentials' }, 401);
     }
-    // Generate a JWT token
-    // const token = jwt.sign({ memberId: user.member_id }, JWT_SECRET, { expiresIn: '10h' });
-    const token = jwt.sign({ memberId: user.member_id }, JWT_SECRET, { expiresIn: '10h' });
+    // Generate a JWT membi_m_token
+    // const membi_m_token = jwt.sign({ memberId: user.member_id }, MEMBI_CUSTOMER_SECRET, { expiresIn: '10h' });
+    const membi_m_token = jwt.sign({ memberId: user.member_id }, MEMBI_CUSTOMER_SECRET, { expiresIn: '10h' });
 
     // Update last_login and reset failed_login_attempts
     await pool.query(
@@ -57,8 +57,8 @@ async function loginMember(c: Context) {
       [user.login_id]
     );
 
-    // Set the token as an HTTP-only cookie
-    // const cookie = serialize('token', token, {
+    // Set the membi_m_token as an HTTP-only cookie
+    // const cookie = serialize('membi_m_token', membi_m_token, {
     //   httpOnly: true,
       // secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
     //   sameSite: 'strict',
@@ -66,7 +66,7 @@ async function loginMember(c: Context) {
     //   path: '/',
     // });
 
-    const cookie = serialize('token', token, {
+    const cookie = serialize('membi_m_token', membi_m_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
       sameSite: 'lax', // Change from 'strict' to 'lax'

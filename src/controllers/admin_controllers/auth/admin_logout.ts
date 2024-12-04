@@ -7,8 +7,8 @@ export async function logoutAdmin(c: Context) {
 
   console.log('Logging out admin...');
 
-  // Clear the token cookie
-  // const cookie = serialize('token', '', {
+  // Clear the membi_admin_token cookie
+  // const cookie = serialize('membi_admin_token', '', {
   //   httpOnly: true,
   //   secure: process.env.NODE_ENV === 'production',
   //   sameSite: 'strict',
@@ -16,7 +16,7 @@ export async function logoutAdmin(c: Context) {
   //   path: '/',
   // });
 
-  const cookie = serialize('token', '', {
+  const cookie = serialize('membi_admin_token', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax', // Change from 'strict' to 'lax'
