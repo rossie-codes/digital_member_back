@@ -2,7 +2,7 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-import { authMiddleware } from '../../middleware/adminAuthMiddleware';
+// import { authMiddleware } from '../../middleware/adminAuthMiddleware';
 
 import getBroadcastList from '../../controllers/admin_controllers/broadcast_setting/get_broadcast_list';
 import getBroadcastHistoryList from '../../controllers/admin_controllers/broadcast_setting/get_broadcast_history_list'

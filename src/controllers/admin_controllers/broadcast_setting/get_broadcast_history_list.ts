@@ -9,6 +9,8 @@ interface GetBroadcastListResponse {
   total: number;
 }
 async function getBroadcastHistoryList(c: Context): Promise<GetBroadcastListResponse> {
+
+  console.log("getBroadcastHistoryList function started");
   try {
     const pageParam = c.req.query("page");
     const pageSizeParam = c.req.query("pageSize");
@@ -106,7 +108,7 @@ async function getBroadcastHistoryList(c: Context): Promise<GetBroadcastListResp
         b.broadcast_name,
         b.wati_template,
         b.scheduled_start,
-        COUNT(bh.broadcast_history_id) AS recipient_count
+        COUNT(bh.broadcast_history_id) FILTER (WHERE bh.broadcast_history_status = 'sent') AS recipient_count
       FROM
         broadcast b
       LEFT JOIN
@@ -135,6 +137,8 @@ async function getBroadcastHistoryList(c: Context): Promise<GetBroadcastListResp
     }));
 
     console.log("Data:", data);
+
+    console.log("getBroadcastHistoryList function done");
 
     // Await the asynchronous function
 

@@ -47,6 +47,8 @@ async function getBroadcastDetail(c: Context): Promise<GetBroadcastDetailRespons
       SELECT member_id
       FROM broadcast_history
       WHERE broadcast_id = $1
+          AND broadcast_history_status = 'pending'
+
     `;
     const memberResult = await pool.query(memberQuery, [broadcast_id]);
 
