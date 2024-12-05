@@ -7,14 +7,14 @@ import bcrypt from 'bcryptjs';
 export async function signupAdmin(c: Context) {
   try {
     console.log('function signupAdmin start')
-    const { admin_name, admin_phone, password } = await c.req.json();
+    const { admin_name, admin_password } = await c.req.json();
 
-    console.log('function signupAdmin start', admin_name, admin_phone, password )
+    console.log('function signupAdmin start', admin_name, admin_password )
 
 
-    if (!admin_name || !admin_phone || !password) {
+    if (!admin_name || !admin_password) {
         console.log('function signupAdmin need input')
-      return c.json({ error: 'Name, phone number, and password are required' }, 400);
+      return c.json({ error: 'Name, phone number, and admin_password are required' }, 400);
     }
 
     // Check if any admins exist
@@ -26,16 +26,16 @@ export async function signupAdmin(c: Context) {
       return c.json({ error: 'Admin account already exists' }, 403);
     }
 
-    // Hash the password
+    // Hash the admin_password
     // const salt = await bcrypt.genSalt(10);
-    // const passwordHash = await bcrypt.hash(password, salt);
+    // const passwordHash = await bcrypt.hash(admin_password, salt);
 
-    const passwordHash = await Bun.password.hash(password);
+    const adminPasswordHash = await Bun.password.hash(admin_password);
 
     // Insert the admin into the database
     const result = await pool.query(
-      'INSERT INTO admin_login (admin_name, admin_phone, password_hash) VALUES ($1, $2, $3) RETURNING login_id, admin_name, admin_phone',
-      [admin_name, admin_phone, passwordHash]
+      'INSERT INTO admin_login (admin_name, password_hash) VALUES ($1, $2, $3) RETURNING login_id, admin_name',
+      [admin_name, adminPasswordHash]
     );
 
     const newAdmin = result.rows[0];

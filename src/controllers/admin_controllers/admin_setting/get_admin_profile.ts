@@ -2,7 +2,7 @@
 
 import { pool } from "../../db";
 import type { Context } from "hono";
-import getWatiDetails from "../../../wati/client";
+import getWatiDetails from "../../../wati/wati_client";
 // Define the response interface
 interface ProfileDetail {
   admin_name: string;

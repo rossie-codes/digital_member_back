@@ -1,4 +1,4 @@
-// src/wati/client.ts
+// src/wati/wati_client.ts
 
 import { pool } from '../controllers/db';
 import crypto from 'crypto';

@@ -3,17 +3,30 @@
 import { pool } from '../controllers/db'; // Adjusted import path
 // import { CronJob } from 'cron';
 
-const WATI_TOKEN = process.env.WATI_TOKEN;
-const WATI_ENDPOINT = process.env.WATI_ENDPOINT;
-const url = `${WATI_ENDPOINT}/api/v1/getMessageTemplates?pageSize=200&pageNumber=1`;
+import getWatiDetails from './wati_client';
+
+// const WATI_TOKEN = process.env.WATI_TOKEN;
+// const WATI_ENDPOINT = process.env.WATI_ENDPOINT;
+// const url = `${WATI_ENDPOINT}/api/v1/getMessageTemplates?pageSize=200&pageNumber=1`;
 
 export const getWatiTemplateDetail = async (): Promise<void> => {
+  
+  
+  const watiDeatil = await getWatiDetails();
+
+  console.log("WATI details is :", watiDeatil);
+
+
+  const url = `${watiDeatil.wati_api_endpoint}/api/v1/getMessageTemplates?pageSize=200&pageNumber=1`;
+
+
   try {
     console.log('Fetching WATI template list from:', url);
 
     const response = await fetch(url, {
       headers: {
-        Authorization: `Bearer ${WATI_TOKEN}`,
+        // Authorization: `Bearer ${WATI_TOKEN}`,
+        Authorization: `${watiDeatil.wati_access_token}`,
         'Content-Type': 'application/json',
       },
     });

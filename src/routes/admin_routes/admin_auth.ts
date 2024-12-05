@@ -10,8 +10,11 @@ import { adminAuthMiddleware } from '../../middleware/adminAuthMiddleware';
 const adminAuthRouter = new Hono();
 
 adminAuthRouter.post('/login', loginAdmin);
+
 adminAuthRouter.post('/logout', logoutAdmin);
+
 adminAuthRouter.post('/signup', signupAdmin); // Signup route
-adminAuthRouter.get('/check', adminAuthMiddleware, checkAuth);
+
+// adminAuthRouter.get('/check', adminAuthMiddleware, checkAuth);
 
 export default adminAuthRouter;
