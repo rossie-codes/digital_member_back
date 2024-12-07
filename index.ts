@@ -1,6 +1,10 @@
 // index.ts
 
 import app from './app'
+// import broadcast_job from './src/wati/cron_only.ts'
+import './src/wati/cron_broadcast.ts'
+// import './cron_only.ts'; // Ensure the path is correct
+
 
 const server = Bun.serve({
   fetch: app.fetch,
@@ -8,6 +12,8 @@ const server = Bun.serve({
 })
 
 console.log(`Listening on ${server.url}`);
+
+// broadcast_job.start();
 
 
 // route 分層跟 database table

@@ -158,11 +158,12 @@ export const getWatiTemplateDetail = async (): Promise<void> => {
   }
 };
 
-// // Schedule the function to run every 5 minutes
+
+// Schedule the function to run every 5 minutes
 // const job = new CronJob('*/10 * * * * *', async () => {
 //   console.log('Running getWatiTemplateDetail at', new Date().toISOString());
 //   try {
-//     await getWatiTemplateDetail();
+//     // await getWatiTemplateDetail();
 //   } catch (error) {
 //     console.error('Error running getWatiTemplateDetail:', error);
 //   }

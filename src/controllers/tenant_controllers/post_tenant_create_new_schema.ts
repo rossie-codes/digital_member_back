@@ -2,40 +2,52 @@
 
 import { pool } from "../db";
 import type { Context } from "hono";
+import format from 'pg-format'; // You might need to install pg-format
 
 async function postTenantCreateNewSchema(c: Context): Promise<Response> {
+  console.log("postTenantCreateNewSchema function begin");
   try {
-    // Parse request body to get the schema name
-    const { schema_name } = await c.req.json();
-
-    // if (!schema_name) {
-    //   return c.json({ message: "Schema name is required" }, 400);
-    // }
-
-    const new_name = "abc_test"
+    const new_name = "abc_test"; // Hardcoded schema name
+    
     // Begin transaction
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
 
-      // Create the new schema
-      const createSchemaQuery = `CREATE SCHEMA IF NOT EXISTS ${schema_name}`;
+      console.log("start create schema");
+
+      // Create the new schema using pg-format for proper escaping
+      const createSchemaQuery = format('CREATE SCHEMA IF NOT EXISTS %I', new_name);
       await client.query(createSchemaQuery);
 
+      console.log("done create schema");
+      
       // Commit the transaction
       await client.query("COMMIT");
 
-      return c.json({ message: `Schema ${schema_name} created successfully` }, 201);
-    } catch (error) {
+      return c.json({ 
+        success: true,
+        message: `Schema ${new_name} created successfully` 
+      }, 201);
+
+    } catch (error: any) {
       await client.query("ROLLBACK");
       console.error("Error creating schema:", error);
-      throw new Error("Schema creation failed");
+      return c.json({ 
+        success: false,
+        message: "Schema creation failed",
+        error: error.message 
+      }, 500);
     } finally {
       client.release();
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error:", error);
-    return c.json({ message: "Schema creation failed" }, 500);
+    return c.json({ 
+      success: false,
+      message: "Schema creation failed",
+      error: error.message 
+    }, 500);
   }
 }
 

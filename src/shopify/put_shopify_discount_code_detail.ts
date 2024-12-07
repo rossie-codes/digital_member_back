@@ -1,7 +1,7 @@
 // src/shopify/put_shopify_discount_code_detail.ts
 
 import { string } from 'zod';
-import { graphqlClient } from './client';
+import { graphqlClient } from './shopify_client';
 
 
 

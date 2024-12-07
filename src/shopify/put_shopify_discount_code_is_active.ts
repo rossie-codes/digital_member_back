@@ -1,6 +1,6 @@
 // src/shopify/put_shopify_discount_code_is_active.ts
 
-import { graphqlClient } from './client';
+import { graphqlClient } from './shopify_client';
 
 const DEACTIVATE_DISCOUNT_CODE_MUTATION = `
   mutation discountCodeDeactivate($id: ID!) {

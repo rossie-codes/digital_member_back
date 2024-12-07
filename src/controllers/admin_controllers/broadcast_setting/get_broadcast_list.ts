@@ -6,7 +6,8 @@ import type { Context } from "hono";
 // Define the response interface
 interface GetBroadcastListResponse {
   data: any[];
-  total: number;
+  total_broadcast: number;
+  total_recipient_count: number;
 }
 async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
   try {
@@ -98,7 +99,7 @@ async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
       ${whereClause}
     `;
     const countResult = await pool.query(countQuery, queryParams);
-    const total = parseInt(countResult.rows[0].count, 10);
+    const total_broadcast = parseInt(countResult.rows[0].count, 10);
 
     const orderByClause = `ORDER BY ${mappedSortField} ${sortOrder}`;
 
@@ -139,12 +140,15 @@ async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
 
     console.log("Data:", data);
 
+    const total_recipient_count = data.map((row) => row.recipient_count).reduce((a, b) => a + b, 0);
+
     // Await the asynchronous function
 
     // Return the data with the correct watiTemplateList
     return {
       data: data,
-      total: total,
+      total_broadcast: total_broadcast,
+      total_recipient_count: total_recipient_count,
     };
     
   } catch (error) {

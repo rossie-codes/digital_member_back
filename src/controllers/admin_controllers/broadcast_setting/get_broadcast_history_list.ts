@@ -6,10 +6,12 @@ import type { Context } from "hono";
 // Define the response interface
 interface GetBroadcastListResponse {
   data: any[];
-  total: number;
+  total_broadcast: number;
+  total_recipient_count: number;
 }
-async function getBroadcastHistoryList(c: Context): Promise<GetBroadcastListResponse> {
-
+async function getBroadcastHistoryList(
+  c: Context
+): Promise<GetBroadcastListResponse> {
   console.log("getBroadcastHistoryList function started");
   try {
     const pageParam = c.req.query("page");
@@ -97,7 +99,7 @@ async function getBroadcastHistoryList(c: Context): Promise<GetBroadcastListResp
       ${whereClause}
     `;
     const countResult = await pool.query(countQuery, queryParams);
-    const total = parseInt(countResult.rows[0].count, 10);
+    const total_broadcast = parseInt(countResult.rows[0].count, 10);
 
     const orderByClause = `ORDER BY ${mappedSortField} ${sortOrder}`;
 
@@ -140,14 +142,18 @@ async function getBroadcastHistoryList(c: Context): Promise<GetBroadcastListResp
 
     console.log("getBroadcastHistoryList function done");
 
+    const total_recipient_count = data
+      .map((row) => row.recipient_count)
+      .reduce((a, b) => a + b, 0);
+
     // Await the asynchronous function
 
     // Return the data with the correct watiTemplateList
     return {
       data: data,
-      total: total,
+      total_broadcast: total_broadcast,
+      total_recipient_count: total_recipient_count,
     };
-    
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");

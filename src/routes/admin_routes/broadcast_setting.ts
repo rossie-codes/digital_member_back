@@ -16,6 +16,8 @@ import postNewBroadcast from '../../controllers/admin_controllers/broadcast_sett
 
 import putEditBroadcastDetail from '../../controllers/admin_controllers/broadcast_setting/put_edit_broadcast_detail';
 
+import deleteBroadcast from '../../controllers/admin_controllers/broadcast_setting/delete_broadcasat';
+
 import { HTTPException } from 'hono/http-exception'
 
 // Import other controllers as needed
@@ -136,6 +138,25 @@ broadcastSettingRouter.post('/post_new_broadcast', async (c: Context) => {
       return response; // Return the Response directly
     } catch (error) {
       console.log('put_edit_broadcast route end in error');
+      throw error;
+    }
+  });
+
+
+  broadcastSettingRouter.delete('/delete_broadcast/:broadcast_id', async (c: Context) => {
+    try {
+      console.log('delete_broadcast route begin');
+  
+      const data = await deleteBroadcast(c);
+  
+      console.log('delete_broadcast route done');
+      //   return data;
+      return c.json(data);
+    } catch (error: any) {
+      console.log('delete_broadcast end in error');
+      if (error.message === 'Member not found') {
+        return c.json({ message: 'Member not found' }, 404);
+      }
       throw error;
     }
   });

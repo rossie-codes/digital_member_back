@@ -1,7 +1,7 @@
 // src/shopify/get_shopify_order_list.ts
 
 import type { Context } from 'hono';
-import { graphqlClient } from './client'; // Import your Shopify GraphQL client
+import { graphqlClient } from './shopify_client'; // Import your Shopify GraphQL client
 // import { GET_SHOPIFY_ORDER_LIST } from './get_shopify_order_list';
 
 

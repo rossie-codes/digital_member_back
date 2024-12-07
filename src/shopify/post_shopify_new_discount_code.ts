@@ -1,6 +1,6 @@
 // src/shopify/post_shopify_new_discount_code.ts
 
-import { graphqlClient } from './client';
+import { graphqlClient } from './shopify_client';
 
 const CREATE_NEW_DISCOUNT_CODE_MUTATION = `
   mutation discountCodeBasicCreate($basicCodeDiscount: DiscountCodeBasicInput!) {

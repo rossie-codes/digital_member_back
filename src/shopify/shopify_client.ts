@@ -1,4 +1,4 @@
-// src/shopify/client.ts
+// src/shopify/shopify_client.ts
 
 import '@shopify/shopify-api/adapters/node';
 import { shopifyApi, LATEST_API_VERSION } from '@shopify/shopify-api';
