@@ -33,8 +33,12 @@ async function postNewMember(c: Context): Promise<Response> {
         const body: NewMember = await c.req.json();
 
         // Destructure the data
-        const { member_name, member_phone, birthday, referrer_phone, points_balance } = body;
+        // const { member_name, member_phone, birthday, referrer_phone, points_balance } = body;
+        const { member_name, member_phone, birthday, referrer_phone } = body;
         console.log(body)
+
+        let points_balance = 0;
+
         // Get a database client from the pool
         const client = await pool.connect();
 
@@ -109,6 +113,9 @@ async function postNewMember(c: Context): Promise<Response> {
 
             const tierResult = await client.query(tierQuery, [points_balance]);
 
+            console.log('tierResult:', tierResult.rows);
+
+
             let membership_tier_id: number | null = null;
             let membership_expiry_date: string | null = null;
 
@@ -125,6 +132,9 @@ async function postNewMember(c: Context): Promise<Response> {
 
                 // Format the date as YYYY-MM-DD
                 membership_expiry_date = expiryDate.toISOString().split('T')[0];
+
+                console.log('membership_expiry_date:', membership_expiry_date);
+
             } else {
                 // Handle case when no tier is matched
                 // You may set a default tier or handle it as needed
@@ -135,6 +145,7 @@ async function postNewMember(c: Context): Promise<Response> {
             const insertMemberQuery = `
             INSERT INTO member (
               created_at,
+              membership_start_date,
               member_phone,
               member_name,
               member_referral_code,
@@ -143,10 +154,12 @@ async function postNewMember(c: Context): Promise<Response> {
               membership_expiry_date,
               referrer_member_id,
               birthday,
-              is_active
+              is_active,
+              membership_status,
+              point
             ) VALUES (
-              NOW(),
-              $1, $2, $3, $4, $5, $6, $7, $8, 1
+              NOW(), NOW(),
+              $1, $2, $3, $4, $5, $6, $7, $8, 1, 'active', 0
             ) RETURNING member_id
           `;
 

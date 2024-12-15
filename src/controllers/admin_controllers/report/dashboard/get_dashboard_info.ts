@@ -36,7 +36,9 @@ async function getDashboardInfo(): Promise<DashboardInfo> {
         AND EXTRACT(MONTH FROM created_at) = $2
     `;
     const newMembersResult = await pool.query(newMembersQuery, [currentYear, currentMonth]);
+
     const new_member_count = parseInt(newMembersResult.rows[0].count, 10);
+
 
     // Members expiring in current month
     const expiringMembersQuery = `
@@ -94,6 +96,7 @@ async function getDashboardInfo(): Promise<DashboardInfo> {
       membership_tier_counts[row.membership_tier_name] = parseInt(row.count, 10);
     });
 
+
     // Membership tier counts (previous month)
     const tierCountsPreviousQuery = `
       SELECT mt.membership_tier_name, COUNT(*) as count
@@ -115,6 +118,7 @@ async function getDashboardInfo(): Promise<DashboardInfo> {
     tierCountsPreviousResult.rows.forEach(row => {
       membership_tier_counts_previous[row.membership_tier_name] = parseInt(row.count, 10);
     });
+
 
     // Calculate membership_tier_change_percentage
     membership_tiers.forEach(name => {

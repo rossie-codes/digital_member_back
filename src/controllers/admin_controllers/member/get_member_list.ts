@@ -1,9 +1,9 @@
 // src/controllers/member/get_member_list.ts
 
-import { pool } from '../../db';
-import type { Context } from 'hono';
+import { pool } from "../../db";
+import type { Context } from "hono";
 
-import getShopifyOrderList from '../../../shopify/get_shopify_order_list';
+import getShopifyOrderList from "../../../shopify/get_shopify_order_list";
 
 interface Member {
   member_id: number;
@@ -22,7 +22,7 @@ interface Member {
   membership_expiry_date: string;
   referrer_member_id: number | null;
   birthday: string | null;
-  membership_status: 'expired' | 'active' | 'suspended';
+  membership_status: "expired" | "active" | "suspended";
   member_note: string | null;
   member_tag: string[] | null;
   state_code: string | null;
@@ -50,35 +50,46 @@ async function getMemberList(c: Context): Promise<{
   // console.log(aaa.json)
 
   try {
-    const pageParam = c.req.query('page');
-    const pageSizeParam = c.req.query('pageSize');
-    const sortFieldParam = c.req.query('sortField');
-    const sortOrderParam = c.req.query('sortOrder');
-    const searchText = c.req.query('searchText') || '';
+    const pageParam = c.req.query("page");
+    const pageSizeParam = c.req.query("pageSize");
+    const sortFieldParam = c.req.query("sortField");
+    const sortOrderParam = c.req.query("sortOrder");
+    const searchText = c.req.query("searchText") || "";
 
+    const url = new URL(c.req.url, "http://localhost"); // Base URL is required for relative URLs
 
-    const url = new URL(c.req.url, 'http://localhost'); // Base URL is required for relative URLs
-    
-    const membershipTierParams: string[] = url.searchParams.getAll('membership_tier') || [];
-    const isActiveFilters: string[] = url.searchParams.getAll('membership_status');
+    const membershipTierParams: string[] =
+      url.searchParams.getAll("membership_tier") || [];
+    const isActiveFilters: string[] =
+      url.searchParams.getAll("membership_status");
 
     const page = pageParam ? parseInt(pageParam, 10) : 1;
     const pageSize = pageSizeParam ? parseInt(pageSizeParam, 10) : 10;
 
     // Allowed fields for sorting
-    const allowedSortFields = ['member_name', 'member_phone', 'points_balance', 'membership_expiry_date', 'membership_tier'];
+    const allowedSortFields = [
+      "member_name",
+      "member_phone",
+      "points_balance",
+      "birthday",
+      "total_order_amount",
+      "membership_expiry_date",
+      "membership_tier",
+    ];
     const sortFieldMapping: { [key: string]: string } = {
-      'member_name': 'm.member_name',
-      'member_phone': 'm.member_phone',
-      'points_balance': 'm.points_balance',
-      'membership_expiry_date': 'm.membership_expiry_date',
-      'membership_tier': 'mt.membership_tier_name',
-      'member_id': 'm.member_id', // Default sorting field
+      member_name: "m.member_name",
+      member_phone: "m.member_phone",
+      points_balance: "m.points_balance",
+      birthday: "m.birthday",
+      total_order_amount: "m.total_order_amount",
+      membership_expiry_date: "m.membership_expiry_date",
+      membership_tier: "mt.membership_tier_name",
+      member_id: "m.member_id", // Default sorting field
     };
 
     // Default sort field and mapped field
-    const defaultSortField = 'member_id';
-    const defaultMappedSortField = 'm.member_id';
+    const defaultSortField = "member_id";
+    const defaultMappedSortField = "m.member_id";
 
     // Determine sort field
     let sortField: string;
@@ -89,28 +100,29 @@ async function getMemberList(c: Context): Promise<{
     }
 
     // Map the sort field to database column
-    const mappedSortField = sortFieldMapping[sortField] || defaultMappedSortField;
+    const mappedSortField =
+      sortFieldMapping[sortField] || defaultMappedSortField;
 
     // Allowed sort orders
-    const allowedSortOrders = ['ascend', 'descend'];
+    const allowedSortOrders = ["ascend", "descend"];
 
     // Default sort order
-    const defaultSortOrder = 'ASC';
+    const defaultSortOrder = "ASC";
 
     // Determine sort order
     let sortOrder: string;
     if (sortOrderParam && allowedSortOrders.includes(sortOrderParam)) {
-      sortOrder = sortOrderParam === 'ascend' ? 'ASC' : 'DESC';
+      sortOrder = sortOrderParam === "ascend" ? "ASC" : "DESC";
     } else {
       sortOrder = defaultSortOrder;
     }
 
     // Validate page and pageSize
     if (isNaN(page) || page < 1) {
-      throw new Error('Invalid page number');
+      throw new Error("Invalid page number");
     }
     if (isNaN(pageSize) || pageSize < 1) {
-      throw new Error('Invalid page size');
+      throw new Error("Invalid page size");
     }
 
     const offset = (page - 1) * pageSize;
@@ -123,29 +135,38 @@ async function getMemberList(c: Context): Promise<{
 
     // Handle searchText for member_name and member_phone
     if (searchText) {
-      whereClauses.push(`(m.member_name ILIKE $${paramIndex} OR m.member_phone::text ILIKE $${paramIndex})`);
+      whereClauses.push(
+        `(m.member_name ILIKE $${paramIndex} OR m.member_phone::text ILIKE $${paramIndex})`
+      );
       queryParams.push(`%${searchText}%`);
       paramIndex++;
     }
 
     // Handle membership_tier filters
     if (membershipTierParams && membershipTierParams.length > 0) {
-      const membershipTierPlaceholders = membershipTierParams.map((_, idx) => `$${paramIndex + idx}`).join(', ');
-      whereClauses.push(`mt.membership_tier_name IN (${membershipTierPlaceholders})`);
+      const membershipTierPlaceholders = membershipTierParams
+        .map((_, idx) => `$${paramIndex + idx}`)
+        .join(", ");
+      whereClauses.push(
+        `mt.membership_tier_name IN (${membershipTierPlaceholders})`
+      );
       queryParams.push(...membershipTierParams);
       paramIndex += membershipTierParams.length;
     }
 
     // Handle membership_status filters
     if (isActiveFilters && isActiveFilters.length > 0) {
-      const statusPlaceholders = isActiveFilters.map((_, idx) => `$${paramIndex + idx}`).join(', ');
+      const statusPlaceholders = isActiveFilters
+        .map((_, idx) => `$${paramIndex + idx}`)
+        .join(", ");
       whereClauses.push(`m.membership_status IN (${statusPlaceholders})`);
       queryParams.push(...isActiveFilters);
       paramIndex += isActiveFilters.length;
     }
 
     // Combine WHERE clauses
-    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+    const whereClause =
+      whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
 
     // Get total count with filters
     const countQuery = `
@@ -157,6 +178,7 @@ async function getMemberList(c: Context): Promise<{
     const total = parseInt(countResult.rows[0].count, 10);
 
     const orderByClause = `ORDER BY ${mappedSortField} ${sortOrder}`;
+
 
     // Append LIMIT and OFFSET to queryParams
     queryParams.push(pageSize);
@@ -183,6 +205,7 @@ async function getMemberList(c: Context): Promise<{
     ${orderByClause}
     LIMIT $${paramIndex - 2} OFFSET $${paramIndex - 1}
   `;
+
 
     const data = await pool.query(dataQuery, queryParams);
 
@@ -227,7 +250,9 @@ async function getMemberList(c: Context): Promise<{
     // Fetch all membership tiers
     const tiersQuery = `SELECT membership_tier_name FROM membership_tier`;
     const tiersResult = await pool.query(tiersQuery);
-    const membershipTiers = tiersResult.rows.map(row => row.membership_tier_name);
+    const membershipTiers = tiersResult.rows.map(
+      (row) => row.membership_tier_name
+    );
 
     // **A. Count of Members in Different Membership Tiers**
     const tierCountsQuery = `
@@ -238,6 +263,8 @@ async function getMemberList(c: Context): Promise<{
         member m
       LEFT JOIN
         membership_tier mt ON m.membership_tier_id = mt.membership_tier_id
+      WHERE
+        m.membership_status = 'active'
       GROUP BY
         mt.membership_tier_name
       ORDER BY
@@ -245,8 +272,11 @@ async function getMemberList(c: Context): Promise<{
     `;
     const tierCountsResult = await pool.query(tierCountsQuery);
     const membershipTierCounts: { [tier: string]: number } = {};
-    tierCountsResult.rows.forEach(row => {
-      membershipTierCounts[row.membership_tier_name || 'No Tier'] = parseInt(row.member_count, 10);
+    tierCountsResult.rows.forEach((row) => {
+      membershipTierCounts[row.membership_tier_name || "No Tier"] = parseInt(
+        row.member_count,
+        10
+      );
     });
 
     // **B. Count of Memberships Expiring in the Current Month**
@@ -261,7 +291,10 @@ async function getMemberList(c: Context): Promise<{
         AND EXTRACT(MONTH FROM membership_expiry_date) = EXTRACT(MONTH FROM CURRENT_DATE)
     `;
     const expiringMembersResult = await pool.query(expiringMembersQuery);
-    const expiringMembersCount = parseInt(expiringMembersResult.rows[0].expiring_members_count, 10);
+    const expiringMembersCount = parseInt(
+      expiringMembersResult.rows[0].expiring_members_count,
+      10
+    );
 
     // **C. Count of Members with Birthdays in the Current Month**
     const birthdayMembersQuery = `
@@ -274,7 +307,10 @@ async function getMemberList(c: Context): Promise<{
         AND EXTRACT(MONTH FROM birthday) = EXTRACT(MONTH FROM CURRENT_DATE)
     `;
     const birthdayMembersResult = await pool.query(birthdayMembersQuery);
-    const birthdayMembersCount = parseInt(birthdayMembersResult.rows[0].birthday_members_count, 10);
+    const birthdayMembersCount = parseInt(
+      birthdayMembersResult.rows[0].birthday_members_count,
+      10
+    );
 
     // **D. Count of Members Who Became Members in the Current Month**
     const newMembersQuery = `
@@ -287,7 +323,10 @@ async function getMemberList(c: Context): Promise<{
         AND EXTRACT(MONTH FROM created_at) = EXTRACT(MONTH FROM CURRENT_DATE)
     `;
     const newMembersResult = await pool.query(newMembersQuery);
-    const newMembersCount = parseInt(newMembersResult.rows[0].new_members_count, 10);
+    const newMembersCount = parseInt(
+      newMembersResult.rows[0].new_members_count,
+      10
+    );
 
     return {
       data: members,
@@ -299,10 +338,9 @@ async function getMemberList(c: Context): Promise<{
       new_members_count: newMembersCount,
     };
   } catch (error) {
-    console.error('Database query error:', error);
-    throw new Error('Database query failed');
+    console.error("Database query error:", error);
+    throw new Error("Database query failed");
   }
 }
-
 
 export default getMemberList;
