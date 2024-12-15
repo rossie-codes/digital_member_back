@@ -127,7 +127,7 @@ async function getDashboardInfo(): Promise<DashboardInfo> {
       if (previousCount === 0) {
         membership_tier_change_percentage[name] = null;
       } else {
-        const change = ((currentCount - previousCount) / previousCount) * 100;
+        const change = ((currentCount - previousCount) / previousCount);
         membership_tier_change_percentage[name] = parseFloat(change.toFixed(2));
       }
     });
