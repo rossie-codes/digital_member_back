@@ -9,6 +9,8 @@ const pool = new pg.Pool({
   database: process.env.PG_DATABASE,
   password: process.env.PG_PASSWORD,
   port: parseInt(process.env.PG_PORT || "5432", 10), // Use parseInt to convert the port to a number
+  options: '-c search_path=mm9_client'
+
   // Add SSL configuration if required by your database provider (e.g., Neon)
   // ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false, // Important for Neon
 });

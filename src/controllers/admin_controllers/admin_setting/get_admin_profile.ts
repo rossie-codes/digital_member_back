@@ -4,6 +4,7 @@ import { pool } from "../../db";
 import type { Context } from "hono";
 import getWatiDetails from "../../../wati/wati_client";
 import postTenantCreateNewSchema from "../../tenant_controllers/post_tenant_create_new_schema";
+import cloneTenantSchema from "../../tenant_controllers/post_tenant_clone_new_schema";
 
 // Define the response interface
 interface ProfileDetail {
@@ -17,7 +18,11 @@ async function getAdminProfileDetail(c: Context): Promise<ProfileDetail> {
 
   // console.log("watidetails", watiDetails);
 
-  const newSchema = await postTenantCreateNewSchema(c);
+  console.log("cloneTenantSchema function begin");
+  const newSchema = await cloneTenantSchema();
+  console.log("cloneTenantSchema function done");
+
+  // const newSchema = await postTenantCreateNewSchema(c);
 
   console.log("newSchema", newSchema);
 
