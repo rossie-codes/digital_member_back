@@ -19,7 +19,7 @@ const pool = new pg.Pool({
 //  * @returns A client connected to the tenant's schema.
 //  */
 
-async function getTenantClient(appUrl: string) {
+async function getTenantClient(tenant: string) {
 
   console.log('getTenantClient function begin');
 
@@ -31,16 +31,20 @@ async function getTenantClient(appUrl: string) {
     // Fetch the tenant's schema name based on the app URL from the master schema
 
     console.log('query system_tenant_login begin');
-    
+    // const aaa = await client.query('SHOW search_path')
+
+    await client.query(`SET search_path TO system_schema;`);
+
+
     const result = await client.query(
       "SELECT tenant_schema FROM system_tenant_login WHERE tenant_host = $1",
-      [appUrl]
+      [tenant]
     );
 
     console.log('query system_tenant_login done', result.rows);
 
     if (result.rows.length === 0) {
-      throw new Error(`No schema found for app URL: ${appUrl}`);
+      throw new Error(`No schema found for app URL: ${tenant}`);
     }
 
     const tenantSchema = result.rows[0].tenant_schema;
@@ -59,31 +63,32 @@ async function getTenantClient(appUrl: string) {
 
   } catch (error) {
     console.error("Error fetching tenant schema or setting search_path:", error);
-    client.release(); // Ensure connection is released on error
+    client.release();
+    // client.release(); // Ensure connection is released on error
     throw error;
   }
 }
 
 
-async function queryTenantSchema(tenant: string, query: string, values?: any[]) {
+// async function queryTenantSchema(tenant: string, query: string, values?: any[]) {
 
-  console.log('queryTenantSchema function begin');
+//   console.log('queryTenantSchema function begin');
 
-  const client = await getTenantClient(tenant);
+//   const client = await getTenantClient(tenant);
 
-  console.log('queryTenantSchema function after getTenantClient done');
-  try {
-    const result = await client.query(query, values);
-    return result;
-  } catch (error) {
-    console.error("Error querying tenant schema:", error);
-    throw error;
-  } finally {
-    client.release(); // Always release the connection back to the pool
-  }
-}
+//   console.log('queryTenantSchema function after getTenantClient done');
+//   try {
+//     const result = await client.query(query, values);
+//     return result;
+//   } catch (error) {
+//     console.error("Error querying tenant schema:", error);
+//     throw error;
+//   } finally {
+//     client.release(); // Always release the connection back to the pool
+//   }
+// }
 
-export { queryTenantSchema, pool };
+export { pool, getTenantClient };
 
 
 // const result = await queryTenantSchema.query(tenant, query, values);

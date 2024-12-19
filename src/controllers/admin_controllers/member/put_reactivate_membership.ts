@@ -1,11 +1,22 @@
 // src/controllers/member/put_reactivate_membership.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import { type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 
 async function putReactivateMembership(c: Context): Promise<Response> {
   console.log('putReactivateMembership function begin');
+    
+  const tenant = c.get("tenant");
+  // const tenant = 'https://mm9_client'
+  // const tenant = 'https://membi-admin'
+
+  console.log("tenant", tenant);
+
+  const pool = await getTenantClient(tenant);
+
+
   try {
     // Extract memberPhone from the route parameters
     const memberPhone = c.req.param('memberPhone');
@@ -66,11 +77,14 @@ async function putReactivateMembership(c: Context): Promise<Response> {
     return c.json({ message: 'Membership reactivated successfully', membership_status: membershipStatus }, 200);
   } catch (error) {
     console.error('Error in putReactivateMembership:', error);
+    pool.release();
     if (error instanceof HTTPException) {
       throw error;
     } else {
       throw new HTTPException(500, { message: 'Internal Server Error' });
     }
+  } finally { 
+    pool.release();
   }
 }
 

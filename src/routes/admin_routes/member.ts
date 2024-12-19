@@ -2,7 +2,7 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-// import { adminAuthMiddleware } from '../../middleware/adminAuthMiddleware';
+import { adminAuthMiddleware } from '../../middleware/adminAuthMiddleware';
 
 import getMemberList from '../../controllers/admin_controllers/member/get_member_list';
 import getBirthdayMemberIds from '../../controllers/admin_controllers/member/get_birthday_member_ids';
@@ -24,7 +24,7 @@ const memberRouter = new Hono();
 
 
 // GET /member - Retrieve all members
-memberRouter.get('/get_member_list', async (c: Context) => {
+memberRouter.get('/get_member_list', adminAuthMiddleware, async (c: Context) => {
   try {
     console.log('get_member_list route begin');
     const data = await getMemberList(c);
@@ -37,7 +37,7 @@ memberRouter.get('/get_member_list', async (c: Context) => {
   }
 });
 
-memberRouter.get('/get_birthday_member_ids', async (c: Context) => {
+memberRouter.get('/get_birthday_member_ids', adminAuthMiddleware, async (c: Context) => {
   try {
     console.log('get_birthday_member_ids route begin');
     const data = await getBirthdayMemberIds(c);
@@ -51,15 +51,12 @@ memberRouter.get('/get_birthday_member_ids', async (c: Context) => {
 });
 
 // GET /member/get_member_detail/:memberPhone - Retrieve member details by phone
-memberRouter.get('/get_member_detail/:memberPhone', async (c: Context) => {
+memberRouter.get('/get_member_detail/:memberPhone', adminAuthMiddleware, async (c: Context) => {
   try {
     console.log('get_member_detail route begin');
     
-    const memberPhone = c.req.param('memberPhone');
+    const data = await getMemberDetail(c);
 
-    console.log('memberPhone is: ', memberPhone);
-    
-    const data = await getMemberDetail(memberPhone);
     console.log('get_member_detail route done');
     return c.json(data);
   } catch (error: any) {
@@ -71,7 +68,7 @@ memberRouter.get('/get_member_detail/:memberPhone', async (c: Context) => {
   }
 });
 
-memberRouter.post('/post_new_member', async (c: Context) => {
+memberRouter.post('/post_new_member', adminAuthMiddleware, async (c: Context) => {
     try {
       console.log('post_new_member route begin');
       const response = await postNewMember(c);
@@ -84,7 +81,7 @@ memberRouter.post('/post_new_member', async (c: Context) => {
     }
   });
 
-  memberRouter.put('/put_suspend_membership/:memberPhone', async (c: Context) => {
+  memberRouter.put('/put_suspend_membership/:memberPhone', adminAuthMiddleware, async (c: Context) => {
     try {
       console.log('put_suspend_membership route begin');
       const response = await putSuspendMembership(c);
@@ -97,7 +94,7 @@ memberRouter.post('/post_new_member', async (c: Context) => {
     }
   });
 
-  memberRouter.put('/put_reactivate_membership/:memberPhone', async (c: Context) => {
+  memberRouter.put('/put_reactivate_membership/:memberPhone', adminAuthMiddleware, async (c: Context) => {
     try {
       console.log('put_reactivate_membership route begin');
       const response = await putReactivateMembership(c);
@@ -110,7 +107,7 @@ memberRouter.post('/post_new_member', async (c: Context) => {
     }
   });
 
-  memberRouter.put('/put_change_member_detail/:memberPhone', async (c: Context) => {
+  memberRouter.put('/put_change_member_detail/:memberPhone', adminAuthMiddleware, async (c: Context) => {
     try {
       console.log('put_change_member_detail route begin');
       const response = await putChangeMemberDetail(c);

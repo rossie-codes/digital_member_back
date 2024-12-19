@@ -1,6 +1,7 @@
 // src/controllers/member/get_birthday_member_ids.ts
 
 import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import type { Context } from 'hono';
 
 interface Member {
@@ -10,6 +11,15 @@ interface Member {
 async function getBirthdayMemberIds(c: Context): Promise<{
   member_ids: Member[];
 }> {
+
+  const tenant = c.get("tenant");
+  // const tenant = 'https://mm9_client'
+  // const tenant = 'https://membi-admin'
+
+  console.log("tenant", tenant);
+
+  const pool = await getTenantClient(tenant);
+
   try {
     // Get the current month
     const now = new Date();
@@ -34,7 +44,10 @@ async function getBirthdayMemberIds(c: Context): Promise<{
     };
   } catch (error) {
     console.error('Database query error:', error);
+    pool.release();
     throw new Error('Database query failed');
+  } finally {
+    pool.release();
   }
 }
 

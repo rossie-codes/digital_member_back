@@ -1,6 +1,8 @@
 // src/controllers/member/get_member_detail.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import type { Context } from "hono";
+import { getTenantClient } from "../../db";
 
 interface PurchaseDataType {
   purchase_id: string;
@@ -71,7 +73,20 @@ interface Member {
   discount_codes: DiscountCodeType[];
 }
 
-async function getMemberDetail(memberPhone: string): Promise<Member> {
+async function getMemberDetail(c: Context): Promise<Member> {
+
+  const memberPhone = c.req.param('memberPhone');
+
+  console.log('memberPhone is: ', memberPhone);
+
+  const tenant = c.get("tenant");
+  // const tenant = 'https://mm9_client'
+  // const tenant = 'https://membi-admin'
+
+  console.log("tenant", tenant);
+
+  const pool = await getTenantClient(tenant);
+
   try {
     // Fetch basic member information
     const memberQuery = `
@@ -267,14 +282,14 @@ async function getMemberDetail(memberPhone: string): Promise<Member> {
       state_code: row.state_code,
       membership_tier: row.mt_membership_tier_id
         ? {
-            membership_tier_id: row.mt_membership_tier_id,
-            membership_tier_name: row.membership_tier_name,
-            membership_tier_sequence: row.mt_membership_tier_sequence,
-            require_point: row.require_point,
-            extend_membership_point: row.extend_membership_point,
-            point_multiplier: row.point_multiplier,
-            membership_period: row.membership_period,
-          }
+          membership_tier_id: row.mt_membership_tier_id,
+          membership_tier_name: row.membership_tier_name,
+          membership_tier_sequence: row.mt_membership_tier_sequence,
+          require_point: row.require_point,
+          extend_membership_point: row.extend_membership_point,
+          point_multiplier: row.point_multiplier,
+          membership_period: row.membership_period,
+        }
         : undefined,
       membership_start_date: membership_start_date,
       membership_end_date: membership_end_date,

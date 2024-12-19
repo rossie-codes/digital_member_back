@@ -1,11 +1,11 @@
 // src/controllers/admin_controllers/admin/get_admin_profile.ts
 
-import { pool } from "../../db";
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 import getWatiDetails from "../../../wati/wati_client";
 import postTenantCreateNewSchema from "../../tenant_controllers/post_tenant_create_new_schema";
 import cloneTenantSchema from "../../tenant_controllers/post_tenant_clone_new_schema";
-import { queryTenantSchema } from "../../db";
 
 
 // Define the response interface
@@ -31,8 +31,17 @@ async function getAdminProfileDetail(c: Context): Promise<ProfileDetail> {
   const user = c.get("user"); // Assuming admin user is set in context
   const admin_id = user.adminId;
 
+
+
+
+  
   const tenant = c.get("tenant");
+  // const tenant = 'https://mm9_client'
+  // const tenant = 'https://membi-admin'
+
   console.log("tenant", tenant);
+
+  const pool = await getTenantClient(tenant);
 
   try {
     const query = `
@@ -42,8 +51,10 @@ async function getAdminProfileDetail(c: Context): Promise<ProfileDetail> {
     `;
     const values = [admin_id];
 
-    const result = await queryTenantSchema(tenant, query, values);
-    // const result1 = await pool.query(query, values);
+
+    // const result = await queryTenantSchema(tenant, query, values);
+    const result = await pool.query(query, values);
+
 
     if (result.rows.length === 0) {
       throw new Error("Admin not found");
@@ -51,15 +62,22 @@ async function getAdminProfileDetail(c: Context): Promise<ProfileDetail> {
 
     const row = result.rows[0];
 
+
     const adminProfileDetail: ProfileDetail = {
       admin_name: row.admin_name,
     };
 
+    console.log("adminProfileDetail", adminProfileDetail)
+
     console.log("getAdminProfileDetail function done");
+    
     return adminProfileDetail;
   } catch (error) {
     console.error("Database query error:", error);
+    pool.release();
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

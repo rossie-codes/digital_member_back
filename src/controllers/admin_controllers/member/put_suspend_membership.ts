@@ -1,11 +1,21 @@
 // src/controllers/member/put_suspend_membership.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import { type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 
 async function putSuspendMembership(c: Context): Promise<Response> {
   console.log('putSuspendMembership function begin');
+
+  const tenant = c.get("tenant");
+  // const tenant = 'https://mm9_client'
+  // const tenant = 'https://membi-admin'
+
+  console.log("tenant", tenant);
+
+  const pool = await getTenantClient(tenant);
+
   try {
     // Extract member_phone from the route parameters
     const memberPhone = c.req.param('memberPhone');
@@ -43,11 +53,14 @@ async function putSuspendMembership(c: Context): Promise<Response> {
     return c.json({ message: 'Membership updated successfully' }, 200);
   } catch (error) {
     console.error('Error in putSuspendMembership:', error);
+    pool.release();
     if (error instanceof HTTPException) {
       throw error;
     } else {
       throw new HTTPException(500, { message: 'Internal Server Error' });
     }
+  } finally {
+    pool.release();
   }
 }
 

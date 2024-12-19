@@ -1,6 +1,7 @@
 // src/controllers/member/get_member_list.ts
 
-import { pool } from "../../db";
+// import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 
 import getShopifyOrderList from "../../../shopify/get_shopify_order_list";
@@ -46,8 +47,15 @@ async function getMemberList(c: Context): Promise<{
   birthday_members_count: number;
   new_members_count: number;
 }> {
-  // const aaa = await getShopifyOrderList(c)
-  // console.log(aaa.json)
+
+
+  const tenant = c.get("tenant");
+  // const tenant = 'https://mm9_client'
+  // const tenant = 'https://membi-admin'
+
+  console.log("tenant", tenant);
+
+  const pool = await getTenantClient(tenant);
 
   try {
     const pageParam = c.req.query("page");
@@ -234,14 +242,14 @@ async function getMemberList(c: Context): Promise<{
         state_code: row.state_code,
         membership_tier: row.mt_membership_tier_id
           ? {
-              membership_tier_id: row.mt_membership_tier_id,
-              membership_tier_name: row.mt_membership_tier_name,
-              membership_tier_sequence: row.mt_membership_tier_sequence,
-              require_point: row.mt_require_point,
-              extend_membership_point: row.mt_extend_membership_point,
-              point_multiplier: row.mt_point_multiplier,
-              membership_period: row.mt_membership_period,
-            }
+            membership_tier_id: row.mt_membership_tier_id,
+            membership_tier_name: row.mt_membership_tier_name,
+            membership_tier_sequence: row.mt_membership_tier_sequence,
+            require_point: row.mt_require_point,
+            extend_membership_point: row.mt_extend_membership_point,
+            point_multiplier: row.mt_point_multiplier,
+            membership_period: row.mt_membership_period,
+          }
           : undefined,
       };
       return member;
@@ -339,7 +347,10 @@ async function getMemberList(c: Context): Promise<{
     };
   } catch (error) {
     console.error("Database query error:", error);
+    pool.release();
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

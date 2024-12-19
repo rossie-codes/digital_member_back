@@ -1,11 +1,22 @@
 // src/controllers/member/put_change_member_detail.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import { type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 
 async function putChangeMemberDetail(c: Context): Promise<Response> {
   console.log('putChangeMemberDetail function begin');
+  
+  const tenant = c.get("tenant");
+  // const tenant = 'https://mm9_client'
+  // const tenant = 'https://membi-admin'
+
+  console.log("tenant", tenant);
+
+  const pool = await getTenantClient(tenant);
+
+
   try {
     // Extract memberPhone from the route parameters
     const memberPhone = c.req.param('memberPhone');
@@ -61,12 +72,16 @@ async function putChangeMemberDetail(c: Context): Promise<Response> {
     return c.json({ message: 'Member details updated successfully' }, 200);
   } catch (error) {
     console.error('Error in putChangeMemberDetail:', error);
+    pool.release();
+
     if (error instanceof HTTPException) {
       throw error;
     } else {
       throw new HTTPException(500, { message: 'Internal Server Error' });
     }
-  }
+  } finally {
+    pool.release();
+  } 
 }
 
 export default putChangeMemberDetail;

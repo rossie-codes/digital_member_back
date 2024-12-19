@@ -1,6 +1,7 @@
 // src/controllers/member/post_new_member.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import { type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception'
 
@@ -40,7 +41,14 @@ async function postNewMember(c: Context): Promise<Response> {
         let points_balance = 0;
 
         // Get a database client from the pool
-        const client = await pool.connect();
+
+        const tenant = c.get("tenant");
+        // const tenant = 'https://mm9_client'
+        // const tenant = 'https://membi-admin'
+
+        console.log("tenant", tenant);
+
+        const client = await getTenantClient(tenant);
 
         try {
             // Start a transaction
@@ -190,6 +198,8 @@ async function postNewMember(c: Context): Promise<Response> {
         } catch (error) {
             // Roll back the transaction on error
             await client.query('ROLLBACK');
+            client.release();
+            
             console.error('Error adding new member:', error);
             throw new HTTPException(500, { message: 'Internal Server Error' });
         } finally {
