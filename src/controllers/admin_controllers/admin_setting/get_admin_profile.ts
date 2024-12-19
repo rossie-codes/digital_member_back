@@ -4,6 +4,9 @@ import { pool } from "../../db";
 import type { Context } from "hono";
 import getWatiDetails from "../../../wati/wati_client";
 import postTenantCreateNewSchema from "../../tenant_controllers/post_tenant_create_new_schema";
+import cloneTenantSchema from "../../tenant_controllers/post_tenant_clone_new_schema";
+import { queryTenantSchema } from "../../db";
+
 
 // Define the response interface
 interface ProfileDetail {
@@ -17,12 +20,19 @@ async function getAdminProfileDetail(c: Context): Promise<ProfileDetail> {
 
   // console.log("watidetails", watiDetails);
 
-  const newSchema = await postTenantCreateNewSchema(c);
+  // console.log("cloneTenantSchema function begin");
+  // const newSchema = await cloneTenantSchema();
+  // console.log("cloneTenantSchema function done");
 
-  console.log("newSchema", newSchema);
+  // const newSchema = await postTenantCreateNewSchema(c);
+
+  // console.log("newSchema", newSchema);
 
   const user = c.get("user"); // Assuming admin user is set in context
   const admin_id = user.adminId;
+
+  const tenant = c.get("tenant");
+  console.log("tenant", tenant);
 
   try {
     const query = `
@@ -32,7 +42,8 @@ async function getAdminProfileDetail(c: Context): Promise<ProfileDetail> {
     `;
     const values = [admin_id];
 
-    const result = await pool.query(query, values);
+    const result = await queryTenantSchema(tenant, query, values);
+    // const result1 = await pool.query(query, values);
 
     if (result.rows.length === 0) {
       throw new Error("Admin not found");
@@ -44,7 +55,7 @@ async function getAdminProfileDetail(c: Context): Promise<ProfileDetail> {
       admin_name: row.admin_name,
     };
 
-    console.log("getAdminProfileDetail function end");
+    console.log("getAdminProfileDetail function done");
     return adminProfileDetail;
   } catch (error) {
     console.error("Database query error:", error);

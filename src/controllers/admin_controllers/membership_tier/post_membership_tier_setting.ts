@@ -40,6 +40,8 @@ async function postMembershipTierSetting(c: Context): Promise<Response> {
       membership_tiers,
     } = payload;
 
+    const admin_setting_id = 1;
+
     // Input Validation
     if (!membership_tiers || !Array.isArray(membership_tiers)) {
       return c.json({ message: 'Invalid input: membership_tiers should be an array.' }, 400);
@@ -52,15 +54,16 @@ async function postMembershipTierSetting(c: Context): Promise<Response> {
       // Upsert the admin_setting record
       const upsertAdminSettingQuery = `
         INSERT INTO admin_setting 
-          (membership_extend_method, membership_end_result, membership_period)
+          (admin_setting_id, membership_extend_method, membership_end_result, membership_period)
         VALUES 
-          ($1, $2, $3)
+          ($1, $2, $3, $4)
         ON CONFLICT (admin_setting_id) DO UPDATE SET 
           membership_extend_method = EXCLUDED.membership_extend_method,
           membership_end_result = EXCLUDED.membership_end_result,
           membership_period = EXCLUDED.membership_period
       `;
       await client.query(upsertAdminSettingQuery, [
+        admin_setting_id,
         parseInt(membership_extend_method, 10),
         parseInt(membership_end_result, 10),
         parseInt(membership_period, 10),

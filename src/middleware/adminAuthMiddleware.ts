@@ -7,9 +7,23 @@ import { getCookie, setCookie } from 'hono/cookie'
 
 const MEMBI_ADMIN_SECRET = process.env.MEMBI_ADMIN_SECRET || 'admin';
 
+
 export const adminAuthMiddleware = async (c: Context, next: Next) => {
 
   // const membi_admin_token = c.req.cookie('membi_admin_token');
+
+  const host = c.req.header('origin'); // Get the host from the request headers
+  // console.log('host', host);
+
+  const tenantIdentifier = extractTenantFromHost(host!);
+
+  if (!tenantIdentifier) {
+    return c.json({ error: 'Tenant identifier missing' }, 400); // Bad Request if no tenant is found
+  }
+
+  console.log('Tenant Identifier:', tenantIdentifier);
+
+  c.set('tenant', tenantIdentifier);
 
   const membi_admin_token = getCookie(c, 'membi_admin_token');
 
@@ -17,7 +31,7 @@ export const adminAuthMiddleware = async (c: Context, next: Next) => {
     return c.json({ error: 'Unauthorized' }, 401);
   }
   console.log('membi_admin_token', membi_admin_token);
-  
+
   // console.log('membi_admin_token', membi_admin_token);
   try {
     const decoded = jwt.verify(membi_admin_token, MEMBI_ADMIN_SECRET);
@@ -29,3 +43,21 @@ export const adminAuthMiddleware = async (c: Context, next: Next) => {
     return c.json({ error: 'Invalid token' }, 401);
   }
 };
+
+
+function extractTenantFromHost(host: string | null): string | null {
+  if (!host) {
+    return null;
+  }
+  console.log('host', host);
+
+  // Split the host by dots to isolate the subdomain
+  const parts = host.split('.');
+  // if (parts.length < 1) {
+  //   return null; // Return null if there is no subdomain
+  // }
+  console.log('parts', parts);
+
+  // Return the first part of the hostname (the subdomain)
+  return parts[0];
+}
