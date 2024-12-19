@@ -77,7 +77,6 @@ async function putReactivateMembership(c: Context): Promise<Response> {
     return c.json({ message: 'Membership reactivated successfully', membership_status: membershipStatus }, 200);
   } catch (error) {
     console.error('Error in putReactivateMembership:', error);
-    pool.release();
     if (error instanceof HTTPException) {
       throw error;
     } else {

@@ -1,6 +1,8 @@
 // src/controllers/discount_code/restore_discount_code.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
+
 import type { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 
@@ -15,7 +17,15 @@ async function restoreDiscountCode(c: Context): Promise<Response> {
 
     // No need to parse the request body as we only need the item_id
 
-    const client = await pool.connect();
+    // const client = await pool.connect();
+
+    const tenant = c.get("tenant");
+    // const tenant = 'https://mm9_client'
+    // const tenant = 'https://membi-admin'
+  
+    console.log("tenant", tenant);
+  
+    const client = await getTenantClient(tenant);
 
     try {
       await client.query('BEGIN');

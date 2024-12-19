@@ -2,7 +2,7 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-import { authMiddleware } from '../../middleware/adminAuthMiddleware';
+import { adminAuthMiddleware } from '../../middleware/adminAuthMiddleware';
 
 import getDiscountCodeList from '../../controllers/admin_controllers/discount_code/get_discount_code_list';
 import getDiscountCodeDetail from '../../controllers/admin_controllers/discount_code/get_discount_code_detail';
@@ -27,11 +27,11 @@ import { HTTPException } from 'hono/http-exception'
 
 const discountCodeRouter = new Hono();
 
-// discountCodeRouter.use('*', authMiddleware); // Protect all member routes
+discountCodeRouter.use('*', adminAuthMiddleware); // Protect all member routes
 
 discountCodeRouter.get('/get_discount_code_list', async (c: Context) => {
   try {
-    const data = await getDiscountCodeList();
+    const data = await getDiscountCodeList(c);
     return c.json(data);
   } catch (error) {
     // Let Hono’s `onError` handle the error
@@ -43,11 +43,8 @@ discountCodeRouter.get('/get_discount_code_detail/:discount_code_id', async (c: 
   try {
     console.log('get_discount_code_detail route begin');
 
-    const discount_code_id = c.req.param('discount_code_id');
 
-    console.log('discount_code_id is: ', discount_code_id);
-
-    const data = await getDiscountCodeDetail(discount_code_id);
+    const data = await getDiscountCodeDetail(c);
     console.log('get_discount_code_detail route done');
     //   return data;
     return c.json(data);

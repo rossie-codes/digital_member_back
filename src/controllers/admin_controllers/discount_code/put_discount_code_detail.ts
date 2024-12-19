@@ -1,12 +1,16 @@
 // src/controllers/discount_code/put_discount_code_detail.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
+
 import type { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import putShopifyDiscountCodeDetail from '../../../shopify/put_shopify_discount_code_detail';
 
 
 async function putDiscountCodeDetail(c: Context): Promise<Response> {
+  
+
   try {
     // Get discount_code_id from route parameters
     const discount_code_id_str = c.req.param('discount_code_id');
@@ -109,7 +113,15 @@ async function putDiscountCodeDetail(c: Context): Promise<Response> {
 
 
     // Get a database client from the pool
-    const client = await pool.connect();
+    // const client = await pool.connect();
+
+    const tenant = c.get("tenant");
+    // const tenant = 'https://mm9_client'
+    // const tenant = 'https://membi-admin'
+  
+    console.log("tenant", tenant);
+  
+    const client = await getTenantClient(tenant);
 
     try {
       // Start a transaction

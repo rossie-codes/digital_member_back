@@ -1,7 +1,8 @@
 // src/controllers/admin_controllers/auth/admin_login.ts
 
 import type { Context } from 'hono';
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 // import bcrypt from 'bcryptjs';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -12,6 +13,17 @@ const MEMBI_ADMIN_SECRET = process.env.MEMBI_ADMIN_SECRET || 'MEMBI_ADMIN_SECRET
 export async function loginAdmin(c: Context) {
   console.log('loginAdmin function begin')
   
+
+  
+  const tenant = c.get("tenant");
+  // const tenant = 'https://mm9_client'
+  // const tenant = 'https://membi-admin'
+
+  console.log("tenant", tenant);
+
+  const pool = await getTenantClient(tenant);
+
+
   try {
     const { admin_name, admin_password } = await c.req.json();
 
@@ -81,5 +93,7 @@ export async function loginAdmin(c: Context) {
   } catch (error) {
     console.error('Login error:', error);
     return c.json({ error: 'Internal server error' }, 500);
+  } finally {  
+    pool.release();
   }
 }

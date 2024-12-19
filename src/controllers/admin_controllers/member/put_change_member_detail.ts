@@ -6,6 +6,7 @@ import { type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 
 async function putChangeMemberDetail(c: Context): Promise<Response> {
+  
   console.log('putChangeMemberDetail function begin');
   
   const tenant = c.get("tenant");
@@ -72,8 +73,6 @@ async function putChangeMemberDetail(c: Context): Promise<Response> {
     return c.json({ message: 'Member details updated successfully' }, 200);
   } catch (error) {
     console.error('Error in putChangeMemberDetail:', error);
-    pool.release();
-
     if (error instanceof HTTPException) {
       throw error;
     } else {

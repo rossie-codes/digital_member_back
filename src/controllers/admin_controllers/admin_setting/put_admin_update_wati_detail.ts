@@ -1,6 +1,7 @@
 // src/controllers/admin_controllers/admin_setting/put_admin_update_wati_detail.ts
 
-import { pool } from "../../db";
+// import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 import crypto from "crypto";
 
@@ -11,33 +12,39 @@ interface UpdateWatiDetail {
 }
 
 // Encryption key and algorithm (ensure the encryption key is securely managed)
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'your-encryption-key-here'; // Must be 256 bits (32 characters)
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || "your-encryption-key-here"; // Must be 256 bits (32 characters)
 const IV_LENGTH = 16; // For AES, this is always 16 bytes
 
 function encrypt(text: string): string {
   const iv = crypto.randomBytes(IV_LENGTH);
   const cipher = crypto.createCipheriv(
-    'aes-256-cbc',
+    "aes-256-cbc",
     Buffer.from(ENCRYPTION_KEY),
     iv
   );
   let encrypted = cipher.update(text);
   encrypted = Buffer.concat([encrypted, cipher.final()]);
-  return iv.toString('hex') + ':' + encrypted.toString('hex');
+  return iv.toString("hex") + ":" + encrypted.toString("hex");
 }
 
 async function putAdminUpdateWatiDetail(c: Context): Promise<Response> {
-  console.log('putAdminUpdateWatiDetail function begin');
+  console.log("putAdminUpdateWatiDetail function begin");
+
+  const tenant = c.get("tenant");
+  // const tenant = 'https://mm9_client'
+  // const tenant = 'https://membi-admin'
+
+  console.log("tenant", tenant);
+
+  const client = await getTenantClient(tenant);
 
   try {
     // Parse request body
-    const {
-      wati_api_endpoint,
-      wati_access_token,
-    }: UpdateWatiDetail = await c.req.json();
+    const { wati_api_endpoint, wati_access_token }: UpdateWatiDetail =
+      await c.req.json();
 
     // Begin transaction
-    const client = await pool.connect();
+    // const client = await pool.connect();
     try {
       await client.query("BEGIN");
 
@@ -69,18 +76,18 @@ async function putAdminUpdateWatiDetail(c: Context): Promise<Response> {
       }
 
       await client.query("COMMIT");
-      console.log('putAdminUpdateWatiDetail function end');
+      console.log("putAdminUpdateWatiDetail function end");
       return c.json({ message: "WATI details updated successfully" }, 200);
     } catch (error) {
       await client.query("ROLLBACK");
       console.error("Error updating WATI details:", error);
       throw new Error("WATI details update failed");
-    } finally {
-      client.release();
     }
   } catch (error) {
     console.error("Update error:", error);
     return c.json({ message: "WATI details update failed" }, 500);
+  } finally {
+    client.release();
   }
 }
 

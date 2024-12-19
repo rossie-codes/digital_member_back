@@ -2,26 +2,22 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-import { authMiddleware } from '../../middleware/adminAuthMiddleware';
+import { adminAuthMiddleware } from '../../middleware/adminAuthMiddleware';
 
 import getDashboardInfo from '../../controllers/admin_controllers/report/dashboard/get_dashboard_info';
-
-
-
 import { HTTPException } from 'hono/http-exception'
 
 // Import other controllers as needed
 
 const dashboardRouter = new Hono();
 
-// dashboardRouter.use('*', authMiddleware); // Protect all member routes
-
+dashboardRouter.use("*", adminAuthMiddleware); // Protect all member routes
 
 // GET /member - Retrieve all members
 dashboardRouter.get('/get_dashboard_info', async (c: Context) => {
   try {
     console.log('get_dashboard_info route begin');
-    const data = await getDashboardInfo();
+    const data = await getDashboardInfo(c);
     console.log('get_dashboard_info route done');
     return c.json(data);
   } catch (error) {

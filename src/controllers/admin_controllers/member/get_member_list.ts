@@ -347,7 +347,6 @@ async function getMemberList(c: Context): Promise<{
     };
   } catch (error) {
     console.error("Database query error:", error);
-    pool.release();
     throw new Error("Database query failed");
   } finally {
     pool.release();

@@ -1,6 +1,8 @@
 // src/controllers/report/dashboard/get_dashboard_info.ts
 
-import { pool } from '../../../db';
+import { getTenantClient } from '../../../db';
+import type { Context } from "hono";
+
 
 interface DashboardInfo {
   new_member_count: number;
@@ -15,7 +17,17 @@ interface DashboardInfo {
   active_discounts: { discount_code_name: string; valid_from: string }[];
 }
 
-async function getDashboardInfo(): Promise<DashboardInfo> {
+async function getDashboardInfo(c: Context): Promise<DashboardInfo> {
+
+
+  const tenant = c.get("tenant");
+  // const tenant = 'https://mm9_client'
+  // const tenant = 'https://membi-admin'
+
+  console.log("tenant", tenant);
+
+  const pool = await getTenantClient(tenant);
+  
   try {
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -201,6 +213,8 @@ async function getDashboardInfo(): Promise<DashboardInfo> {
   } catch (error) {
     console.error('Error fetching dashboard info:', error);
     throw error;
+  } finally {
+    pool.release();
   }
 }
 

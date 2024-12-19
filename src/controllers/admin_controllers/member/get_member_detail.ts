@@ -53,7 +53,7 @@ interface Member {
   membership_expiry_date: string | null;
   referrer_member_id: number | null;
   birthday: string | null;
-  membership_status: 'expired' | 'active' | 'suspended';
+  membership_status: "expired" | "active" | "suspended";
   member_note: string | null;
   member_tag: string | null;
   state_code: string | null;
@@ -74,10 +74,9 @@ interface Member {
 }
 
 async function getMemberDetail(c: Context): Promise<Member> {
+  const memberPhone = c.req.param("memberPhone");
 
-  const memberPhone = c.req.param('memberPhone');
-
-  console.log('memberPhone is: ', memberPhone);
+  console.log("memberPhone is: ", memberPhone);
 
   const tenant = c.get("tenant");
   // const tenant = 'https://mm9_client'
@@ -110,7 +109,7 @@ async function getMemberDetail(c: Context): Promise<Member> {
     const { rows } = await pool.query(memberQuery, [memberPhone]);
 
     if (rows.length === 0) {
-      throw new Error('Member not found');
+      throw new Error("Member not found");
     }
 
     const row = rows[0];
@@ -127,8 +126,11 @@ async function getMemberDetail(c: Context): Promise<Member> {
       FROM point_earning_record
       WHERE member_id = $1
     `;
-    const totalPointsResult = await pool.query(totalPointsEarnedQuery, [memberId]);
-    const total_points_earned = parseInt(totalPointsResult.rows[0].total_points_earned, 10) || 0;
+    const totalPointsResult = await pool.query(totalPointsEarnedQuery, [
+      memberId,
+    ]);
+    const total_points_earned =
+      parseInt(totalPointsResult.rows[0].total_points_earned, 10) || 0;
 
     const usedPointsQuery = `
       SELECT COALESCE(SUM(redeem_point), 0) AS used_points
@@ -148,9 +150,13 @@ async function getMemberDetail(c: Context): Promise<Member> {
       FROM "order"
       WHERE customer_phone = $1
     `;
-    const purchaseStatsResult = await pool.query(purchaseStatsQuery, [memberPhone]);
-    const purchase_count = parseInt(purchaseStatsResult.rows[0].purchase_count, 10) || 0;
-    const total_purchase_amount = parseFloat(purchaseStatsResult.rows[0].total_purchase_amount) || 0;
+    const purchaseStatsResult = await pool.query(purchaseStatsQuery, [
+      memberPhone,
+    ]);
+    const purchase_count =
+      parseInt(purchaseStatsResult.rows[0].purchase_count, 10) || 0;
+    const total_purchase_amount =
+      parseFloat(purchaseStatsResult.rows[0].total_purchase_amount) || 0;
 
     const currentMembershipPurchaseQuery = `
       SELECT 
@@ -160,14 +166,15 @@ async function getMemberDetail(c: Context): Promise<Member> {
         customer_phone = $1
         AND order_created_date BETWEEN $2 AND $3
     `;
-    const currentMembershipPurchaseResult = await pool.query(currentMembershipPurchaseQuery, [
-      memberPhone,
-      membership_start_date,
-      membership_end_date,
-    ]);
-    const current_membership_purchase_amount = parseFloat(
-      currentMembershipPurchaseResult.rows[0].current_membership_purchase_amount
-    ) || 0;
+    const currentMembershipPurchaseResult = await pool.query(
+      currentMembershipPurchaseQuery,
+      [memberPhone, membership_start_date, membership_end_date]
+    );
+    const current_membership_purchase_amount =
+      parseFloat(
+        currentMembershipPurchaseResult.rows[0]
+          .current_membership_purchase_amount
+      ) || 0;
 
     // Purchases
     const purchasesQuery = `
@@ -196,7 +203,9 @@ async function getMemberDetail(c: Context): Promise<Member> {
         FROM member
         WHERE member_id = $1
       `;
-      const referrerResult = await pool.query(referrerQuery, [row.referrer_member_id]);
+      const referrerResult = await pool.query(referrerQuery, [
+        row.referrer_member_id,
+      ]);
       if (referrerResult.rows.length > 0) {
         referrer = referrerResult.rows[0].member_phone;
       }
@@ -248,7 +257,9 @@ async function getMemberDetail(c: Context): Promise<Member> {
       GROUP BY rr.redemption_record_id, ri.redemption_item_name, rr.redeem_code, ri.redemption_type, ri.redemption_item_status, rr.received_date
     `;
 
-    const discountCodesResult = await pool.query(discountCodesQuery, [memberId]);
+    const discountCodesResult = await pool.query(discountCodesQuery, [
+      memberId,
+    ]);
 
     const discount_codes = discountCodesResult.rows.map((code) => ({
       code_id: code.code_id.toString(),
@@ -256,7 +267,7 @@ async function getMemberDetail(c: Context): Promise<Member> {
       code_name: code.code_name,
       code: code.code,
       type: code.type,
-      status: code.status ? 'active' : 'inactive',
+      status: code.status ? "active" : "inactive",
       received_date: code.received_date,
       usage_count: parseInt(code.usage_count, 10) || 0,
     }));
@@ -282,14 +293,14 @@ async function getMemberDetail(c: Context): Promise<Member> {
       state_code: row.state_code,
       membership_tier: row.mt_membership_tier_id
         ? {
-          membership_tier_id: row.mt_membership_tier_id,
-          membership_tier_name: row.membership_tier_name,
-          membership_tier_sequence: row.mt_membership_tier_sequence,
-          require_point: row.require_point,
-          extend_membership_point: row.extend_membership_point,
-          point_multiplier: row.point_multiplier,
-          membership_period: row.membership_period,
-        }
+            membership_tier_id: row.mt_membership_tier_id,
+            membership_tier_name: row.membership_tier_name,
+            membership_tier_sequence: row.mt_membership_tier_sequence,
+            require_point: row.require_point,
+            extend_membership_point: row.extend_membership_point,
+            point_multiplier: row.point_multiplier,
+            membership_period: row.membership_period,
+          }
         : undefined,
       membership_start_date: membership_start_date,
       membership_end_date: membership_end_date,
@@ -308,8 +319,10 @@ async function getMemberDetail(c: Context): Promise<Member> {
 
     return member;
   } catch (error) {
-    console.error('Database query error:', error);
+    console.error("Database query error:", error);
     throw error;
+  } finally {
+    pool.release();
   }
 }
 

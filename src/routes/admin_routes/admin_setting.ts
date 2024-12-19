@@ -1,65 +1,64 @@
 // src/routes/member.ts
 
-import { Hono } from 'hono';
-import { type Context } from 'hono';
-import { adminAuthMiddleware } from '../../middleware/adminAuthMiddleware';
+import { Hono } from "hono";
+import { type Context } from "hono";
+import { adminAuthMiddleware } from "../../middleware/adminAuthMiddleware";
 
-import getAdminProfile from '../../controllers/admin_controllers/admin_setting/get_admin_profile';
+import getAdminProfile from "../../controllers/admin_controllers/admin_setting/get_admin_profile";
 // import getBirthdayMemberIds from '../../controllers/admin_controllers/member/get_birthday_member_ids';
 
-import putAdminUpdateProfileDetail from '../../controllers/admin_controllers/admin_setting/put_admin_update_profile_detail';
-import putAdminUpdateWatiDetail from '../../controllers/admin_controllers/admin_setting/put_admin_update_wati_detail';
+import putAdminUpdateProfileDetail from "../../controllers/admin_controllers/admin_setting/put_admin_update_profile_detail";
+import putAdminUpdateWatiDetail from "../../controllers/admin_controllers/admin_setting/put_admin_update_wati_detail";
 
-
-import { HTTPException } from 'hono/http-exception'
+import { HTTPException } from "hono/http-exception";
 // Import other controllers as needed
 
 const adminSettingRouter = new Hono();
 
-// memberRouter.use('*', authMiddleware); // Protect all member routes
-
+adminSettingRouter.use("*", adminAuthMiddleware); // Protect all member routes
 
 // GET /member - Retrieve all members
-adminSettingRouter.get('/get_admin_profile',adminAuthMiddleware , async (c: Context) => {
+adminSettingRouter.get("/get_admin_profile", async (c: Context) => {
   try {
-    console.log('get_admin_profile route begin');
+    console.log("get_admin_profile route begin");
     const response = await getAdminProfile(c);
-    console.log('get_admin_profile route done');
+    console.log("get_admin_profile route done");
     return c.json(response);
   } catch (error) {
-    console.log('get_admin_profile route end in error');
+    console.log("get_admin_profile route end in error");
     // Let Hono’s `onError` handle the error
     throw error;
   }
 });
 
-
-adminSettingRouter.put('/put_admin_update_profile_detail',adminAuthMiddleware , async (c: Context) => {
-  try {
-    console.log('put_admin_update_profile_detail route begin');
-    const response = await putAdminUpdateProfileDetail(c);
-    console.log('put_admin_update_profile_detail route done');
-    return response
-  } catch (error) {
-    console.log('put_admin_update_profile_detail route end in error');
-    // Let Hono’s `onError` handle the error
-    throw error;
+adminSettingRouter.put(
+  "/put_admin_update_profile_detail",
+  async (c: Context) => {
+    try {
+      console.log("put_admin_update_profile_detail route begin");
+      const response = await putAdminUpdateProfileDetail(c);
+      console.log("put_admin_update_profile_detail route done");
+      return response;
+    } catch (error) {
+      console.log("put_admin_update_profile_detail route end in error");
+      // Let Hono’s `onError` handle the error
+      throw error;
+    }
   }
-});
+);
 
-adminSettingRouter.put('/put_admin_update_wati_detail', async (c: Context) => {
+adminSettingRouter.put("/put_admin_update_wati_detail", async (c: Context) => {
   try {
-    console.log('put_admin_update_wati_detail route begin');
+    console.log("put_admin_update_wati_detail route begin");
     const response = await putAdminUpdateWatiDetail(c);
-    console.log('put_admin_update_wati_detail route done');
-    return response
+    console.log("put_admin_update_wati_detail route done");
+    return response;
   } catch (error) {
-    console.log('put_admin_update_wati_detail route end in error');
+    console.log("put_admin_update_wati_detail route end in error");
     // Let Hono’s `onError` handle the error
     throw error;
   }
 });
-
 
 // adminSettingRouter.get('/get_birthday_member_ids', async (c: Context) => {
 //   try {
@@ -78,11 +77,11 @@ adminSettingRouter.put('/put_admin_update_wati_detail', async (c: Context) => {
 // adminSettingRouter.get('/get_member_detail/:memberPhone', async (c: Context) => {
 //   try {
 //     console.log('get_member_detail route begin');
-    
+
 //     const memberPhone = c.req.param('memberPhone');
 
 //     console.log('memberPhone is: ', memberPhone);
-    
+
 //     const data = await getMemberDetail(memberPhone);
 //     console.log('get_member_detail route done');
 //     return c.json(data);
@@ -146,7 +145,5 @@ adminSettingRouter.put('/put_admin_update_wati_detail', async (c: Context) => {
 //       throw error;
 //     }
 //   });
-
-
 
 export default adminSettingRouter;

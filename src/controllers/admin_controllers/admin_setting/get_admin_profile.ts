@@ -74,7 +74,6 @@ async function getAdminProfileDetail(c: Context): Promise<ProfileDetail> {
     return adminProfileDetail;
   } catch (error) {
     console.error("Database query error:", error);
-    pool.release();
     throw new Error("Database query failed");
   } finally {
     pool.release();

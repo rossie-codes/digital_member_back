@@ -1,6 +1,7 @@
 // src/controllers/discount_code/get_discount_code_detail.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import type { Context } from 'hono';
 
 interface DiscountCode {
@@ -23,7 +24,22 @@ interface DiscountCode {
   // Remove 'is_active' since it no longer exists
 }
 
-async function getDiscountCodeDetail(discount_code_id: string): Promise<DiscountCode> {
+async function getDiscountCodeDetail(c: Context): Promise<DiscountCode> {
+  
+  
+  
+  const discount_code_id = c.req.param('discount_code_id');
+
+  console.log('discount_code_id is: ', discount_code_id);
+
+  const tenant = c.get("tenant");
+  // const tenant = 'https://mm9_client'
+  // const tenant = 'https://membi-admin'
+
+  console.log("tenant", tenant);
+
+  const pool = await getTenantClient(tenant);
+  
   try {
     // Query the database to get the specific discount code
     const query = `
@@ -94,6 +110,8 @@ async function getDiscountCodeDetail(discount_code_id: string): Promise<Discount
   } catch (error) {
     console.error('Error fetching discount code:', error);
     throw error;
+  } finally {
+    pool.release();
   }
 }
 

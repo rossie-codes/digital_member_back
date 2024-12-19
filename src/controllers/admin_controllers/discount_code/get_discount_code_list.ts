@@ -1,58 +1,58 @@
 // src/controllers/discount_code/get_discount_code_list.ts
 
-import { pool } from '../../db';
-import { type Context } from 'hono';
+import type { Pool, PoolClient } from "pg";
+import { getTenantClient } from "../../db";
+import type { Context } from "hono";
 
 interface DiscountCode {
   key: number;
   discount_code_id: number;
   discount_code_name: string;
   discount_code: string;
-  discount_type: 'fixed_amount' | 'percentage';
+  discount_type: "fixed_amount" | "percentage";
   discount_amount?: number;
   discount_percentage?: number;
   minimum_spending: number;
   fixed_discount_cap?: number;
-  use_limit_type: 'single_use' | 'once_per_customer' | 'unlimited';
+  use_limit_type: "single_use" | "once_per_customer" | "unlimited";
   valid_from?: string;
   valid_until?: string;
   created_at: string;
   updated_at: string;
-  discount_code_status: 'expired' | 'active' | 'suspended' | 'scheduled';
+  discount_code_status: "expired" | "active" | "suspended" | "scheduled";
 }
 
 // Date formatting function
 const formatDate = (date: Date): string => {
   const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, '0'); // Months are zero-based
-  const day = `${date.getDate()}`.padStart(2, '0');
+  const month = `${date.getMonth() + 1}`.padStart(2, "0"); // Months are zero-based
+  const day = `${date.getDate()}`.padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
 
-// Function to get allowed enum values
-async function getEnumValues(enumName: string): Promise<string[]> {
-  const query = `
-    SELECT enumlabel AS enum_value
-    FROM pg_type t
-    JOIN pg_enum e ON t.oid = e.enumtypid
-    WHERE t.typname = $1
-    ORDER BY e.enumsortorder
-  `;
-  const { rows } = await pool.query(query, [enumName]);
-  return rows.map((row) => row.enum_value);
-}
 
-async function getDiscountCodeList(): Promise<{
 
+async function getDiscountCodeList(c: Context): Promise<{
   discount_codes: DiscountCode[];
   discount_types: string[];
   use_limit_types: string[];
   discount_code_status: string[];
   active_count: number;
   scheduled_count: number;
-
 }> {
-  const query = `
+
+
+  const tenant = c.get("tenant");
+  // const tenant = 'https://mm9_client'
+  // const tenant = 'https://membi-admin'
+
+  console.log("tenant", tenant);
+
+  const pool = await getTenantClient(tenant);
+
+  try {
+
+    const query = `
     SELECT
       discount_code_id,
       discount_code_name,
@@ -72,12 +72,10 @@ async function getDiscountCodeList(): Promise<{
     ORDER BY created_at DESC
   `;
 
-  try {
     const { rows } = await pool.query(query);
 
     let activeCount = 0;
     let scheduledCount = 0;
-
 
     // Map the data to the DiscountCode interface
     const discountCodes: DiscountCode[] = rows.map((row, index) => {
@@ -88,21 +86,28 @@ async function getDiscountCodeList(): Promise<{
       let discountPercentage: number | undefined = undefined;
       let fixedDiscountCap: number | undefined = undefined;
 
-      if (row.discount_type === 'fixed_amount') {
-        discountAmount = row.discount_amount !== null ? Number(row.discount_amount) : undefined;
-      } else if (row.discount_type === 'percentage') {
-        discountPercentage = row.discount_amount !== null ? Number(row.discount_amount) : undefined;
-        fixedDiscountCap = row.fixed_discount_cap !== null ? Number(row.fixed_discount_cap) : undefined;
+      if (row.discount_type === "fixed_amount") {
+        discountAmount =
+          row.discount_amount !== null
+            ? Number(row.discount_amount)
+            : undefined;
+      } else if (row.discount_type === "percentage") {
+        discountPercentage =
+          row.discount_amount !== null
+            ? Number(row.discount_amount)
+            : undefined;
+        fixedDiscountCap =
+          row.fixed_discount_cap !== null
+            ? Number(row.fixed_discount_cap)
+            : undefined;
       }
-
 
       // Increment counters based on discount_code_status
-      if (row.discount_code_status === 'active') {
+      if (row.discount_code_status === "active") {
         activeCount++;
-      } else if (row.discount_code_status === 'scheduled') {
+      } else if (row.discount_code_status === "scheduled") {
         scheduledCount++;
       }
-
 
       const discountCode: DiscountCode = {
         key: index + 1,
@@ -115,10 +120,14 @@ async function getDiscountCodeList(): Promise<{
         minimum_spending: Number(row.minimum_spending),
         fixed_discount_cap: fixedDiscountCap,
         use_limit_type: row.use_limit_type,
-        valid_from: row.valid_from ? formatDate(new Date(row.valid_from)) : undefined,
-        valid_until: row.valid_until ? formatDate(new Date(row.valid_until)) : undefined,
-        created_at: row.created_at ? formatDate(new Date(row.created_at)) : '',
-        updated_at: row.updated_at ? formatDate(new Date(row.updated_at)) : '',
+        valid_from: row.valid_from
+          ? formatDate(new Date(row.valid_from))
+          : undefined,
+        valid_until: row.valid_until
+          ? formatDate(new Date(row.valid_until))
+          : undefined,
+        created_at: row.created_at ? formatDate(new Date(row.created_at)) : "",
+        updated_at: row.updated_at ? formatDate(new Date(row.updated_at)) : "",
         discount_code_status: row.discount_code_status,
       };
 
@@ -126,9 +135,10 @@ async function getDiscountCodeList(): Promise<{
     });
 
     // Get allowed options from the database enums
-    const discountTypes = await getEnumValues('discount_type_enum');
-    const useLimitTypes = await getEnumValues('use_limit_enum');
-    const statusOptions = await getEnumValues('discount_code_status_enum');
+    const discountTypes = await getEnumValues("discount_type_enum", pool);
+    const useLimitTypes = await getEnumValues("use_limit_enum", pool);
+    const statusOptions = await getEnumValues("discount_code_status_enum", pool);
+
 
     // Since 'is_active' is boolean, options are true and false
     const isActiveOptions = [true, false];
@@ -142,9 +152,27 @@ async function getDiscountCodeList(): Promise<{
       scheduled_count: scheduledCount,
     };
   } catch (error) {
-    console.error('Error fetching discount codes:', error);
+    console.error("Error fetching discount codes:", error);
     throw error;
+  } finally {
+    pool.release();
   }
 }
+
+
+// Function to get allowed enum values
+async function getEnumValues(enumName: string, pool: PoolClient): Promise<string[]> {
+
+  const query = `
+    SELECT enumlabel AS enum_value
+    FROM pg_type t
+    JOIN pg_enum e ON t.oid = e.enumtypid
+    WHERE t.typname = $1
+    ORDER BY e.enumsortorder
+  `;
+  const { rows } = await pool.query(query, [enumName]);
+  return rows.map((row) => row.enum_value);
+}
+
 
 export default getDiscountCodeList;

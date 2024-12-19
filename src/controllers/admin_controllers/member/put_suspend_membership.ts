@@ -53,7 +53,6 @@ async function putSuspendMembership(c: Context): Promise<Response> {
     return c.json({ message: 'Membership updated successfully' }, 200);
   } catch (error) {
     console.error('Error in putSuspendMembership:', error);
-    pool.release();
     if (error instanceof HTTPException) {
       throw error;
     } else {

@@ -1,6 +1,8 @@
 // src/controllers/discount_code/put_discount_code_is_active.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
+
 import type { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import putShopifyDiscountCodeIsActive from '../../../shopify/put_shopify_discount_code_is_active';
@@ -27,7 +29,15 @@ async function putDiscountCodeIsActive(c: Context): Promise<Response> {
       throw new HTTPException(400, { message: 'Invalid action. Must be "enable" or "suspended".' });
     }
 
-    const client = await pool.connect();
+    // const client = await pool.connect();
+      
+  const tenant = c.get("tenant");
+  // const tenant = 'https://mm9_client'
+  // const tenant = 'https://membi-admin'
+
+  console.log("tenant", tenant);
+
+  const client = await getTenantClient(tenant);
 
     try {
       await client.query('BEGIN');
