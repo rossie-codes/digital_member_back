@@ -93,6 +93,7 @@ async function getTenantHost(tenantIdentifier: string) {
     const admin_secret = result.rows[0].admin_secret;
     const app_domain = result.rows[0].app_domain;
 
+    console.log('query getTenantHost done', tenantIdentifier);
     console.log('query getTenantHost done', admin_secret);
     console.log('query getTenantHost done', app_domain);
 

@@ -3,7 +3,7 @@
 import type { Context } from 'hono';
 // import { pool } from '../../db';
 import { getTenantClient, getTenantHost } from "../../db";
-import {  } from "../../db";
+import { } from "../../db";
 import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
 
@@ -11,7 +11,7 @@ const MEMBI_ADMIN_SECRET = process.env.MEMBI_ADMIN_SECRET || 'MEMBI_ADMIN_SECRET
 
 export async function loginAdmin(c: Context) {
   console.log('loginAdmin function begin')
-  
+
   const app_domain = c.get('app_domain');
   const tenantIdentifier = c.get("tenant");
   // const tenantIdentifier = 'https://mm9_client'
@@ -25,7 +25,7 @@ export async function loginAdmin(c: Context) {
   try {
     const { admin_name, admin_password } = await c.req.json();
 
-    console.log('loginAdmin function begin', admin_name, admin_password )
+    console.log('loginAdmin function begin', admin_name, admin_password)
 
     if (!admin_name || !admin_password) {
       return c.json({ error: 'Phone number and password are required' }, 400);
@@ -63,9 +63,13 @@ export async function loginAdmin(c: Context) {
     console.log('loginAdmin function handle membi_admin_token')
     // Generate a JWT membi_admin_token
 
-    const admin_secret = await getTenantHost(tenantIdentifier)
+    const admin_secret_domain = await getTenantHost(tenantIdentifier)
+    console.log('loginAdmin function handle membi_admin_token', admin_secret_domain)
+
+    const admin_secret = admin_secret_domain.admin_secret;
 
     const membi_admin_token = jwt.sign({ adminId: user.admin_id }, admin_secret, { expiresIn: '10h' });
+    console.log('loginAdmin function handle membi_admin_token', membi_admin_token)
 
     // Update last_login and reset failed_login_attempts
     await pool.query(
@@ -84,8 +88,10 @@ export async function loginAdmin(c: Context) {
       domain: process.env.NODE_ENV === 'production' ? `${tenantIdentifier}${app_domain}` : undefined,
     });
 
+    console.log('loginAdmin function done cookies', cookie)
+
     c.header('Set-Cookie', cookie);
-    
+
 
     console.log('loginAdmin function done cookies', cookie)
 
@@ -94,7 +100,7 @@ export async function loginAdmin(c: Context) {
   } catch (error) {
     console.error('Login error:', error);
     return c.json({ error: 'Internal server error' }, 500);
-  } finally {  
+  } finally {
     pool.release();
   }
 }
