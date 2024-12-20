@@ -14,7 +14,7 @@ export const adminAuthMiddleware = async (c: Context, next: Next) => {
 
   // const membi_admin_token = c.req.cookie('membi_admin_token');
 
-  const host = c.req.header('host'); // Get the host from the request headers
+  const host = c.req.header('origin'); // Get the host from the request headers
   const tenant = extractTenantFromHost(host!);
   if (!tenant) {
     return c.json({ error: 'Tenant identifier missing' }, 400); // Bad Request if no tenant is found
@@ -56,7 +56,7 @@ export const adminLoginMiddleware = async (c: Context, next: Next) => {
 
   // const membi_admin_token = c.req.cookie('membi_admin_token');
   try {
-    const host = c.req.header('host'); // Get the host from the request headers
+    const host = c.req.header('origin'); // Get the host from the request headers
     // console.log('host', host);
 
     console.log('hostaaaa', host);
@@ -93,15 +93,26 @@ function extractTenantFromHost(host: string | null): string | null {
   }
   console.log('host', host);
 
-  // Split the host by dots to isolate the subdomain
-  const parts = host.split('.');
-  // if (parts.length < 1) {
-  //   return null; // Return null if there is no subdomain
-  // }
-  console.log('parts', parts);
+  try {
+    // Split the host by dots to isolate the subdomain
+    // const parts = host.split('.');
+    // if (parts.length < 1) {
+    //   return null; // Return null if there is no subdomain
+    // }
 
-  // Return the first part of the hostname (the subdomain)
-  return parts[0];
+    const url = new URL(host); // Use URL constructor to parse
+    const hostname = url.hostname; // Get the hostname (e.g., "membi-admin.up.railway.app")
+    const parts = hostname.split('.');
+
+
+
+    console.log('parts', parts);
+    // Return the first part of the hostname (the subdomain)
+    return parts[0];
+  }
+  catch (err) {
+    return null;
+  }
 }
 
 
