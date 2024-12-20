@@ -89,9 +89,9 @@ export async function loginAdmin(c: Context) {
       // maxAge: 30, // 1 hour
       path: '/',
       // domain: process.env.NODE_ENV === 'production' ? `${tenantIdentifier}${app_domain}` : undefined,
-      // domain: process.env.NODE_ENV === 'production' ? `${app_domain}` : undefined,
+      domain: process.env.NODE_ENV === 'production' ? `${app_domain}` : undefined,
       // domain: process.env.NODE_ENV === 'production' ? `.membi-admin.up.railway.app` : undefined,
-      domain: undefined,
+      // domain: undefined,
     });
 
     console.log('loginAdmin function done cookies', cookie)
