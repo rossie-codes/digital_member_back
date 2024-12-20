@@ -26,13 +26,13 @@ export const adminAuthMiddleware = async (c: Context, next: Next) => {
   console.log('admin_secret_domain: ', admin_secret_domain)
   const admin_secret = admin_secret_domain.admin_secret;
   const app_domain = admin_secret_domain.app_domain;
-  
+
   c.set('app_domain', app_domain);
-  
+
 
   const membi_admin_token = getCookie(c, 'membi_admin_token');
   console.log('membi_admin_token', membi_admin_token);
-  
+
 
   if (!membi_admin_token) {
     return c.json({ error: 'Unauthorized' }, 401);
@@ -59,15 +59,24 @@ export const adminLoginMiddleware = async (c: Context, next: Next) => {
     const host = c.req.header('origin'); // Get the host from the request headers
     // console.log('host', host);
 
-    const tenantIdentifier = extractTenantFromHost(host!);
+    const tenant = extractTenantFromHost(host!);
 
-    if (!tenantIdentifier) {
+    if (!tenant) {
       return c.json({ error: 'Tenant identifier missing' }, 400); // Bad Request if no tenant is found
     }
 
-    console.log('Tenant Identifier:', tenantIdentifier);
+    console.log('Tenant Identifier:', tenant);
 
-    c.set('tenant', tenantIdentifier);
+    c.set('tenant', tenant);
+
+    const admin_secret_domain = await getTenantHost(tenant);
+    console.log('admin_secret_domain: ', admin_secret_domain)
+    const admin_secret = admin_secret_domain.admin_secret;
+    const app_domain = admin_secret_domain.app_domain;
+
+    c.set('app_domain', app_domain);
+
+
 
     await next();
   } catch (err) {

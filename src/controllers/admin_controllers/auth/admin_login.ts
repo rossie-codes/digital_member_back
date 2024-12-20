@@ -18,6 +18,7 @@ export async function loginAdmin(c: Context) {
   // const tenantIdentifier = 'https://membi-admin'
 
   console.log("tenant at login: ", tenantIdentifier);
+  console.log("tenant at login: ", app_domain);
 
   const pool = await getTenantClient(tenantIdentifier);
 
