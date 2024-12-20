@@ -79,7 +79,7 @@ export async function loginAdmin(c: Context) {
     );
 
     console.log("this!!!!!!!!", `${tenantIdentifier}${app_domain}`)
-    
+
     // Set the membi_admin_token as an HTTP-only cookie
     const cookie = serialize('membi_admin_token', membi_admin_token, {
       httpOnly: true,
@@ -88,7 +88,8 @@ export async function loginAdmin(c: Context) {
       maxAge: 36000, // 10 hour
       // maxAge: 30, // 1 hour
       path: '/',
-      domain: process.env.NODE_ENV === 'production' ? `${tenantIdentifier}${app_domain}` : undefined,
+      // domain: process.env.NODE_ENV === 'production' ? `${tenantIdentifier}${app_domain}` : undefined,
+      domain: process.env.NODE_ENV === 'production' ? `${app_domain}` : undefined,
     });
 
     console.log('loginAdmin function done cookies', cookie)
