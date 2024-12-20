@@ -1,8 +1,9 @@
 // src/controllers/member/get_member_detail.ts
 
 // import { pool } from '../../db';
-import type { Context } from "hono";
 import { getTenantClient } from "../../db";
+import type { Context } from "hono";
+
 
 interface PurchaseDataType {
   purchase_id: string;

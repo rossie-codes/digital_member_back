@@ -1,6 +1,7 @@
 // src/controllers/broadcast_setting/get_broadcast_detail.ts
 
-import { pool } from "../../db";
+// import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 
 // Define the response interface
@@ -22,6 +23,11 @@ async function getBroadcastDetail(c: Context): Promise<GetBroadcastDetailRespons
   if (!broadcast_id) {
     throw new Error('broadcast_id parameter is required');
   }
+
+  const tenant = c.get("tenant");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
+
 
   try {
     // Fetch broadcast details
@@ -64,6 +70,8 @@ async function getBroadcastDetail(c: Context): Promise<GetBroadcastDetailRespons
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

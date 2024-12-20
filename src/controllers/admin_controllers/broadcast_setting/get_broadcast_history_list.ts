@@ -1,6 +1,7 @@
 // src/controllers/broadcast_setting/get_broadcast_list.ts
 
-import { pool } from "../../db";
+// import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 
 // Define the response interface
@@ -13,6 +14,11 @@ async function getBroadcastHistoryList(
   c: Context
 ): Promise<GetBroadcastListResponse> {
   console.log("getBroadcastHistoryList function started");
+  
+  const tenant = c.get("tenant");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
+  
   try {
     const pageParam = c.req.query("page");
     const pageSizeParam = c.req.query("pageSize");
@@ -138,8 +144,6 @@ async function getBroadcastHistoryList(
       recipient_count: parseInt(row.recipient_count, 10),
     }));
 
-    console.log("Data:", data);
-
     console.log("getBroadcastHistoryList function done");
 
     const total_recipient_count = data
@@ -157,6 +161,8 @@ async function getBroadcastHistoryList(
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

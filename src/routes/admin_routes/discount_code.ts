@@ -13,17 +13,8 @@ import postNewDiscountCode from '../../controllers/admin_controllers/discount_co
 import putDiscountCodeDetail from '../../controllers/admin_controllers/discount_code/put_discount_code_detail';
 import putDiscountCodeIsActive from '../../controllers/admin_controllers/discount_code/put_discount_code_is_active';
 
-
-
 import deleteDiscountCode from '../../controllers/admin_controllers/discount_code/delete_discount_code';
 import restoreDiscountCode from '../../controllers/admin_controllers/discount_code/restore_discount_code';
-
-// import postNewMember from '../controllers/member/post_new_member';
-// import getMemberDetail from '../controllers/member/get_member_detail';
-
-import { HTTPException } from 'hono/http-exception'
-
-// Import other controllers as needed
 
 const discountCodeRouter = new Hono();
 
@@ -69,28 +60,6 @@ discountCodeRouter.get('/get_deleted_discount_code_list', async (c: Context) => 
   }
 });
 
-
-
-// // GET /member/get_member_detail/:memberPhone - Retrieve member details by phone
-// discountCodeRouter.get('/get_member_detail/:memberPhone', async (c: Context) => {
-//   try {
-//     console.log('get_member_detail route begin');
-
-//     const memberPhone = c.req.param('memberPhone');
-
-//     console.log('memberPhone is: ', memberPhone);
-
-//     const data = await AAA(memberPhone);
-//     console.log('get_member_detail route done');
-//     return c.json(data);
-//   } catch (error: any) {
-//     console.log('get_member_detail end in error');
-//     if (error.message === 'Member not found') {
-//       return c.json({ message: 'Member not found' }, 404);
-//     }
-//     throw error;
-//   }
-// });
 
 discountCodeRouter.post('/post_new_discount_code', async (c: Context) => {
   try {

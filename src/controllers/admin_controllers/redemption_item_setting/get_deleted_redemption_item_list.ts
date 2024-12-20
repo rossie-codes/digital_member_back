@@ -1,6 +1,7 @@
 // src/controllers/redemption_item_setting/get_deleted_redemption_item_list.ts
 
-import { pool } from "../../db";
+// import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import { type Context } from "hono";
 
 interface RedemptionItem {
@@ -13,10 +14,15 @@ interface RedemptionItem {
     fixed_discount_cap?: number; // For percentage discount
     minimum_spending: number;
     validity_period: number;
-    redemption_item_status: 'expired'| 'active'| 'suspended'| 'scheduled';
+    redemption_item_status: 'expired' | 'active' | 'suspended' | 'scheduled';
 }
 
 async function getDeletedRedemptionItemList(c: Context): Promise<RedemptionItem[]> {
+
+    const tenant = c.get("tenant");
+    console.log("tenant", tenant);
+    const pool = await getTenantClient(tenant);
+
     try {
         // Query the database to get all redemption items
         const query = `
@@ -86,6 +92,8 @@ async function getDeletedRedemptionItemList(c: Context): Promise<RedemptionItem[
         console.error("Error fetching redemption items:", error);
         // Return an error response
         throw new Error("Internal Server Error");
+    } finally {
+        pool.release();
     }
 }
 

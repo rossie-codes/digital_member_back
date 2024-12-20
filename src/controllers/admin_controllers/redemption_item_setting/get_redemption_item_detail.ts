@@ -1,6 +1,7 @@
 // src/controllers/redemption_item_setting/get_redemption_item_detail.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import type { Context } from 'hono';
 
 interface RedemptionItem {
@@ -21,7 +22,18 @@ interface RedemptionItem {
   redemption_term: string;
 }
 
-async function getRedemptionItemDetail(redemption_item_id: string): Promise<RedemptionItem> {
+async function getRedemptionItemDetail(c: Context): Promise<RedemptionItem> {
+  
+  
+  const redemption_item_id = c.req.param('redemption_item_id');
+
+  console.log('redemption_item_id is: ', redemption_item_id);
+  
+  const tenant = c.get("tenant");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
+
+  
   try {
     // Query the database to get the specific redemption item
     const query = `

@@ -1,6 +1,7 @@
 // src/controllers/broadcast_setting/get_broadcast_list.ts
 
-import { pool } from "../../db";
+// import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 
 // Define the response interface
@@ -10,6 +11,11 @@ interface GetBroadcastListResponse {
   total_recipient_count: number;
 }
 async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
+  
+  const tenant = c.get("tenant");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
+  
   try {
 
     console.log("getBroadcastList function begin");
@@ -98,6 +104,7 @@ async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
       SELECT COUNT(*) FROM broadcast b
       ${whereClause}
     `;
+    
     const countResult = await pool.query(countQuery, queryParams);
     const total_broadcast = parseInt(countResult.rows[0].count, 10);
 
@@ -137,9 +144,7 @@ async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
       scheduled_start: row.scheduled_start,
       recipient_count: parseInt(row.recipient_count, 10),
     }));
-
-    console.log("Data:", data);
-
+    
     const total_recipient_count = data.map((row) => row.recipient_count).reduce((a, b) => a + b, 0);
 
     // Await the asynchronous function
@@ -154,6 +159,8 @@ async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

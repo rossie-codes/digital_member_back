@@ -1,6 +1,7 @@
 // src/controllers/membership_tier/post_membership_basic_setting.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import { type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception'
 
@@ -16,15 +17,13 @@ interface PostMembershipTierRequest {
     tiers: AdminSetting[];
 }
 
-// async function postAdminSetting() {
-//     console.log('function begin')
-// }
 
 const BATCH_SIZE = 500; // Define an appropriate batch size based on your system's capacity
 
 async function postMembershipBasicSetting(c: Context): Promise<{ message: string }> {
     console.log('post_admin_setting function begin')
-    
+
+
     try {
         const setting: AdminSetting = await c.req.json();
 
@@ -33,7 +32,12 @@ async function postMembershipBasicSetting(c: Context): Promise<{ message: string
             throw new HTTPException(400, { message: 'Invalid input: Missing required fields in admin setting.' });
         }
 
-        const client = await pool.connect();
+        // const client = await pool.connect();
+        
+        const tenant = c.get("tenant");
+        console.log("tenant", tenant);
+        const client = await getTenantClient(tenant);
+
 
         try {
             await client.query('BEGIN');

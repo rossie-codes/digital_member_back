@@ -1,6 +1,7 @@
 // src/controllers/membership_tier/get_membership_basic_setting.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import { type Context } from 'hono';
 
 interface getMembershipBasicSetting {
@@ -10,6 +11,11 @@ interface getMembershipBasicSetting {
 }
 
 async function getMembershipBasicSetting(c: Context): Promise<getMembershipBasicSetting> {
+  
+  const tenant = c.get("tenant");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
+
   try {
     // Query to fetch membership basic settings
     console.log('getMembershipBasicSetting function begin');
@@ -43,6 +49,8 @@ async function getMembershipBasicSetting(c: Context): Promise<getMembershipBasic
   } catch (error) {
     console.error("Error fetching membership basic settings:", error);
     throw error; // Re-throw the error to be handled by the caller
+  } finally {
+    pool.release()
   }
 }
 

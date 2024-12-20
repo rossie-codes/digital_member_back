@@ -1,6 +1,7 @@
 // src/controllers/membership_tier/get_membership_tier_setting.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import { type Context } from 'hono';
 
 interface MembershipTier {
@@ -21,7 +22,12 @@ interface MembershipTierResponse {
   membership_period: number;
 }
 
-async function getMembershipTierSetting(): Promise<MembershipTierResponse[]> {
+async function getMembershipTierSetting(c: Context): Promise<MembershipTierResponse[]> {
+  
+  const tenant = c.get("tenant");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
+  
   try {
     // Query to fetch all membership tiers sorted by sequence
     console.log('getMembershipTierSetting function start')
@@ -43,6 +49,8 @@ async function getMembershipTierSetting(): Promise<MembershipTierResponse[]> {
   } catch (error) {
     console.error("Error fetching membership tier settings:", error);
     throw error; // Re-throw the error to be handled by the caller
+  } finally {
+    pool.release();
   }
 }
 

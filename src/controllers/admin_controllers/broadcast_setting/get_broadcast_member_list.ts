@@ -1,6 +1,7 @@
 // src/controllers/broadcast_setting/get_broadcast_member_list.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import type { Context } from 'hono';
 
 // import { getWatiTemplateList } from "../../wati/get_wati_template_list";
@@ -51,6 +52,11 @@ async function getMemberList(c: Context): Promise<{
   // console.log(aaa.json)
 
   
+  const tenant = c.get("tenant");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
+
+
   try {
     const pageParam = c.req.query('page');
     const pageSizeParam = c.req.query('pageSize');
@@ -312,6 +318,8 @@ async function getMemberList(c: Context): Promise<{
   } catch (error) {
     console.error('Database query error:', error);
     throw new Error('Database query failed');
+  } finally {
+    pool.release();
   }
 }
 

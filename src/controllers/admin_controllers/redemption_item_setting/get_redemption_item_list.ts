@@ -1,6 +1,8 @@
 // src/controllers/redemption_item_setting/get_redemption_item_list.ts
 
-import { pool } from "../../db";
+// import { pool } from "../../db";
+import type { Pool, PoolClient } from "pg";
+import { getTenantClient } from "../../db";
 import { type Context } from "hono";
 
 interface RedemptionItem {
@@ -28,7 +30,7 @@ const formatDate = (date: Date): string => {
 };
 
 // Function to get allowed enum values from the database
-async function getEnumValues(enumName: string): Promise<string[]> {
+async function getEnumValues(enumName: string, pool: PoolClient): Promise<string[]> {
   const query = `
     SELECT enumlabel AS enum_value
     FROM pg_type t
@@ -49,6 +51,11 @@ async function getRedemptionItemList(c: Context): Promise<{
   scheduled_count: number;
 
 }> {
+
+  const tenant = c.get("tenant");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
+
   try {
     // Query the database to get all redemption items
     const query = `
@@ -127,8 +134,8 @@ async function getRedemptionItemList(c: Context): Promise<{
     });
 
     // Get allowed options from the database enums
-    const redemptionTypes = await getEnumValues('redemption_type_enum');
-    const statusOptions = await getEnumValues('redemption_item_status_enum');
+    const redemptionTypes = await getEnumValues('redemption_type_enum', pool);
+    const statusOptions = await getEnumValues('redemption_item_status_enum', pool);
 
     return {
       redemption_items: redemptionItems,
@@ -140,6 +147,8 @@ async function getRedemptionItemList(c: Context): Promise<{
   } catch (error) {
     console.error("Error fetching redemption items:", error);
     throw new Error("Internal Server Error");
+  } finally {
+    pool.release();
   }
 }
 

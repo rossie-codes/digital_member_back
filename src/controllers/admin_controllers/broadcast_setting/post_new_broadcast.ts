@@ -1,6 +1,7 @@
 // src/controllers/broadcast_setting/post_new_broadcast.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import { type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 
@@ -51,7 +52,12 @@ async function postNewBroadcast(c: Context): Promise<Response> {
       throw new HTTPException(400, { message: 'Invalid schedule_type' });
     }
 
-    const client = await pool.connect();
+    // const client = await pool.connect();
+
+    const tenant = c.get("tenant");
+    console.log("tenant", tenant);
+    const client = await getTenantClient(tenant);
+  
 
     try {
       await client.query('BEGIN');

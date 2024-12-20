@@ -14,8 +14,6 @@ import putChangeMemberDetail from "../../controllers/admin_controllers/member/pu
 
 import { HTTPException } from "hono/http-exception";
 
-// Import other controllers as needed
-
 const memberRouter = new Hono();
 
 memberRouter.use("*", adminAuthMiddleware); // Protect all member routes

@@ -2,7 +2,7 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-import { authMiddleware } from '../../middleware/adminAuthMiddleware';
+import { adminAuthMiddleware } from '../../middleware/adminAuthMiddleware';
 
 import getMembershipTierSetting from '../../controllers/admin_controllers/membership_tier/get_membership_tier_setting';
 import getMembershipBasicSetting from '../../controllers/admin_controllers/membership_tier/get_membership_basic_setting';
@@ -10,17 +10,15 @@ import getMembershipBasicSetting from '../../controllers/admin_controllers/membe
 import postMembershipTierSetting from '../../controllers/admin_controllers/membership_tier/post_membership_tier_setting';
 import postMembershipBasicSetting from '../../controllers/admin_controllers/membership_tier/post_membership_basic_setting';
 
-// Import other controllers as needed
-
 const membershipTierRouter = new Hono();
 
-// membershipTierRouter.use('*', authMiddleware); // Protect all member routes
+membershipTierRouter.use("*", adminAuthMiddleware); // Protect all member routes
 
 
 membershipTierRouter.get('/get_membership_basic_setting', async (c: Context) => {
     try {
         console.log('get_membership_tier_setting route begin');
-        const data = await getMembershipBasicSetting()
+        const data = await getMembershipBasicSetting(c)
         console.log('get_membership_tier_setting route done');
         return c.json(data);
     } catch (error) {
@@ -33,7 +31,7 @@ membershipTierRouter.get('/get_membership_basic_setting', async (c: Context) => 
 membershipTierRouter.get('/get_membership_tier_setting', async (c: Context) => {
     try {
         console.log('get_membership_tier_setting route begin');
-        const data = await getMembershipTierSetting()
+        const data = await getMembershipTierSetting(c)
         console.log('get_membership_tier_setting route done');
         return c.json(data);
     } catch (error) {

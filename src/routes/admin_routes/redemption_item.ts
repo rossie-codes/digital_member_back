@@ -2,7 +2,7 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-import { authMiddleware } from '../../middleware/adminAuthMiddleware';
+import { adminAuthMiddleware } from '../../middleware/adminAuthMiddleware';
 
 import getRedemptionItemList from '../../controllers/admin_controllers/redemption_item_setting/get_redemption_item_list';
 import getRedemptionItemDetail from '../../controllers/admin_controllers/redemption_item_setting/get_redemption_item_detail';
@@ -16,18 +16,15 @@ import putRedemptionItemDetail from '../../controllers/admin_controllers/redempt
 import deleteRedemptionItem from '../../controllers/admin_controllers/redemption_item_setting/delete_redemption_item';
 import restoreRedemptionItem from '../../controllers/admin_controllers/redemption_item_setting/restore_redemption_item';
 
-
-// Import other controllers as needed
-
 interface ErrorWithMessage {
   message: string;
 }
 
 const redemptionItemRouter = new Hono();
 
-// redemptionItemRouter.use('*', authMiddleware); // Protect all member routes
+redemptionItemRouter.use("*", adminAuthMiddleware); // Protect all member routes
 
-// GET /member - Retrieve all members
+
 redemptionItemRouter.get('/get_redemption_list', async (c: Context) => {
   try {
     console.log('get_redemption_list route begin');
@@ -40,29 +37,14 @@ redemptionItemRouter.get('/get_redemption_list', async (c: Context) => {
   }
 });
 
-redemptionItemRouter.post('/post_phone', async (c: Context) => {
-  try {
-    console.log('get_redemption_list route begin');
-    const data = c.json(c.req.param)
-    console.log('get_redemption_list route end');
-    return c.json(data);
-  } catch (error: any) {
-    // Let Hono’s `onError` handle the error
-    throw error;
-  }
-});
-
 redemptionItemRouter.get('/get_redemption_item_detail/:redemption_item_id', async (c: Context) => {
   try {
     console.log('get_redemption_detail route begin');
 
-    const redemption_item_id = c.req.param('redemption_item_id');
 
-    console.log('redemption_item_id is: ', redemption_item_id);
-
-    const data = await getRedemptionItemDetail(redemption_item_id);
+    const data = await getRedemptionItemDetail(c);
     console.log('get_redemption_detail route done');
-    //   return data;
+
     return c.json(data);
   } catch (error: any) {
     console.log('get_redemption_detail end in error');

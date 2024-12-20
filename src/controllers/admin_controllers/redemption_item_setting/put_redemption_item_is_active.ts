@@ -1,7 +1,8 @@
 // src/controllers/redemption_item_setting/put_redemption_item_is_active.ts
 
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import type { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 
@@ -25,7 +26,12 @@ async function putRedemptionItemIsActive(c: Context): Promise<Response> {
     }
 
     // Get a database client from the pool
-    const client = await pool.connect();
+    // const client = await pool.connect();
+
+    const tenant = c.get("tenant");
+    console.log("tenant", tenant);
+    const client = await getTenantClient(tenant);
+  
 
     try {
       // Start a transaction

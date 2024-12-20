@@ -34,13 +34,11 @@ async function getAdminProfileDetail(c: Context): Promise<ProfileDetail> {
 
 
 
-  
-  const tenant = c.get("tenant");
   // const tenant = 'https://mm9_client'
   // const tenant = 'https://membi-admin'
 
+  const tenant = c.get("tenant");
   console.log("tenant", tenant);
-
   const pool = await getTenantClient(tenant);
 
   try {

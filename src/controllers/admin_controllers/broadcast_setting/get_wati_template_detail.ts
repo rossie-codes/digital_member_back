@@ -1,18 +1,20 @@
-import { pool } from "../../db";
+// import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
-
-
 
 interface WatiContent {
   body: string;
   footer: string;
   button_type: string;
   header_present: boolean;
-} 
-
-
+}
 
 async function getWatiTemplateDetail(c: Context): Promise<WatiContent> {
+
+  const tenant = c.get("tenant");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
+
   try {
     console.log("Fetching WATI template detail");
     const template_name = c.req.param("wati_template_name"); // Changed line
@@ -37,12 +39,15 @@ async function getWatiTemplateDetail(c: Context): Promise<WatiContent> {
 
     const { body, footer, button_type, header_present } = result.rows[0];
 
-    const wati_content = {  body, footer, button_type, header_present };
+    const wati_content = { body, footer, button_type, header_present };
 
     return wati_content
+
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error('Database query failed');
+  } finally {
+    pool.release();
   }
 }
 

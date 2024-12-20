@@ -27,6 +27,8 @@ export const adminAuthMiddleware = async (c: Context, next: Next) => {
 
   const membi_admin_token = getCookie(c, 'membi_admin_token');
 
+  console.log('membi_admin_token', membi_admin_token);
+  
   if (!membi_admin_token) {
     return c.json({ error: 'Unauthorized' }, 401);
   }

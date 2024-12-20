@@ -1,6 +1,6 @@
 // src/controllers/discount_code/get_discount_code_list.ts
 
-import type { Pool, PoolClient } from "pg";
+import type { PoolClient } from "pg";
 import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 

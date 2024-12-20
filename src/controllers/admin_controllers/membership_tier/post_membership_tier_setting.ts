@@ -1,6 +1,7 @@
 // src/controllers/membership_tier/post_membership_tier_setting.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import { type Context } from 'hono';
 
 interface MembershipTier {
@@ -47,7 +48,13 @@ async function postMembershipTierSetting(c: Context): Promise<Response> {
       return c.json({ message: 'Invalid input: membership_tiers should be an array.' }, 400);
     }
 
-    const client = await pool.connect();
+
+    // const client = await pool.connect();
+
+    const tenant = c.get("tenant");
+    console.log("tenant", tenant);
+    const client = await getTenantClient(tenant);
+
     try {
       await client.query('BEGIN');
 

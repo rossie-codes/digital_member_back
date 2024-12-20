@@ -1,6 +1,7 @@
 // src/controllers/point_setting/get_member_point_rule.ts
 
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient } from "../../db";
 import { type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 
@@ -8,7 +9,12 @@ export const getMemberPointRule = async (c: Context): Promise<Response> => {
   console.log('getMemberPointRule function begin');
   try {
     // Get a database client from the pool
-    const client = await pool.connect();
+    // const client = await pool.connect();
+
+    const tenant = c.get("tenant");
+    console.log("tenant", tenant);
+    const client = await getTenantClient(tenant);
+  
 
     try {
       // Begin transaction (optional, good practice)
