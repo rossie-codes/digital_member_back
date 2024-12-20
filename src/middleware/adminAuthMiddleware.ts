@@ -4,8 +4,10 @@ import type { Context, Next } from 'hono';
 import jwt from 'jsonwebtoken';
 import { validator } from 'hono/validator'
 import { getCookie, setCookie } from 'hono/cookie'
+import { getTenantHost } from '../controllers/db';
 
 const MEMBI_ADMIN_SECRET = process.env.MEMBI_ADMIN_SECRET || 'admin';
+
 
 
 export const adminAuthMiddleware = async (c: Context, next: Next) => {
@@ -13,30 +15,33 @@ export const adminAuthMiddleware = async (c: Context, next: Next) => {
   // const membi_admin_token = c.req.cookie('membi_admin_token');
 
   const host = c.req.header('origin'); // Get the host from the request headers
-  // console.log('host', host);
-
-  const tenantIdentifier = extractTenantFromHost(host!);
-
-  if (!tenantIdentifier) {
+  const tenant = extractTenantFromHost(host!);
+  if (!tenant) {
     return c.json({ error: 'Tenant identifier missing' }, 400); // Bad Request if no tenant is found
   }
+  console.log('Tenant Identifier:', tenant);
+  c.set('tenant', tenant);
 
-  console.log('Tenant Identifier:', tenantIdentifier);
-
-  c.set('tenant', tenantIdentifier);
+  const admin_secret_domain = await getTenantHost(tenant);
+  console.log('admin_secret_domain: ', admin_secret_domain)
+  const admin_secret = admin_secret_domain.admin_secret;
+  const app_domain = admin_secret_domain.app_domain;
+  
+  c.set('app_domain', app_domain);
+  
 
   const membi_admin_token = getCookie(c, 'membi_admin_token');
-
   console.log('membi_admin_token', membi_admin_token);
   
+
   if (!membi_admin_token) {
     return c.json({ error: 'Unauthorized' }, 401);
   }
-  console.log('membi_admin_token', membi_admin_token);
 
   // console.log('membi_admin_token', membi_admin_token);
   try {
-    const decoded = jwt.verify(membi_admin_token, MEMBI_ADMIN_SECRET);
+    // const decoded = jwt.verify(membi_admin_token, MEMBI_ADMIN_SECRET);
+    const decoded = jwt.verify(membi_admin_token, admin_secret);
     c.set('user', decoded);
 
     console.log('decoded', decoded);
@@ -51,18 +56,18 @@ export const adminLoginMiddleware = async (c: Context, next: Next) => {
 
   // const membi_admin_token = c.req.cookie('membi_admin_token');
   try {
-  const host = c.req.header('origin'); // Get the host from the request headers
-  // console.log('host', host);
+    const host = c.req.header('origin'); // Get the host from the request headers
+    // console.log('host', host);
 
-  const tenantIdentifier = extractTenantFromHost(host!);
+    const tenantIdentifier = extractTenantFromHost(host!);
 
-  if (!tenantIdentifier) {
-    return c.json({ error: 'Tenant identifier missing' }, 400); // Bad Request if no tenant is found
-  }
+    if (!tenantIdentifier) {
+      return c.json({ error: 'Tenant identifier missing' }, 400); // Bad Request if no tenant is found
+    }
 
-  console.log('Tenant Identifier:', tenantIdentifier);
+    console.log('Tenant Identifier:', tenantIdentifier);
 
-  c.set('tenant', tenantIdentifier);
+    c.set('tenant', tenantIdentifier);
 
     await next();
   } catch (err) {

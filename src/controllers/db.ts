@@ -19,7 +19,7 @@ const pool = new pg.Pool({
 //  * @returns A client connected to the tenant's schema.
 //  */
 
-async function getTenantClient(tenant: string) {
+async function getTenantClient(tenantIdentifier: string) {
 
   console.log('getTenantClient function begin');
 
@@ -38,13 +38,13 @@ async function getTenantClient(tenant: string) {
 
     const result = await client.query(
       "SELECT tenant_schema FROM system_tenant_login WHERE tenant_host = $1",
-      [tenant]
+      [tenantIdentifier]
     );
 
     console.log('query system_tenant_login done', result.rows);
 
     if (result.rows.length === 0) {
-      throw new Error(`No schema found for app URL: ${tenant}`);
+      throw new Error(`No schema found for app URL: ${tenantIdentifier}`);
     }
 
     const tenantSchema = result.rows[0].tenant_schema;
@@ -70,25 +70,48 @@ async function getTenantClient(tenant: string) {
 }
 
 
-// async function queryTenantSchema(tenant: string, query: string, values?: any[]) {
+async function getTenantHost(tenantIdentifier: string) {
 
-//   console.log('queryTenantSchema function begin');
+  console.log('getTenantHost function begin');
 
-//   const client = await getTenantClient(tenant);
+  const client = await pool.connect(); // Connect to the database
 
-//   console.log('queryTenantSchema function after getTenantClient done');
-//   try {
-//     const result = await client.query(query, values);
-//     return result;
-//   } catch (error) {
-//     console.error("Error querying tenant schema:", error);
-//     throw error;
-//   } finally {
-//     client.release(); // Always release the connection back to the pool
-//   }
-// }
+  try {
+    // Fetch the tenant's schema name based on the app URL from the master schema
 
-export { pool, getTenantClient };
+    console.log('getTenantHost function begin');
+    // const aaa = await client.query('SHOW search_path')
+    await client.query(`SET search_path TO system_schema;`);
+
+    const result = await client.query(
+      "SELECT admin_secret, app_domain FROM system_tenant_login WHERE tenant_host = $1",
+      [tenantIdentifier]
+    );
+
+    console.log('result', result.rows);
+
+    const admin_secret = result.rows[0].admin_secret;
+    const app_domain = result.rows[0].app_domain;
+
+    console.log('query getTenantHost done', admin_secret);
+    console.log('query getTenantHost done', app_domain);
+
+    const admin_secret_domain = result.rows[0]
+    console.log('admin_secret_domain', admin_secret_domain);
+
+    console.log('getTenantHost function done');
+    // return admin_secret.rows[0].admin_secret;
+    return admin_secret_domain;
+
+  } catch (error) {
+    console.error("Error fetching tenant schema or setting search_path:", error);
+    throw error;
+  } finally {
+    client.release();
+  }
+};
 
 
-// const result = await queryTenantSchema.query(tenant, query, values);
+
+export { pool, getTenantClient, getTenantHost };
+

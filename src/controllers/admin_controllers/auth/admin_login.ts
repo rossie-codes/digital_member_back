@@ -2,9 +2,8 @@
 
 import type { Context } from 'hono';
 // import { pool } from '../../db';
-import { getTenantClient } from "../../db";
-// import bcrypt from 'bcryptjs';
-import bcrypt from 'bcrypt';
+import { getTenantClient, getTenantHost } from "../../db";
+import {  } from "../../db";
 import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
 
@@ -13,15 +12,14 @@ const MEMBI_ADMIN_SECRET = process.env.MEMBI_ADMIN_SECRET || 'MEMBI_ADMIN_SECRET
 export async function loginAdmin(c: Context) {
   console.log('loginAdmin function begin')
   
+  const app_domain = c.get('app_domain');
+  const tenantIdentifier = c.get("tenant");
+  // const tenantIdentifier = 'https://mm9_client'
+  // const tenantIdentifier = 'https://membi-admin'
 
-  
-  const tenant = c.get("tenant");
-  // const tenant = 'https://mm9_client'
-  // const tenant = 'https://membi-admin'
+  console.log("tenant at login: ", tenantIdentifier);
 
-  console.log("tenant", tenant);
-
-  const pool = await getTenantClient(tenant);
+  const pool = await getTenantClient(tenantIdentifier);
 
 
   try {
@@ -64,7 +62,10 @@ export async function loginAdmin(c: Context) {
     }
     console.log('loginAdmin function handle membi_admin_token')
     // Generate a JWT membi_admin_token
-    const membi_admin_token = jwt.sign({ adminId: user.admin_id }, MEMBI_ADMIN_SECRET, { expiresIn: '10h' });
+
+    const admin_secret = await getTenantHost(tenantIdentifier)
+
+    const membi_admin_token = jwt.sign({ adminId: user.admin_id }, admin_secret, { expiresIn: '10h' });
 
     // Update last_login and reset failed_login_attempts
     await pool.query(
@@ -80,7 +81,7 @@ export async function loginAdmin(c: Context) {
       maxAge: 36000, // 10 hour
       // maxAge: 30, // 1 hour
       path: '/',
-      domain: process.env.NODE_ENV === 'production' ? '.up.railway.app' : undefined,
+      domain: process.env.NODE_ENV === 'production' ? `${tenantIdentifier}${app_domain}` : undefined,
     });
 
     c.header('Set-Cookie', cookie);
