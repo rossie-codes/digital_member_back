@@ -56,8 +56,10 @@ export const adminLoginMiddleware = async (c: Context, next: Next) => {
 
   // const membi_admin_token = c.req.cookie('membi_admin_token');
   try {
-    const host = c.req.header('origin'); // Get the host from the request headers
+    const host = c.req.header('host'); // Get the host from the request headers
     // console.log('host', host);
+
+    console.log('hostaaaa', host);
 
     const tenant = extractTenantFromHost(host!);
 
