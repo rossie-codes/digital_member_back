@@ -14,7 +14,7 @@ export const adminAuthMiddleware = async (c: Context, next: Next) => {
 
   // const membi_admin_token = c.req.cookie('membi_admin_token');
 
-  const host = c.req.header('origin'); // Get the host from the request headers
+  const host = c.req.header('host'); // Get the host from the request headers
   const tenant = extractTenantFromHost(host!);
   if (!tenant) {
     return c.json({ error: 'Tenant identifier missing' }, 400); // Bad Request if no tenant is found
