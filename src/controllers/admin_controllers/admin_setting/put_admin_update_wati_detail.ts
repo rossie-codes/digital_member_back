@@ -30,7 +30,7 @@ function encrypt(text: string): string {
 async function putAdminUpdateWatiDetail(c: Context): Promise<Response> {
   console.log("putAdminUpdateWatiDetail function begin");
 
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   // const tenant = 'https://mm9_client'
   // const tenant = 'https://membi-admin'
 

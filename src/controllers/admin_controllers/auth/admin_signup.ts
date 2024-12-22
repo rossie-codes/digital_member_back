@@ -5,7 +5,7 @@ import { getTenantClient } from "../../db";
 import bcrypt from "bcryptjs";
 
 export async function signupAdmin(c: Context) {
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   // const tenant = 'https://mm9_client'
   // const tenant = 'https://membi-admin'
 

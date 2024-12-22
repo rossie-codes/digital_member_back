@@ -32,7 +32,7 @@ async function getDiscountCodeDetail(c: Context): Promise<DiscountCode> {
 
   console.log('discount_code_id is: ', discount_code_id);
 
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   // const tenant = 'https://mm9_client'
   // const tenant = 'https://membi-admin'
 

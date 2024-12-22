@@ -39,7 +39,7 @@ async function postNewMember(c: Context): Promise<Response> {
 
   // Get a database client from the pool
 
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   // const tenant = 'https://mm9_client'
   // const tenant = 'https://membi-admin'
 

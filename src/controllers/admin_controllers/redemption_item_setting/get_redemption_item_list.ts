@@ -52,7 +52,7 @@ async function getRedemptionItemList(c: Context): Promise<{
 
 }> {
 
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
   const pool = await getTenantClient(tenant);
 

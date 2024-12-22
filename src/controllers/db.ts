@@ -70,7 +70,7 @@ async function getTenantClient(tenantIdentifier: string) {
 }
 
 
-async function getTenantHost(tenantIdentifier: string) {
+async function getTenantHost(tenant_host: string) {
 
   console.log('getTenantHost function begin');
 
@@ -85,7 +85,7 @@ async function getTenantHost(tenantIdentifier: string) {
 
     const result = await client.query(
       "SELECT admin_secret, app_domain FROM system_tenant_login WHERE tenant_host = $1",
-      [tenantIdentifier]
+      [tenant_host]
     );
 
     console.log('result', result.rows);
@@ -93,9 +93,9 @@ async function getTenantHost(tenantIdentifier: string) {
     const admin_secret = result.rows[0].admin_secret;
     const app_domain = result.rows[0].app_domain;
 
-    console.log('query getTenantHost done', tenantIdentifier);
-    console.log('query getTenantHost done', admin_secret);
-    console.log('query getTenantHost done', app_domain);
+    console.log('query getTenantHost done, tenantIdentifier: ', tenant_host);
+    console.log('query getTenantHost done, admin_secret: ', admin_secret);
+    console.log('query getTenantHost done, app_domain: ', app_domain);
 
     const admin_secret_domain = result.rows[0]
     console.log('admin_secret_domain', admin_secret_domain);

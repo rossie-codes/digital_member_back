@@ -79,7 +79,7 @@ async function getMemberDetail(c: Context): Promise<Member> {
 
   console.log("memberPhone is: ", memberPhone);
 
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   // const tenant = 'https://mm9_client'
   // const tenant = 'https://membi-admin'
 

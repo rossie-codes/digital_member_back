@@ -12,7 +12,7 @@ interface GetBroadcastListResponse {
 }
 async function getBroadcastList(c: Context): Promise<GetBroadcastListResponse> {
   
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
   const pool = await getTenantClient(tenant);
   

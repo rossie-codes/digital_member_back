@@ -20,7 +20,7 @@ interface DashboardInfo {
 async function getDashboardInfo(c: Context): Promise<DashboardInfo> {
 
 
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   // const tenant = 'https://mm9_client'
   // const tenant = 'https://membi-admin'
 

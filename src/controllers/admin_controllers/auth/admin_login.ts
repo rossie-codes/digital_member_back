@@ -13,14 +13,14 @@ export async function loginAdmin(c: Context) {
   console.log('loginAdmin function begin')
 
   const app_domain = c.get('app_domain');
-  const tenantIdentifier = c.get("tenant");
+  const tenant_host = c.get("tenant_host");
   // const tenantIdentifier = 'https://mm9_client'
   // const tenantIdentifier = 'https://membi-admin'
 
-  console.log("tenant at login: ", tenantIdentifier);
-  console.log("tenant at login: ", app_domain);
+  console.log("tenant at login as tenant_host: ", tenant_host);
+  console.log("tenant at login ad app_domain: ", app_domain);
 
-  const pool = await getTenantClient(tenantIdentifier);
+  const pool = await getTenantClient(tenant_host);
 
 
   try {
@@ -64,12 +64,13 @@ export async function loginAdmin(c: Context) {
     console.log('loginAdmin function handle membi_admin_token')
     // Generate a JWT membi_admin_token
 
-    const admin_secret_domain = await getTenantHost(tenantIdentifier)
+    const admin_secret_domain = await getTenantHost(tenant_host)
     console.log('loginAdmin function handle membi_admin_token', admin_secret_domain)
 
     const admin_secret = admin_secret_domain.admin_secret;
 
     const membi_admin_token = jwt.sign({ adminId: user.admin_id }, admin_secret, { expiresIn: '10h' });
+    // const membi_admin_token = jwt.sign({ adminId: user.admin_id }, admin_secret, { expiresIn: '10h' });
     console.log('loginAdmin function handle membi_admin_token', membi_admin_token)
 
     // Update last_login and reset failed_login_attempts
@@ -78,10 +79,10 @@ export async function loginAdmin(c: Context) {
       [user.login_id]
     );
 
-    console.log("this!!!!!!!!", `${tenantIdentifier}${app_domain}`)
+    console.log("this!!!!!!!!", `${tenant_host}${app_domain}`)
 
     // Set the membi_admin_token as an HTTP-only cookie
-    const cookie = serialize('membi_admin_token', membi_admin_token, {
+    const cookie = serialize(`${tenant_host}_admin_token`, membi_admin_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
       sameSite: 'lax', // Change from 'strict' to 'lax'

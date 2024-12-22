@@ -12,7 +12,7 @@ async function getBirthdayMemberIds(c: Context): Promise<{
   member_ids: Member[];
 }> {
 
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   // const tenant = 'https://mm9_client'
   // const tenant = 'https://membi-admin'
 

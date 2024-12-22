@@ -15,7 +15,7 @@ async function getBroadcastHistoryList(
 ): Promise<GetBroadcastListResponse> {
   console.log("getBroadcastHistoryList function started");
   
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
   const pool = await getTenantClient(tenant);
   

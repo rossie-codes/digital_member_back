@@ -8,7 +8,7 @@ import { HTTPException } from 'hono/http-exception';
 async function putSuspendMembership(c: Context): Promise<Response> {
   console.log('putSuspendMembership function begin');
 
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   // const tenant = 'https://mm9_client'
   // const tenant = 'https://membi-admin'
 

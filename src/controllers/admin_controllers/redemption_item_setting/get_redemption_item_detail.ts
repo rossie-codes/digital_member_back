@@ -29,7 +29,7 @@ async function getRedemptionItemDetail(c: Context): Promise<RedemptionItem> {
 
   console.log('redemption_item_id is: ', redemption_item_id);
   
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
   const pool = await getTenantClient(tenant);
 

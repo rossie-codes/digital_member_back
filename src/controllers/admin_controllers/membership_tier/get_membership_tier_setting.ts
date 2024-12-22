@@ -24,7 +24,7 @@ interface MembershipTierResponse {
 
 async function getMembershipTierSetting(c: Context): Promise<MembershipTierResponse[]> {
   
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
   const pool = await getTenantClient(tenant);
   

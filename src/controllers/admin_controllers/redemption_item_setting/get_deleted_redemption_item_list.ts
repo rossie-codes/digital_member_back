@@ -19,7 +19,7 @@ interface RedemptionItem {
 
 async function getDeletedRedemptionItemList(c: Context): Promise<RedemptionItem[]> {
 
-    const tenant = c.get("tenant");
+    const tenant = c.get("tenant_host");
     console.log("tenant", tenant);
     const pool = await getTenantClient(tenant);
 

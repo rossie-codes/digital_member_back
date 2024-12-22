@@ -24,7 +24,7 @@ async function getBroadcastDetail(c: Context): Promise<GetBroadcastDetailRespons
     throw new Error('broadcast_id parameter is required');
   }
 
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
   const pool = await getTenantClient(tenant);
 

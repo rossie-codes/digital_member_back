@@ -49,7 +49,7 @@ async function getMemberList(c: Context): Promise<{
 }> {
 
 
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   // const tenant = 'https://mm9_client'
   // const tenant = 'https://membi-admin'
 

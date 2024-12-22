@@ -54,7 +54,7 @@ async function postNewBroadcast(c: Context): Promise<Response> {
 
     // const client = await pool.connect();
 
-    const tenant = c.get("tenant");
+    const tenant = c.get("tenant_host");
     console.log("tenant", tenant);
     const client = await getTenantClient(tenant);
   

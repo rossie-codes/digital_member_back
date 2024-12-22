@@ -18,7 +18,7 @@ async function deleteDiscountCode(c: Context): Promise<Response> {
 
     // const client = await pool.connect();
 
-    const tenant = c.get("tenant");
+    const tenant = c.get("tenant_host");
     // const tenant = 'https://mm9_client'
     // const tenant = 'https://membi-admin'
 

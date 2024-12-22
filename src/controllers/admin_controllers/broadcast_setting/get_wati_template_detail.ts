@@ -11,7 +11,7 @@ interface WatiContent {
 
 async function getWatiTemplateDetail(c: Context): Promise<WatiContent> {
 
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
   const pool = await getTenantClient(tenant);
 

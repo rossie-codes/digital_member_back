@@ -64,7 +64,7 @@ async function getDeletedDiscountCodeList(c: Context): Promise<DiscountCode[]> {
       ORDER BY created_at DESC
     `;
 
-  const tenant = c.get("tenant");
+  const tenant = c.get("tenant_host");
   // const tenant = 'https://mm9_client'
   // const tenant = 'https://membi-admin'
 

@@ -14,15 +14,15 @@ export const adminAuthMiddleware = async (c: Context, next: Next) => {
 
   // const membi_admin_token = c.req.cookie('membi_admin_token');
 
-  const host = c.req.header('origin'); // Get the host from the request headers
-  const tenant = extractTenantFromHost(host!);
-  if (!tenant) {
+  const user_sub_domain = c.req.header('origin'); // Get the host from the request headers
+  const tenant_host = extractTenantFromHost(user_sub_domain!);
+  if (!tenant_host) {
     return c.json({ error: 'Tenant identifier missing' }, 400); // Bad Request if no tenant is found
   }
-  console.log('Tenant Identifier:', tenant);
-  c.set('tenant', tenant);
+  console.log('Tenant Identifier:', tenant_host);
+  c.set('tenant_host', tenant_host);
 
-  const admin_secret_domain = await getTenantHost(tenant);
+  const admin_secret_domain = await getTenantHost(tenant_host);
   console.log('admin_secret_domain: ', admin_secret_domain)
   const admin_secret = admin_secret_domain.admin_secret;
   const app_domain = admin_secret_domain.app_domain;
@@ -30,7 +30,7 @@ export const adminAuthMiddleware = async (c: Context, next: Next) => {
   c.set('app_domain', app_domain);
 
 
-  const membi_admin_token = getCookie(c, 'membi_admin_token');
+  const membi_admin_token = getCookie(c, `${tenant_host}_admin_token`);
   console.log('membi_admin_token', membi_admin_token);
 
 
@@ -56,22 +56,22 @@ export const adminLoginMiddleware = async (c: Context, next: Next) => {
 
   // const membi_admin_token = c.req.cookie('membi_admin_token');
   try {
-    const host = c.req.header('origin'); // Get the host from the request headers
+    const user_sub_domain = c.req.header('origin'); // Get the host from the request headers
     // console.log('host', host);
 
-    console.log('hostaaaa', host);
+    console.log('the sub-domin of the user is: ', user_sub_domain);
 
-    const tenant = extractTenantFromHost(host!);
+    const tenant_host = extractTenantFromHost(user_sub_domain!);
 
-    if (!tenant) {
+    if (!tenant_host) {
       return c.json({ error: 'Tenant identifier missing' }, 400); // Bad Request if no tenant is found
     }
 
-    console.log('Tenant Identifier:', tenant);
+    console.log('Tenant Identifier:', tenant_host);
 
-    c.set('tenant', tenant);
+    c.set('tenant_host', tenant_host);
 
-    const admin_secret_domain = await getTenantHost(tenant);
+    const admin_secret_domain = await getTenantHost(tenant_host);
     console.log('admin_secret_domain: ', admin_secret_domain)
     const admin_secret = admin_secret_domain.admin_secret;
     const app_domain = admin_secret_domain.app_domain;
@@ -94,17 +94,10 @@ function extractTenantFromHost(host: string | null): string | null {
   console.log('host', host);
 
   try {
-    // Split the host by dots to isolate the subdomain
-    // const parts = host.split('.');
-    // if (parts.length < 1) {
-    //   return null; // Return null if there is no subdomain
-    // }
 
     const url = new URL(host); // Use URL constructor to parse
     const hostname = url.hostname; // Get the hostname (e.g., "membi-admin.up.railway.app")
     const parts = hostname.split('.');
-
-
 
     console.log('parts', parts);
     // Return the first part of the hostname (the subdomain)
