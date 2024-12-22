@@ -13,13 +13,14 @@ import discountCodeRouter from './src/routes/admin_routes/discount_code';
 import broadcastSettingRouter from './src/routes/admin_routes/broadcast_setting';
 import dashboardRouter from './src/routes/admin_routes/dashboard';
 
-
 import customerAuthRouter from './src/routes/customer_routes/customer_auth';
 import memberMemberRouter from './src/routes/customer_routes/member_member';
 import memberDiscountCodeRouter from './src/routes/customer_routes/member_discount_code';
 import memberRedemptionItemRouter from './src/routes/customer_routes/member_redemption_item';
 import memberMemberOrderRouter from './src/routes/customer_routes/member_member_order';
 import memberMembershipTierRouter from './src/routes/customer_routes/member_membership_tier';
+
+import tenantRouter from './src/routes/tenant_routes/tenant';
 
 import { config } from './src/config'; // Adjust the path as needed
 
@@ -68,6 +69,9 @@ app.route('/customer/member_discount_code', memberDiscountCodeRouter);
 app.route('/customer/member_redemption_item', memberRedemptionItemRouter);
 app.route('/customer/member_member_order', memberMemberOrderRouter);
 app.route('/customer/member_membership_tier', memberMembershipTierRouter);
+
+app.route('/tenant/tenant', tenantRouter);
+
 
 
 export default app;
