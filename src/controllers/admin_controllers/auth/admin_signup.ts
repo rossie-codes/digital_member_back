@@ -46,7 +46,7 @@ export async function signupAdmin(c: Context) {
 
     // Insert the admin into the database
     const result = await pool.query(
-      "INSERT INTO admin_login (admin_name, password_hash) VALUES ($1, $2, $3) RETURNING login_id, admin_name",
+      "INSERT INTO admin_login (admin_name, admin_password_hash) VALUES ($1, $2) RETURNING login_id, admin_name",
       [admin_name, adminPasswordHash]
     );
 
