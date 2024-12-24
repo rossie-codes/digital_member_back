@@ -5,6 +5,9 @@ import { type Context } from 'hono';
 // import { adminAuthMiddleware } from '../../middleware/adminAuthMiddleware';
 
 import cloneTenantSchema from '../../controllers/tenant_controllers/post_tenant_clone_new_schema';
+import postTenantCreateNewService1 from '../../controllers/tenant_controllers/post_tenant_create_new_service1';
+import postTenantCreateNewTenantLoginRecord from '../../controllers/tenant_controllers/post_tenant_create_new_tenant_login_record';
+
 
 const tenantRouter = new Hono();
 
@@ -15,7 +18,10 @@ tenantRouter.post('/post_new_tenant', async (c: Context) => {
     console.log('post_new_tenant route begin');
 
     // const data = await cloneTenantSchema(c);
+    // const data = await postTenantCreateNewTenantLoginRecord(c);
+    const data = await postTenantCreateNewService1(c);
 
+    console.log('data', data);
     console.log('post_new_tenant route done');
     
     // return c.json(data);

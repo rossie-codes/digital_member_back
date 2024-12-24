@@ -38,13 +38,14 @@ const app = new Hono();
 //   credentials: true,
 // }));
 
-  // /^https:\/\/.*\.railway\.app$/, // Matches any subdomain of railway.app
-  // "http://localhost:3000",
-  // "http://localhost:3002"
 
 
 // const allowedOrigins = [
 //   process.env.ALLOWED_ORIGINS,
+// /^https:\/\/.*\.railway\.app$/, // Matches any subdomain of railway.app
+// "http://localhost:3000",
+// "http://localhost:3002"
+
 // ];
 
 
