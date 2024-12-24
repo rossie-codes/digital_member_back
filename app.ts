@@ -40,6 +40,8 @@ const app = new Hono();
 
 const allowedOrigins = [
   /^https:\/\/.*\.railway\.app$/, // Matches any subdomain of railway.app
+  "http://localhost:3000",
+  "http://localhost:3002"
 ];
 
 app.use('*', cors({
