@@ -38,11 +38,25 @@ const app = new Hono();
 //   credentials: true,
 // }));
 
-const allowedOrigins = [
-  /^https:\/\/.*\.railway\.app$/, // Matches any subdomain of railway.app
-  "http://localhost:3000",
-  "http://localhost:3002"
-];
+  // /^https:\/\/.*\.railway\.app$/, // Matches any subdomain of railway.app
+  // "http://localhost:3000",
+  // "http://localhost:3002"
+
+
+// const allowedOrigins = [
+//   process.env.ALLOWED_ORIGINS,
+// ];
+
+
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(origin => {
+  // Check if origin is a regex pattern (starts and ends with /)
+  if (origin.startsWith('/') && origin.endsWith('/')) {
+    // Remove slashes and create RegExp
+    return new RegExp(origin.slice(1, -1));
+  }
+  return origin;
+});
+
 
 app.use('*', cors({
   origin: (origin) => {
