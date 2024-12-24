@@ -79,7 +79,6 @@ export async function loginAdmin(c: Context) {
       [user.login_id]
     );
 
-    console.log("this!!!!!!!!", `${tenant_host}${app_domain}`)
 
     // Set the membi_admin_token as an HTTP-only cookie
     const cookie = serialize(`${tenant_host}_admin_token`, membi_admin_token, {

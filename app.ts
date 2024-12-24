@@ -27,14 +27,39 @@ import { config } from './src/config'; // Adjust the path as needed
 const app = new Hono();
 
 // Apply global CORS middleware
+// app.use('*', cors({
+//   origin: config.allowedOrigins, // Always a string array
+//   // origin: '*', // Always a string array
+//   // origin: process.env.ALLOWED_ORIGINS, // Always a string array
+//   // origin: 'https://digitalmemberfront-production.up.railway.app',
+//   // origin: 'http://localhost:3001',
+//   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowHeaders: ['Content-Type'],
+//   credentials: true,
+// }));
+
+const allowedOrigins = [
+  /^https:\/\/.*\.railway\.app$/, // Matches any subdomain of railway.app
+];
+
 app.use('*', cors({
-  origin: config.allowedOrigins, // Always a string array
-  // origin: '*', // Always a string array
-  // origin: process.env.ALLOWED_ORIGINS, // Always a string array
-  // origin: 'https://digitalmemberfront-production.up.railway.app',
-  // origin: 'http://localhost:3001',
+  origin: (origin) => {
+    if (!origin) return '*';
+
+    const isAllowed = allowedOrigins.some((allowedOrigin) => {
+      if (typeof allowedOrigin === 'string') {
+        return allowedOrigin === origin;
+      }
+      if (allowedOrigin instanceof RegExp) {
+        return allowedOrigin.test(origin);
+      }
+      return false;
+    });
+
+    return isAllowed ? origin : null;
+  },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type'],
+  allowHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 }));
 
