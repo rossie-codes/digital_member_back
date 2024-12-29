@@ -7,7 +7,7 @@ import postTenantChangeServiceDomain from "./post_tenant_change_service_domain";
 import postTenantChangeServiceEnvVaiable from "./post_tenant_change_service_env_variable";
 import postTenantServiceConnect from "./post_tenant_service_connect";
 import postTenantServiceDeployment from "./post_tenant_service_deployment";
-
+import cloneTenantSchema from "./post_tenant_clone_new_schema";
 
 // Environment variables for Railway
 const RAILWAY_TOKEN = process.env.RAILWAY_TOKEN;
@@ -32,6 +32,9 @@ async function theWholeFlow(c: Context): Promise<Response> {
   console.log("theWholeFlow function begin");
 
   try {
+
+
+
     // Step 1: Create a new tenant login record
     const newTenantRecord = await postTenantCreateNewTenantLoginRecord(c);
 
@@ -56,6 +59,14 @@ async function theWholeFlow(c: Context): Promise<Response> {
 
     console.log("Selected tenant for service creation:", availableTenant);
 
+
+    const cloneTenantSchemaResponse = await cloneTenantSchema(availableTenant.tenant_schema)
+    
+    console.log("Schema cloned from membi_template_schema: ", cloneTenantSchemaResponse);
+
+    // return c.json({ });
+
+    
     const createNewServiceResponse = await postTenantCreateNewService(
       availableTenant
     );
@@ -104,7 +115,8 @@ async function theWholeFlow(c: Context): Promise<Response> {
 
     console.log("Service connect response:", serviceConnectResponse);
 
-    
+
+
     // const serviceDeploymentResponse = await postTenantServiceDeployment(
     //   createNewServiceResponse.id
     // );

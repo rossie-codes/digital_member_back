@@ -5,12 +5,12 @@ import type { Context } from "hono";
 
 
 // async function cloneTenantSchema(sourceSchema, targetSchema) {
-async function cloneTenantSchema(c: Context): Promise<Response> {
+async function cloneTenantSchema(targetSchema: string): Promise<Response> {
 
   console.log("cloneTenantSchema function begin");
 
   const sourceSchema = 'membi_template_schema'
-  const targetSchema = 'membi'
+  const targetSchema2 = 'membi-0002-xuMJgy'
 
   console.log("cloneTenantSchema function start connection");
   const client = await pool.connect();
@@ -19,7 +19,7 @@ async function cloneTenantSchema(c: Context): Promise<Response> {
     console.log("cloneTenantSchema function connection success");
     // Call the clone_schema function
     console.log("cloneTenantSchema function start performing query");
-    const result = await client.query('SELECT system_schema.clone_schema($1, $2);', [sourceSchema, targetSchema]);
+    const result = await client.query('SELECT system_schema.clone_schema($1, $2);', [sourceSchema, targetSchema2]);
 
     console.log("cloneTenantSchema function query success");
 
