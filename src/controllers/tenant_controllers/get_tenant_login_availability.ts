@@ -8,7 +8,9 @@ interface TenantLoginAvailability {
   tenant_schema: string;
   tenant_host: string;
   service_created: boolean;
-  used_count: number;
+  column_used_with_false_value: number;
+  admin_secret: string;
+  customer_secret: string;  
 }
 
 export async function getTenantLoginAvailability(c: Context): Promise<TenantLoginAvailability[]> {
@@ -22,7 +24,9 @@ export async function getTenantLoginAvailability(c: Context): Promise<TenantLogi
         tenant_schema,
         tenant_host,
         service_created,
-        (SELECT COUNT(*) FROM system_schema.system_tenant_login WHERE used = false) AS used_count
+        admin_secret,
+        customer_secret,
+        (SELECT COUNT(*) FROM system_schema.system_tenant_login WHERE used = false) AS column_used_with_false_value
       FROM system_schema.system_tenant_login
       WHERE used = false
       ORDER BY tenant_login_id ASC
@@ -36,7 +40,9 @@ export async function getTenantLoginAvailability(c: Context): Promise<TenantLogi
       tenant_schema: row.tenant_schema,
       tenant_host: row.tenant_host,
       service_created: row.service_created,
-      used_count: parseInt(row.used_count, 10),
+      admin_secret: row.admin_secret,
+      customer_secret: row.customer_secret,
+      column_used_with_false_value: parseInt(row.column_used_with_false_value, 10),
     }));
   } finally {
     client.release();

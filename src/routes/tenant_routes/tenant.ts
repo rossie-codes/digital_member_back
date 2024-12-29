@@ -5,7 +5,7 @@ import { type Context } from 'hono';
 // import { adminAuthMiddleware } from '../../middleware/adminAuthMiddleware';
 
 import cloneTenantSchema from '../../controllers/tenant_controllers/post_tenant_clone_new_schema';
-import postTenantCreateNewService1 from '../../controllers/tenant_controllers/post_tenant_create_new_service1';
+import theWholeFlow from '../../controllers/tenant_controllers/post_the_whole_flow';
 import postTenantCreateNewTenantLoginRecord from '../../controllers/tenant_controllers/post_tenant_create_new_tenant_login_record';
 
 
@@ -19,7 +19,7 @@ tenantRouter.post('/post_new_tenant', async (c: Context) => {
 
     // const data = await cloneTenantSchema(c);
     // const data = await postTenantCreateNewTenantLoginRecord(c);
-    const data = await postTenantCreateNewService1(c);
+    const data = await theWholeFlow(c);
 
     console.log('data', data);
     console.log('post_new_tenant route done');

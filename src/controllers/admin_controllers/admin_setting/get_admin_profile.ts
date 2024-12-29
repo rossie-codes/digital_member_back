@@ -4,7 +4,7 @@
 import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 import getWatiDetails from "../../../wati/wati_client";
-import postTenantCreateNewSchema from "../../tenant_controllers/post_tenant_create_new_schema";
+import postTenantCreateNewSchema from "../../tenant_controllers/backup_post_tenant_create_new_schema";
 import cloneTenantSchema from "../../tenant_controllers/post_tenant_clone_new_schema";
 
 
