@@ -3,7 +3,6 @@
 import type { Context } from 'hono';
 // import { pool } from '../../db';
 import { getTenantClient, getTenantHost } from "../../db";
-import { } from "../../db";
 import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
 

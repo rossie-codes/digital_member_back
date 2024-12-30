@@ -2,10 +2,22 @@
 
 import type { Context } from 'hono';
 import { serialize } from 'cookie';
+import { getTenantClient, getTenantHost } from "../../db";
 
 export async function logoutAdmin(c: Context) {
 
   console.log('Logging out admin...');
+
+  const app_domain = c.get('app_domain');
+  const tenant_host = c.get("tenant_host");
+  // const tenantIdentifier = 'https://mm9_client'
+  // const tenantIdentifier = 'https://membi-admin'
+
+  console.log("tenant at login as tenant_host: ", tenant_host);
+  console.log("tenant at login ad app_domain: ", app_domain);
+
+  const pool = await getTenantClient(tenant_host);
+
 
   // Clear the membi_admin_token cookie
   // const cookie = serialize('membi_admin_token', '', {
@@ -16,7 +28,7 @@ export async function logoutAdmin(c: Context) {
   //   path: '/',
   // });
 
-  const cookie = serialize('membi_admin_token', '', {
+  const cookie = serialize(`${tenant_host}_admin_token`, '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax', // Change from 'strict' to 'lax'
