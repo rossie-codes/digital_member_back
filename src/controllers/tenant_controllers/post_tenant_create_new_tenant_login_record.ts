@@ -5,7 +5,7 @@ import type { Context } from "hono";
  * Generates a random string of specified length from
  * uppercase letters, lowercase letters, and digits.
  */
-function generateRandomString(length: number): string {
+function generateRandomSecret(length: number): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
   for (let i = 0; i < length; i++) {
@@ -16,15 +16,17 @@ function generateRandomString(length: number): string {
 }
 
 /**
- * Generates three unique random strings of specified length.
+ * Generates a random string of specified length from
+ * lowercase letters and digits. Used for tenant schemas.
  */
-function generateThreeUniqueStrings(length: number): [string, string, string] {
-  const set = new Set<string>();
-  while (set.size < 3) {
-    set.add(generateRandomString(length));
+function generateRandomSchemaName(length: number): string {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    const index = Math.floor(Math.random() * chars.length);
+    result += chars[index];
   }
-  const [str1, str2, str3] = Array.from(set);
-  return [str1, str2, str3];
+  return result;
 }
 
 async function postTenantCreateNewTenantLoginRecord(c: Context): Promise<Response> {
@@ -49,11 +51,11 @@ async function postTenantCreateNewTenantLoginRecord(c: Context): Promise<Respons
       return c.json({ message: "used limit reached. Need not to create a new tenant login." }, 400);
     }
 
-    // Query only records where tenant_host starts with "membi-"
+    // Query only records where tenant_host starts with "membi_"
     const lastHostQuery = `
       SELECT tenant_host
       FROM system_schema.system_tenant_login
-      WHERE tenant_host LIKE 'membi-%'
+      WHERE tenant_host LIKE 'membi_%'
       ORDER BY tenant_login_id DESC
       LIMIT 1
     `;
@@ -61,24 +63,29 @@ async function postTenantCreateNewTenantLoginRecord(c: Context): Promise<Respons
 
     let nextNumber = 1;
     if (lastHostResult.rowCount && lastHostResult.rowCount > 0) {
-      const lastHost = lastHostResult.rows[0].tenant_host; // e.g. "membi-0002"
-      const parts = lastHost.split("-");
+      // e.g. "membi_0002"
+      const lastHost = lastHostResult.rows[0].tenant_host;
+      const parts = lastHost.split("_");
       if (parts.length >= 2) {
         const lastNumber = parseInt(parts[1], 10);
         nextNumber = isNaN(lastNumber) ? 1 : lastNumber + 1;
       }
     }
 
-    // If there's no record, this will remain "membi-0001"
+    // If there's no record, this will remain "membi_0001"
     const paddedNumber = nextNumber.toString().padStart(4, "0"); // "0001", "0002", ...
-    const tenantHost = `membi-${paddedNumber}`;
+    const tenantHost = `membi_${paddedNumber}`;
 
-    // Generate three distinct random strings for schema/admin/customer secrets
-    const [schemaRand, adminRand, customerRand] = generateThreeUniqueStrings(6);
+    // Use generateRandomSchemaName() for tenant_schema
+    const schemaPart = generateRandomSchemaName(6);
+    const tenantSchema = `${tenantHost}_${schemaPart}`;
 
-    const tenantSchema = `${tenantHost}-${schemaRand}`;
-    const adminSecret = `${tenantHost}-ad-${adminRand}`;
-    const customerSecret = `${tenantHost}-cu-${customerRand}`;
+    // Use generateRandomSecret() for admin_secret and customer_secret
+    const adminSecretPart = generateRandomSecret(6);
+    const customerSecretPart = generateRandomSecret(6);
+
+    const adminSecret = `${tenantHost}_ad_${adminSecretPart}`;
+    const customerSecret = `${tenantHost}_cu_${customerSecretPart}`;
 
     // Insert the new record
     const insertQuery = `

@@ -10,7 +10,7 @@ async function cloneTenantSchema(targetSchema: string): Promise<Response> {
   console.log("cloneTenantSchema function begin");
 
   const sourceSchema = 'membi_template_schema'
-  // const targetSchema2 = 'membi-0002-xuMJgy'
+  // const targetSchema2 = 'membi_0002_xuMJgy'
 
   console.log("cloneTenantSchema function start connection");
   const client = await pool.connect();
