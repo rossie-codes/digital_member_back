@@ -1,7 +1,8 @@
 // src/controllers/member_controllers/member_auth/member_login.ts
 
 import type { Context } from 'hono';
-import { pool } from '../../db';
+// import { pool } from '../../db';
+import { getTenantClient, getTenantHost } from '../../db';
 // import bcrypt from 'bcryptjs';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -12,6 +13,18 @@ const MEMBI_CUSTOMER_SECRET = process.env.MEMBI_CUSTOMER_SECRET || 'MEMBI_CUSTOM
 async function loginMember(c: Context) {
   console.log('loginMember function begin')
   
+
+  const app_domain = c.get('app_domain');
+  const tenant_host = c.get("tenant_host");
+  // const tenantIdentifier = 'https://mm9_client'
+  // const tenantIdentifier = 'https://membi-admin'
+
+  console.log("tenant at login as tenant_host: ", tenant_host);
+  console.log("tenant at login ad app_domain: ", app_domain);
+
+  const pool = await getTenantClient(tenant_host);
+
+
   try {
     const { member_phone, member_password } = await c.req.json();
 
@@ -66,7 +79,7 @@ async function loginMember(c: Context) {
     //   path: '/',
     // });
 
-    const cookie = serialize('membi_m_token', membi_m_token, {
+    const cookie = serialize(`${tenant_host}_m_token`, membi_m_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
       sameSite: 'lax', // Change from 'strict' to 'lax'

@@ -3,9 +3,11 @@
 // Environment variables for Railway
 const RAILWAY_TOKEN = process.env.RAILWAY_TOKEN;
 const RAILWAY_GRAPHQL_URL = process.env.RAILWAY_GRAPHQL_URL;
-const RAILWAY_REPO = process.env.RAILWAY_REPO;
+const RAILWAY_REPO_ADMIN = process.env.RAILWAY_REPO_ADMIN;
+const RAILWAY_REPO_CUSTOMER = process.env.RAILWAY_REPO_CUSTOMER;
 const RAILWAY_PROJECT_ID = process.env.RAILWAY_PROJECT_ID;
 const RAILWAY_ENVIRONMENT_ID = process.env.RAILWAY_ENVIRONMENT_ID;
+
 
 async function postTenantServiceConnect(serviceId: string): Promise<Response> {
   console.log("async function postTenantServiceConnect function begin");

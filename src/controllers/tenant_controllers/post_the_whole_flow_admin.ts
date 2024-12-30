@@ -2,11 +2,10 @@ import { pool } from "../db";
 import type { Context } from "hono";
 import getTenantLoginAvailability from "./get_tenant_login_availability";
 import postTenantCreateNewTenantLoginRecord from "./post_tenant_create_new_tenant_login_record";
-import postTenantCreateNewService from "./post_tenant_create_new_service";
-import postTenantChangeServiceDomain from "./post_tenant_change_service_domain";
+import postTenantCreateNewService from "./post_tenant_create_new_service_admin";
+import postTenantChangeServiceDomain from "./post_tenant_change_service_domain_admin";
 import postTenantChangeServiceEnvVaiable from "./post_tenant_change_service_env_variable";
 import postTenantServiceConnect from "./post_tenant_service_connect";
-import postTenantServiceDeployment from "./post_tenant_service_deployment";
 import cloneTenantSchema from "./post_tenant_clone_new_schema";
 
 // Environment variables for Railway
@@ -28,7 +27,7 @@ interface AvailableTenant {
   customer_secret: string;
 }
 
-async function theWholeFlow(c: Context): Promise<Response> {
+async function theWholeFlowAdmin(c: Context): Promise<Response> {
   console.log("theWholeFlow function begin");
 
   try {
@@ -59,14 +58,8 @@ async function theWholeFlow(c: Context): Promise<Response> {
 
     console.log("Selected tenant for service creation:", availableTenant);
 
-
-    const cloneTenantSchemaResponse = await cloneTenantSchema(availableTenant.tenant_schema)
-    
-    console.log("Schema cloned from membi_template_schema: ", cloneTenantSchemaResponse);
-
-    // return c.json({ });
-
-    
+    // Step 4: Prepare GraphQL mutation payload for service creation
+    // Step 5: Perform the GraphQL request to Railway to create a new service
     const createNewServiceResponse = await postTenantCreateNewService(
       availableTenant
     );
@@ -78,6 +71,7 @@ async function theWholeFlow(c: Context): Promise<Response> {
       createNewServiceResponse.id
     );
 
+    // Step 6: Perform the GraphQL request to Railway to change the service domain
     const changeServiceDomainResponse = await postTenantChangeServiceDomain(
       createNewServiceResponse.id,
       availableTenant.tenant_host
@@ -85,6 +79,7 @@ async function theWholeFlow(c: Context): Promise<Response> {
 
     console.log("Service domain change response:", changeServiceDomainResponse);
 
+    // Step 7: Perform the GraphQL request to Railway to change the service environment variables    
     const changeServiceEnvVariableResponse =
       await postTenantChangeServiceEnvVaiable(
         "TENANT_HOST",
@@ -111,27 +106,28 @@ async function theWholeFlow(c: Context): Promise<Response> {
       changeServiceEnvVariableResponse3
     );
 
+    // Step 8: Perform the GraphQL request to Railway to connect service to github repo branch, this will automatically deploy the service
     const serviceConnectResponse = await postTenantServiceConnect(createNewServiceResponse.id)
 
     console.log("Service connect response:", serviceConnectResponse);
 
 
 
-    // const serviceDeploymentResponse = await postTenantServiceDeployment(
-    //   createNewServiceResponse.id
-    // );
+    const cloneTenantSchemaResponse = await cloneTenantSchema(availableTenant.tenant_schema)
+    
+    console.log("Schema cloned from membi_template_schema: ", cloneTenantSchemaResponse);
 
-    // console.log("Service deployment response:", serviceDeploymentResponse);
-    // Step 6: Update the tenant login record to mark the service as created
+
+    // Step 9: Update the tenant login record to mark the service as created
     const client = await pool.connect();
 
     try {
       await client.query("BEGIN");
 
-      // 6A: Insert the Railway service info into system_schema.railway_services
+      // 9A: Insert the Railway service info into system_schema.railway_services
       await client.query(
         `
-        INSERT INTO system_schema.railway_services (
+        INSERT INTO system_schema.railway_services_admin (
           project_id,
           environment_id,
           railway_services_id,
@@ -157,7 +153,7 @@ async function theWholeFlow(c: Context): Promise<Response> {
         ]
       );
 
-      // 6B: Mark the tenant login record as service_created
+      // 9B: Mark the tenant login record as service_created
       await client.query(
         `
         UPDATE system_schema.system_tenant_login
@@ -180,7 +176,7 @@ async function theWholeFlow(c: Context): Promise<Response> {
       client.release();
     }
 
-    // Step 7: Return success response
+    // Step 10: Return success response
     return c.json({
       message: "Service created successfully on Railway.",
       railwayResponse: createNewServiceResponse,
@@ -194,4 +190,4 @@ async function theWholeFlow(c: Context): Promise<Response> {
   }
 }
 
-export default theWholeFlow;
+export default theWholeFlowAdmin;

@@ -3,7 +3,8 @@
 // Environment variables for Railway
 const RAILWAY_TOKEN = process.env.RAILWAY_TOKEN;
 const RAILWAY_GRAPHQL_URL = process.env.RAILWAY_GRAPHQL_URL;
-const RAILWAY_REPO = process.env.RAILWAY_REPO;
+const RAILWAY_REPO_ADMIN = process.env.RAILWAY_REPO_ADMIN;
+const RAILWAY_REPO_CUSTOMER = process.env.RAILWAY_REPO_CUSTOMER;
 const RAILWAY_PROJECT_ID = process.env.RAILWAY_PROJECT_ID;
 const RAILWAY_ENVIRONMENT_ID = process.env.RAILWAY_ENVIRONMENT_ID;
 
@@ -54,7 +55,6 @@ async function postTenantChangeServiceDomain(
     },
   };
 
-  // Step 5: Perform the GraphQL request to Railway
   try {
     if (!RAILWAY_GRAPHQL_URL) {
       throw new Error("Missing environment variable: RAILWAY_GRAPHQL_URL");
@@ -97,7 +97,7 @@ async function postTenantChangeServiceDomain(
           environmentId: RAILWAY_ENVIRONMENT_ID,
           serviceDomainId:
             serviceDomainCreateResponse.data.serviceDomainCreate.id,
-          domain: `${tenantHost}.up.railway.app`,
+          domain: `${tenantHost}_admin.up.railway.app`,
         },
       },
     };
