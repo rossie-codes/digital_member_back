@@ -1,6 +1,6 @@
 // src/controllers/member_controllers/member_redemption_item/get_member_redemption_item_list.ts
 
-import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 
 // Define the response interface
@@ -13,8 +13,13 @@ interface RedemptionItemRecord {
 async function getMemberRedemptionItemRecord(
   c: Context
 ): Promise<RedemptionItemRecord[]> {
+
   const user = c.get("user"); // Retrieve the user from context
   const member_id = user.memberId;
+  
+  const tenant = c.get("tenant_host");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
 
   try {
     const query = `

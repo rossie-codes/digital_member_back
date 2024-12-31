@@ -5,15 +5,15 @@ import loginMember from '../../controllers/member_controllers/member_auth/member
 import signupMember from '../../controllers/member_controllers/member_auth/member_signup';
 import logoutMember from '../../controllers/member_controllers/member_auth/member_logout';
 import checkAuth from '../../controllers/member_controllers/member_auth/check_auth';
-import { memberAuthMiddleware } from '../../middleware/memberAuthMiddleware';
+import { memberLoginMiddleware } from '../../middleware/memberAuthMiddleware';
 
 const customerAuthRouter = new Hono();
 
-customerAuthRouter.post('/login', loginMember);
+customerAuthRouter.post('/login', memberLoginMiddleware, loginMember);
 
-customerAuthRouter.post('/signup', signupMember); // Signup route
+customerAuthRouter.post('/signup', memberLoginMiddleware, signupMember); // Signup route
 
-customerAuthRouter.post('/logout', logoutMember);
+customerAuthRouter.post('/logout', memberLoginMiddleware, logoutMember);
 
 // customerAuthRouter.get('/check', memberAuthMiddleware, checkAuth);
 

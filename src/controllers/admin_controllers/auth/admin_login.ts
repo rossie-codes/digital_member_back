@@ -2,7 +2,7 @@
 
 import type { Context } from 'hono';
 // import { pool } from '../../db';
-import { getTenantClient, getTenantHost } from "../../db";
+import { getTenantClient, getTenantHostAdmin } from "../../db";
 import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
 
@@ -63,7 +63,7 @@ export async function loginAdmin(c: Context) {
     console.log('loginAdmin function handle membi_admin_token')
     // Generate a JWT membi_admin_token
 
-    const admin_secret_domain = await getTenantHost(tenant_host)
+    const admin_secret_domain = await getTenantHostAdmin(tenant_host)
     console.log('loginAdmin function handle membi_admin_token', admin_secret_domain)
 
     const admin_secret = admin_secret_domain.admin_secret;

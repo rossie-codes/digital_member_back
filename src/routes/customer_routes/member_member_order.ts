@@ -2,7 +2,6 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-// import { authMiddleware } from '../middleware/authMiddleware';
 
 import {memberAuthMiddleware} from '../../middleware/memberAuthMiddleware';
 
@@ -23,7 +22,7 @@ memberMemberOrderRouter.use('*', memberAuthMiddleware); // Protect all member ro
 
 
 // GET /member - Retrieve all members
-memberMemberOrderRouter.get('/get_member_member_order_list', memberAuthMiddleware, async (c: Context) => {
+memberMemberOrderRouter.get('/get_member_member_order_list', async (c: Context) => {
   try {
     console.log('get_member_member_order_list route begin');
     
@@ -38,7 +37,7 @@ memberMemberOrderRouter.get('/get_member_member_order_list', memberAuthMiddlewar
 });
 
 // GET /member - Retrieve all members
-memberMemberOrderRouter.get('/get_member_member_order_card', memberAuthMiddleware, async (c: Context) => {
+memberMemberOrderRouter.get('/get_member_member_order_card', async (c: Context) => {
   try {
     console.log('get_member_member_order_card route begin');
     
@@ -71,7 +70,7 @@ memberMemberOrderRouter.get('/get_member_member_order_detail/:order_id',memberAu
 });
 
 
-// memberMemberOrderRouter.get('/get_member_redemption_item_setting', memberAuthMiddleware, async (c: Context) => {
+// memberMemberOrderRouter.get('/get_member_redemption_item_setting', async (c: Context) => {
 //   try {
 //     console.log('get_member_redemption_item_setting route begin');
     

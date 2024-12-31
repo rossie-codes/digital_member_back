@@ -1,6 +1,6 @@
 // src/controllers/member_controllers/member_member/get_member_profile_detail.ts
 
-import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 
 // Define the response interface
@@ -16,8 +16,11 @@ async function getProfileDetail(c: Context): Promise<ProfileDetail> {
   const user = c.get('user'); // Retrieve the user from context
   console.log('user is:', user);
   const member_id = user.memberId;
-
   console.log('member_id is:', member_id);
+
+  const tenant = c.get("tenant_host");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
 
   try {
     const query = `

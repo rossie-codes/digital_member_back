@@ -70,16 +70,16 @@ async function getTenantClient(tenantIdentifier: string) {
 }
 
 
-async function getTenantHost(tenant_host: string) {
+async function getTenantHostAdmin(tenant_host: string) {
 
-  console.log('getTenantHost function begin');
+  console.log('getTenantHostAdmin function begin');
 
   const client = await pool.connect(); // Connect to the database
 
   try {
     // Fetch the tenant's schema name based on the app URL from the master schema
 
-    console.log('getTenantHost function begin');
+    console.log('getTenantHostAdmin function begin');
     // const aaa = await client.query('SHOW search_path')
     await client.query(`SET search_path TO system_schema;`);
 
@@ -93,14 +93,14 @@ async function getTenantHost(tenant_host: string) {
     const admin_secret = result.rows[0].admin_secret;
     const app_domain = result.rows[0].app_domain;
 
-    console.log('query getTenantHost done, tenantIdentifier: ', tenant_host);
-    console.log('query getTenantHost done, admin_secret: ', admin_secret);
-    console.log('query getTenantHost done, app_domain: ', app_domain);
+    console.log('query getTenantHostAdmin done, tenantIdentifier: ', tenant_host);
+    console.log('query getTenantHostAdmin done, admin_secret: ', admin_secret);
+    console.log('query getTenantHostAdmin done, app_domain: ', app_domain);
 
     const admin_secret_domain = result.rows[0]
     console.log('admin_secret_domain', admin_secret_domain);
 
-    console.log('getTenantHost function done');
+    console.log('getTenantHostAdmin function done');
     // return admin_secret.rows[0].admin_secret;
     return admin_secret_domain;
 
@@ -114,5 +114,48 @@ async function getTenantHost(tenant_host: string) {
 
 
 
-export { pool, getTenantClient, getTenantHost };
 
+async function getTenantHostCustomer(tenant_host: string) {
+
+  console.log('getTenantHostCustomer function begin');
+
+  const client = await pool.connect(); // Connect to the database
+
+  try {
+    // Fetch the tenant's schema name based on the app URL from the master schema
+    // const aaa = await client.query('SHOW search_path')
+    await client.query(`SET search_path TO system_schema;`);
+
+    const result = await client.query(
+      "SELECT customer_secret, app_domain FROM system_tenant_login WHERE tenant_host = $1",
+      [tenant_host]
+    );
+
+    console.log('result', result.rows);
+
+    const customer_secret = result.rows[0].customer_secret;
+    const app_domain = result.rows[0].app_domain;
+
+    console.log('query getTenantHostCustomer done, tenantIdentifier: ', tenant_host);
+    console.log('query getTenantHostCustomer done, customer_secret: ', customer_secret);
+    console.log('query getTenantHostCustomer done, app_domain: ', app_domain);
+
+    const customer_secret_domain = result.rows[0]
+    console.log('customer_secret_domain', customer_secret_domain);
+
+    console.log('getTenantHostCustomer function done');
+    // return customer_secret.rows[0].customer_secret;
+    return customer_secret_domain;
+
+  } catch (error) {
+    console.error("Error fetching tenant schema or setting search_path:", error);
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+
+
+
+export { pool, getTenantClient, getTenantHostAdmin, getTenantHostCustomer};

@@ -1,6 +1,6 @@
 // src/controllers/member_controllers/member_discount_code/get_member_discount_code_detail.ts
 
-import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 
 // Define the response interface
@@ -20,13 +20,19 @@ async function getMemberDiscountCodeDetail(
 ): Promise<MemberDiscountCodeDetail> {
   console.log("getMemberDiscountCodeDetail function begin");
 
+
   const user = c.get("user");
   console.log("user is:", user);
   const member_id = user.memberId;
   console.log("member_id is:", member_id);
-
   const discountCodeId = c.req.param('discount_code_id');
   console.log('discount_code_id is:', discountCodeId);
+
+
+  const tenant = c.get("tenant_host");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
+
 
   try {
     const query = `

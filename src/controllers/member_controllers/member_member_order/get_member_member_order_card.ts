@@ -1,6 +1,6 @@
 // src/controllers/member_controllers/member_member/get_member_dashboard_card.ts
 
-import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 
 // Define the response interface
@@ -16,9 +16,12 @@ async function getMemberMemberOrderCard(c: Context): Promise<MemberOrderCard> {
   // Retrieve the user from context (assuming you've set it using middleware)
   const user = c.get('user');
   console.log('user is:', user);
-
   const member_id = user.memberId;
   console.log('member_id is:', member_id);
+
+  const tenant = c.get("tenant_host");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
 
   try {
     const query = `

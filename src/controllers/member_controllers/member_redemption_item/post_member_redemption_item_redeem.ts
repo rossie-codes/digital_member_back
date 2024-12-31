@@ -1,6 +1,6 @@
 // src/controllers/member_controllers/member_redemption_item/post_member_redemption_item_redeem.ts
 
-import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 import createShopifyDiscountCodeRedeem from "../../../shopify/post_shopify_new_discount_code_redeem";
 
@@ -17,15 +17,23 @@ interface DiscountInput {
 }
 
 async function postMemberRedemptionItemRedeem(c: Context): Promise<Response> {
+  
   const user = c.get('user'); // Assuming user is set in context
   const member_id = user.memberId;
+
+
 
   try {
     // Get redemption_item_id from request body
     const { redemption_item_id } = await c.req.json();
 
     // Begin transaction
-    const client = await pool.connect();
+    // const client = await pool.connect();
+
+    const tenant = c.get("tenant_host");
+    console.log("tenant", tenant);
+    const client = await getTenantClient(tenant);
+    
     try {
       await client.query('BEGIN');
 

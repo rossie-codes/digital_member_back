@@ -7,6 +7,16 @@ async function logoutMember(c: Context) {
   
   console.log('Logging out member...');
   
+
+  const app_domain = c.get('app_domain');
+  const tenant_host = c.get("tenant_host");
+  // const tenantIdentifier = 'https://mm9_client'
+  // const tenantIdentifier = 'https://membi-admin'
+
+  console.log("tenant at login as tenant_host: ", tenant_host);
+  console.log("tenant at login ad app_domain: ", app_domain);
+
+
   // // Clear the membi_m_token cookie
   // const cookie = serialize('membi_m_token', '', {
   //   httpOnly: true,
@@ -16,7 +26,7 @@ async function logoutMember(c: Context) {
   //   path: '/',
   // });
 
-  const cookie = serialize('membi_m_token', '', {
+  const cookie = serialize(`${tenant_host}_m_token`, '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax', // Change from 'strict' to 'lax'

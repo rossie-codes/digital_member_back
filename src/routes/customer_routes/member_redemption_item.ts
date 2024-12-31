@@ -2,7 +2,6 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-// import { authMiddleware } from '../middleware/authMiddleware';
 
 import {memberAuthMiddleware} from '../../middleware/memberAuthMiddleware';
 
@@ -26,7 +25,7 @@ memberRedemptionItemRouter.use('*', memberAuthMiddleware); // Protect all member
 
 
 // GET /member - Retrieve all members
-memberRedemptionItemRouter.get('/get_member_redemption_item_record_list', memberAuthMiddleware, async (c: Context) => {
+memberRedemptionItemRouter.get('/get_member_redemption_item_record_list', async (c: Context) => {
   try {
     console.log('get_member_redemption_item_record_list route begin');
     
@@ -60,7 +59,7 @@ memberRedemptionItemRouter.get('/get_member_redemption_item_record_detail/:redem
 });
 
 
-memberRedemptionItemRouter.get('/get_member_expired_redemption_item_record_list', memberAuthMiddleware, async (c: Context) => {
+memberRedemptionItemRouter.get('/get_member_expired_redemption_item_record_list', async (c: Context) => {
   try {
     console.log('get_member_expired_redemption_item_record_list route begin');
     
@@ -92,7 +91,7 @@ memberRedemptionItemRouter.get('/get_member_expired_redemption_item_record_detai
 });
 
 
-memberRedemptionItemRouter.get('/get_member_redemption_item_setting', memberAuthMiddleware, async (c: Context) => {
+memberRedemptionItemRouter.get('/get_member_redemption_item_setting', async (c: Context) => {
   try {
     console.log('get_member_redemption_item_setting route begin');
     

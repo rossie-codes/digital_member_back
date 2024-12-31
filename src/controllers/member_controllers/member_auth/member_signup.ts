@@ -1,7 +1,7 @@
 // src/controllers/member_controllers/member_auth/signup.ts
 
 import type { Context } from 'hono';
-import { pool } from '../../db';
+import { pool, getTenantClient } from '../../db';
 import { HTTPException } from 'hono/http-exception';
 import Bun from 'bun'; // Assuming Bun.js is available
 
@@ -14,6 +14,21 @@ interface SignupPayload {
 }
 
 async function signupMember(c: Context) {
+
+  console.log('loginMember function begin')
+  
+
+  const app_domain = c.get('app_domain');
+  const tenant_host = c.get("tenant_host");
+  // const tenantIdentifier = 'https://mm9_client'
+  // const tenantIdentifier = 'https://membi-admin'
+
+  console.log("tenant at login as tenant_host: ", tenant_host);
+  console.log("tenant at login ad app_domain: ", app_domain);
+
+  const pool = await getTenantClient(tenant_host);
+
+
   try {
     console.log('Signup request received');
     const { member_name, member_birthday, member_phone, referrer_phone, member_password }: SignupPayload = await c.req.json();
@@ -50,7 +65,8 @@ async function signupMember(c: Context) {
     let member_id: number;
 
     // Start transaction
-    const client = await pool.connect();
+    // const client = await pool.connect();
+    const client = await getTenantClient(tenant_host);
     try {
       await client.query('BEGIN');
 
@@ -112,6 +128,8 @@ async function signupMember(c: Context) {
       throw error;
     }
     return c.json({ message: 'Internal server error' }, 500);
+  } finally {
+    pool.release();
   }
 }
 

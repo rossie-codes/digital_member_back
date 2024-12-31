@@ -2,7 +2,7 @@
 
 import type { Context } from 'hono';
 // import { pool } from '../../db';
-import { getTenantClient, getTenantHost } from '../../db';
+import { getTenantClient, getTenantHostCustomer } from '../../db';
 // import bcrypt from 'bcryptjs';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -60,9 +60,19 @@ async function loginMember(c: Context) {
 
       return c.json({ error: 'Invalid credentials' }, 401);
     }
+    
+
+    console.log('loginCustomer function handle membi_m_token')
     // Generate a JWT membi_m_token
+
+    const customer_secret_domain = await getTenantHostCustomer(tenant_host)
+    console.log('loginCustomer function handle membi_m_token', customer_secret_domain)
+
+    const customer_secret = customer_secret_domain.customer_secret;
+
+
     // const membi_m_token = jwt.sign({ memberId: user.member_id }, MEMBI_CUSTOMER_SECRET, { expiresIn: '10h' });
-    const membi_m_token = jwt.sign({ memberId: user.member_id }, MEMBI_CUSTOMER_SECRET, { expiresIn: '10h' });
+    const membi_m_token = jwt.sign({ memberId: user.member_id }, customer_secret, { expiresIn: '10h' });
 
     // Update last_login and reset failed_login_attempts
     await pool.query(

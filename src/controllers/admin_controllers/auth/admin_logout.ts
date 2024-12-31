@@ -2,7 +2,7 @@
 
 import type { Context } from 'hono';
 import { serialize } from 'cookie';
-import { getTenantClient, getTenantHost } from "../../db";
+import { getTenantClient } from "../../db";
 
 export async function logoutAdmin(c: Context) {
 

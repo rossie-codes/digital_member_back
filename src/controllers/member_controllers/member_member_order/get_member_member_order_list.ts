@@ -1,6 +1,6 @@
 // src/controllers/member_controllers/member_member_order/get_member_member_order_list.ts
 
-import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 
 // Define the response interface
@@ -21,9 +21,13 @@ interface MemberOrder {
 async function getMemberMemberOrderList(
   c: Context
 ): Promise<MemberOrder[]> {
-  const user = c.get('user'); // Assuming user is set in context
   
+  const user = c.get('user'); // Assuming user is set in context
   const member_id = user.memberId;
+
+  const tenant = c.get("tenant_host");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
 
   try {
     // Get member_phone using member_id

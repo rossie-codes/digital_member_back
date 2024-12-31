@@ -2,7 +2,6 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-// import { authMiddleware } from '../middleware/authMiddleware';
 
 import {memberAuthMiddleware} from '../../middleware/memberAuthMiddleware';
 
@@ -15,7 +14,7 @@ import { HTTPException } from 'hono/http-exception'
 
 const memberMembershipTierRouter = new Hono();
 
-// memberRouter.use('*', authMiddleware); // Protect all member routes
+memberMembershipTierRouter.use('*', memberAuthMiddleware); // Protect all member routes
 
 
 // GET /member - Retrieve all members

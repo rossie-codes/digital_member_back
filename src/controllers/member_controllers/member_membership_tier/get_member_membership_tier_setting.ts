@@ -1,6 +1,6 @@
 // src/controllers/member_controllers/member_member/get_membership_tier_setting.ts
 
-import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 
 // Define the response interface
@@ -17,6 +17,12 @@ interface MembershipTierSetting {
 async function getMembershipTierSetting(
   c: Context
 ): Promise<MembershipTierSetting[]> {
+  
+  
+  const tenant = c.get("tenant_host");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
+  
   try {
     const query = `
       SELECT

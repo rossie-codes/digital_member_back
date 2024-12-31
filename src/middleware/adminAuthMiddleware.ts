@@ -4,11 +4,9 @@ import type { Context, Next } from 'hono';
 import jwt from 'jsonwebtoken';
 import { validator } from 'hono/validator'
 import { getCookie, setCookie } from 'hono/cookie'
-import { getTenantHost } from '../controllers/db';
+import { getTenantHostAdmin } from '../controllers/db';
 
 const MEMBI_ADMIN_SECRET = process.env.MEMBI_ADMIN_SECRET || 'admin';
-
-
 
 export const adminAuthMiddleware = async (c: Context, next: Next) => {
 
@@ -22,7 +20,7 @@ export const adminAuthMiddleware = async (c: Context, next: Next) => {
   console.log('Tenant Identifier:', tenant_host);
   c.set('tenant_host', tenant_host);
 
-  const admin_secret_domain = await getTenantHost(tenant_host);
+  const admin_secret_domain = await getTenantHostAdmin(tenant_host);
   console.log('admin_secret_domain: ', admin_secret_domain)
   const admin_secret = admin_secret_domain.admin_secret;
   const app_domain = admin_secret_domain.app_domain;
@@ -71,7 +69,7 @@ export const adminLoginMiddleware = async (c: Context, next: Next) => {
 
     c.set('tenant_host', tenant_host);
 
-    const admin_secret_domain = await getTenantHost(tenant_host);
+    const admin_secret_domain = await getTenantHostAdmin(tenant_host);
     console.log('admin_secret_domain: ', admin_secret_domain)
     const admin_secret = admin_secret_domain.admin_secret;
     const app_domain = admin_secret_domain.app_domain;

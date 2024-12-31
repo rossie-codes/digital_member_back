@@ -2,7 +2,6 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-// import { authMiddleware } from '../middleware/authMiddleware';
 
 import {memberAuthMiddleware} from '../../middleware/memberAuthMiddleware';
 
@@ -26,11 +25,11 @@ import { HTTPException } from 'hono/http-exception'
 
 const memberMemberRouter = new Hono();
 
-// memberRouter.use('*', authMiddleware); // Protect all member routes
+memberMemberRouter.use('*', memberAuthMiddleware); // Protect all member routes
 
 
 // GET /member - Retrieve all members
-memberMemberRouter.get('/get_member_dashboard_card', memberAuthMiddleware, async (c: Context) => {
+memberMemberRouter.get('/get_member_dashboard_card', async (c: Context) => {
   try {
     console.log('get_member_dashboard_card route begin');
     
@@ -45,7 +44,7 @@ memberMemberRouter.get('/get_member_dashboard_card', memberAuthMiddleware, async
 });
 
 
-memberMemberRouter.get('/get_member_redemption_page_card', memberAuthMiddleware, async (c: Context) => {
+memberMemberRouter.get('/get_member_redemption_page_card', async (c: Context) => {
   try {
     console.log('get_member_redemption_page_card route begin');
     
@@ -60,7 +59,7 @@ memberMemberRouter.get('/get_member_redemption_page_card', memberAuthMiddleware,
 });
 
 
-memberMemberRouter.get('/get_member_profile_detail', memberAuthMiddleware, async (c: Context) => {
+memberMemberRouter.get('/get_member_profile_detail', async (c: Context) => {
   try {
     console.log('get_member_profile_detail route begin');
     
@@ -74,7 +73,7 @@ memberMemberRouter.get('/get_member_profile_detail', memberAuthMiddleware, async
   }
 });
 
-memberMemberRouter.put('/put_member_update_profile_detail', memberAuthMiddleware, async (c: Context) => {
+memberMemberRouter.put('/put_member_update_profile_detail', async (c: Context) => {
   try {
     console.log('put_member_update_profile_detail route begin');
     

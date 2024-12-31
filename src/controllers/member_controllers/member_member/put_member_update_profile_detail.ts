@@ -1,6 +1,6 @@
 // src/controllers/member_controllers/member_member/put_member_update_profile_detail.ts
 
-import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 import bcrypt from "bcryptjs";
 
@@ -13,8 +13,14 @@ interface UpdateProfileDetail {
 }
 
 async function putMemberUpdateProfileDetail(c: Context): Promise<Response> {
+  
   const user = c.get("user"); // Retrieve the user from context
   const member_id = user.memberId;
+
+  const tenant = c.get("tenant_host");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
+
 
   try {
     // Parse request body
@@ -26,7 +32,12 @@ async function putMemberUpdateProfileDetail(c: Context): Promise<Response> {
     }: UpdateProfileDetail = await c.req.json();
 
     // Begin transaction
-    const client = await pool.connect();
+    // const client = await pool.connect();
+
+    const tenant = c.get("tenant_host");
+    console.log("tenant", tenant);
+    const client = await getTenantClient(tenant);
+
     try {
       await client.query("BEGIN");
 

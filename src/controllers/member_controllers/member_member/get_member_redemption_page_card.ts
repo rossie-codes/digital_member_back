@@ -1,6 +1,6 @@
 // src/controllers/member_controllers/member_member/get_member_redemption_page_card.ts
 
-import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 
 // Define the response interface
@@ -18,8 +18,13 @@ interface MemberRedemptionPageCard {
 async function getMemberRedemptionPageCard(
   c: Context
 ): Promise<MemberRedemptionPageCard> {
+  
   const user = c.get('user'); // Retrieve the user from context
   const member_id = user.memberId;
+
+  const tenant = c.get("tenant_host");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
 
   try {
     // Get member details along with current membership tier

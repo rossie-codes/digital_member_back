@@ -1,6 +1,6 @@
 // src/controllers/member_controllers/member_redemption_item/get_member_redemption_item_detail.ts
 
-import { pool } from "../../db";
+import { getTenantClient } from "../../db";
 import type { Context } from "hono";
 
 // Define the response interface
@@ -22,6 +22,10 @@ async function getMemberRedemptionItemDetail(
 ): Promise<MemberRedemptionItemDetail> {
   // Retrieve the redemption_item_id from request parameters
   const redemptionItemId = c.req.param('redemption_item_id');
+
+  const tenant = c.get("tenant_host");
+  console.log("tenant", tenant);
+  const pool = await getTenantClient(tenant);
 
   try {
     const query = `

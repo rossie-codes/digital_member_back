@@ -2,7 +2,6 @@
 
 import { Hono } from 'hono';
 import { type Context } from 'hono';
-// import { authMiddleware } from '../middleware/authMiddleware';
 
 import {memberAuthMiddleware} from '../../middleware/memberAuthMiddleware';
 
@@ -23,7 +22,7 @@ memberDiscountCodeRouter.use('*', memberAuthMiddleware); // Protect all member r
 
 
 // GET /member - Retrieve all members
-memberDiscountCodeRouter.get('/get_member_discount_code_list', memberAuthMiddleware, async (c: Context) => {
+memberDiscountCodeRouter.get('/get_member_discount_code_list', async (c: Context) => {
   try {
     console.log('get_member_discount_code route begin');
     
@@ -38,7 +37,7 @@ memberDiscountCodeRouter.get('/get_member_discount_code_list', memberAuthMiddlew
 });
 
 // GET /member/get_member_detail/:memberPhone - Retrieve member details by phone
-memberDiscountCodeRouter.get('/get_member_discount_code_detail/:discount_code_id',memberAuthMiddleware, async (c: Context) => {
+memberDiscountCodeRouter.get('/get_member_discount_code_detail/:discount_code_id', async (c: Context) => {
   try {
     console.log('get_member_discount_code_detail route begin');
     
