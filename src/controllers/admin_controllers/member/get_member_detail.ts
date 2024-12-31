@@ -148,7 +148,7 @@ async function getMemberDetail(c: Context): Promise<Member> {
       SELECT 
         COUNT(*) AS purchase_count,
         COALESCE(SUM(total_price), 0) AS total_purchase_amount
-      FROM "order"
+      FROM member_order
       WHERE customer_phone = $1
     `;
     const purchaseStatsResult = await pool.query(purchaseStatsQuery, [
@@ -162,7 +162,7 @@ async function getMemberDetail(c: Context): Promise<Member> {
     const currentMembershipPurchaseQuery = `
       SELECT 
         COALESCE(SUM(total_price), 0) AS current_membership_purchase_amount
-      FROM "order"
+      FROM member_order
       WHERE
         customer_phone = $1
         AND order_created_date BETWEEN $2 AND $3
@@ -183,7 +183,7 @@ async function getMemberDetail(c: Context): Promise<Member> {
         order_id AS purchase_id,
         order_created_date AS purchase_date,
         total_price AS amount
-      FROM "order"
+      FROM member_order
       WHERE
         customer_phone = $1
       ORDER BY order_created_date DESC
@@ -224,7 +224,7 @@ async function getMemberDetail(c: Context): Promise<Member> {
         COALESCE(SUM(o.total_price), 0) AS total_purchase_amount
       FROM
         member m
-      LEFT JOIN "order" o ON o.customer_phone = m.member_phone
+      LEFT JOIN member_order o ON o.customer_phone = m.member_phone
       WHERE
         m.referrer_member_id = $1
       GROUP BY

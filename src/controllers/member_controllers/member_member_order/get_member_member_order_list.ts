@@ -56,7 +56,7 @@ async function getMemberMemberOrderList(
         per.point_earning_id,
         per.point_earning
       FROM
-        "order" o
+        member_order o
         INNER JOIN order_line_items oli ON o.order_id = oli.order_id
         LEFT JOIN point_earning_record per ON per.order_id = o.order_id AND per.member_id = $2
       WHERE

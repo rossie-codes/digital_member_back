@@ -29,7 +29,7 @@ async function getMemberMemberOrderCard(c: Context): Promise<MemberOrderCard> {
       FROM
         member m
       LEFT JOIN
-        "order" o ON o.customer_phone = m.member_phone
+        member_order o ON o.customer_phone = m.member_phone
         AND o.order_created_date >= (NOW() - INTERVAL '12 months')
       WHERE
         m.member_id = $1

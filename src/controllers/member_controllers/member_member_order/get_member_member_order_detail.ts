@@ -83,7 +83,7 @@ async function getMemberMemberOrderDetail(c: Context): Promise<MemberOrderDetail
         o.customer_phone,
         o.customer_address
       FROM
-        "order" o
+        member_order o
       WHERE
         o.order_id = $1
         AND o.customer_phone = $2
