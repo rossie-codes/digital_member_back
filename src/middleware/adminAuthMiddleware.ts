@@ -26,6 +26,10 @@ export const adminAuthMiddleware = async (c: Context, next: Next) => {
   const app_domain = admin_secret_domain.app_domain;
   const tenant_host = admin_secret_domain.tenant_host;
 
+  console.log('admin_secret', admin_secret);
+  console.log('app_domain', app_domain);
+  console.log('tenant_host', tenant_host);
+
   c.set('app_domain', app_domain);
   c.set('tenant_host', tenant_host);
 
@@ -60,23 +64,24 @@ export const adminLoginMiddleware = async (c: Context, next: Next) => {
 
     console.log('the sub-domin of the user is: ', user_sub_domain);
 
-    const tenant_host = extractTenantFromHost(user_sub_domain!);
+    const admin_host = extractTenantFromHost(user_sub_domain!);
 
-    if (!tenant_host) {
+    if (!admin_host) {
       return c.json({ error: 'Tenant identifier missing' }, 400); // Bad Request if no tenant is found
     }
 
-    console.log('Tenant Identifier:', tenant_host);
+    console.log('Tenant Identifier:', admin_host);
 
-    c.set('tenant_host', tenant_host);
 
-    const admin_secret_domain = await getTenantHostAdmin(tenant_host);
+
+    const admin_secret_domain = await getTenantHostAdmin(admin_host);
     console.log('admin_secret_domain: ', admin_secret_domain)
     const admin_secret = admin_secret_domain.admin_secret;
     const app_domain = admin_secret_domain.app_domain;
+    const tenant_host = admin_secret_domain.tenant_host;
 
     c.set('app_domain', app_domain);
-
+    c.set('tenant_host', tenant_host);
 
 
     await next();
