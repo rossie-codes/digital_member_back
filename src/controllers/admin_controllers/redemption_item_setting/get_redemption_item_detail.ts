@@ -105,6 +105,8 @@ async function getRedemptionItemDetail(c: Context): Promise<RedemptionItem> {
   } catch (error) {
     console.error('Error fetching redemption item:', error);
     throw error;
+  } finally {
+    pool.release();
   }
 }
 

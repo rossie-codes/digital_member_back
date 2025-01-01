@@ -7,7 +7,7 @@ import type { Context } from "hono";
 interface MemberRedemptionItemDetail {
   redemption_item_id: number;
   redemption_item_name: string;
-  redemption_type: 'fixed_amount' | 'percentage';
+  redemption_type: "fixed_amount" | "percentage";
   discount_amount: number;
   validity_period: number;
   valid_from: string | null;
@@ -21,7 +21,7 @@ async function getMemberRedemptionItemDetail(
   c: Context
 ): Promise<MemberRedemptionItemDetail> {
   // Retrieve the redemption_item_id from request parameters
-  const redemptionItemId = c.req.param('redemption_item_id');
+  const redemptionItemId = c.req.param("redemption_item_id");
 
   const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
@@ -50,7 +50,7 @@ async function getMemberRedemptionItemDetail(
     const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
-      throw new Error('Redemption item not found');
+      throw new Error("Redemption item not found");
     }
 
     const row = result.rows[0];
@@ -72,6 +72,8 @@ async function getMemberRedemptionItemDetail(
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

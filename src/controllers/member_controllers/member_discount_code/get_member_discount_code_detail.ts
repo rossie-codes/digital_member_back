@@ -20,19 +20,16 @@ async function getMemberDiscountCodeDetail(
 ): Promise<MemberDiscountCodeDetail> {
   console.log("getMemberDiscountCodeDetail function begin");
 
-
   const user = c.get("user");
   console.log("user is:", user);
   const member_id = user.memberId;
   console.log("member_id is:", member_id);
-  const discountCodeId = c.req.param('discount_code_id');
-  console.log('discount_code_id is:', discountCodeId);
-
+  const discountCodeId = c.req.param("discount_code_id");
+  console.log("discount_code_id is:", discountCodeId);
 
   const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
   const pool = await getTenantClient(tenant);
-
 
   try {
     const query = `
@@ -55,7 +52,7 @@ async function getMemberDiscountCodeDetail(
     const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
-      throw new Error('Discount code not found');
+      throw new Error("Discount code not found");
     }
 
     const row = result.rows[0];
@@ -76,6 +73,8 @@ async function getMemberDiscountCodeDetail(
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

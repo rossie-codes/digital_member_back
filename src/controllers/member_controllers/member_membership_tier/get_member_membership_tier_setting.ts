@@ -17,12 +17,10 @@ interface MembershipTierSetting {
 async function getMembershipTierSetting(
   c: Context
 ): Promise<MembershipTierSetting[]> {
-  
-  
   const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
   const pool = await getTenantClient(tenant);
-  
+
   try {
     const query = `
       SELECT
@@ -53,6 +51,8 @@ async function getMembershipTierSetting(
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

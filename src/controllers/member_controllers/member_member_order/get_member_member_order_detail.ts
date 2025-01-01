@@ -48,18 +48,18 @@ interface LineItemDiscountCode {
   discount_amount: number;
 }
 
-async function getMemberMemberOrderDetail(c: Context): Promise<MemberOrderDetail> {
-  
-  const user = c.get('user'); // Assuming user is set in context
+async function getMemberMemberOrderDetail(
+  c: Context
+): Promise<MemberOrderDetail> {
+  const user = c.get("user"); // Assuming user is set in context
   const member_id = user.memberId;
 
   // Retrieve the order_id from request parameters
-  const order_id = c.req.param('order_id');
+  const order_id = c.req.param("order_id");
 
   const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
   const pool = await getTenantClient(tenant);
-
 
   try {
     // Get member_phone using member_id
@@ -71,7 +71,7 @@ async function getMemberMemberOrderDetail(c: Context): Promise<MemberOrderDetail
     const memberResult = await pool.query(memberQuery, [member_id]);
 
     if (memberResult.rows.length === 0) {
-      throw new Error('Member not found');
+      throw new Error("Member not found");
     }
 
     const member_phone = memberResult.rows[0].member_phone;
@@ -97,7 +97,7 @@ async function getMemberMemberOrderDetail(c: Context): Promise<MemberOrderDetail
     const orderResult = await pool.query(orderQuery, [order_id, member_phone]);
 
     if (orderResult.rows.length === 0) {
-      throw new Error('Order not found or does not belong to the member');
+      throw new Error("Order not found or does not belong to the member");
     }
 
     const orderRow = orderResult.rows[0];
@@ -113,7 +113,10 @@ async function getMemberMemberOrderDetail(c: Context): Promise<MemberOrderDetail
         order_id = $1
         AND member_id = $2
     `;
-    const pointEarningResult = await pool.query(pointEarningQuery, [order_id, member_id]);
+    const pointEarningResult = await pool.query(pointEarningQuery, [
+      order_id,
+      member_id,
+    ]);
 
     const pointEarningRow = pointEarningResult.rows[0] || null;
 
@@ -129,16 +132,23 @@ async function getMemberMemberOrderDetail(c: Context): Promise<MemberOrderDetail
       WHERE
         order_id = $1
     `;
-    const orderDiscountsResult = await pool.query(orderDiscountsQuery, [order_id]);
+    const orderDiscountsResult = await pool.query(orderDiscountsQuery, [
+      order_id,
+    ]);
 
-    const discount_codes: OrderDiscountCode[] = orderDiscountsResult.rows.map((row) => ({
-      order_discount_id: row.order_discount_id,
-      discount_type: row.discount_type,
-      discount_code: row.discount_code,
-      discount_amount: parseFloat(row.discount_amount),
-    }));
+    const discount_codes: OrderDiscountCode[] = orderDiscountsResult.rows.map(
+      (row) => ({
+        order_discount_id: row.order_discount_id,
+        discount_type: row.discount_type,
+        discount_code: row.discount_code,
+        discount_amount: parseFloat(row.discount_amount),
+      })
+    );
 
-    const totalOrderDiscountAmount = discount_codes.reduce((acc, discount) => acc + discount.discount_amount, 0);
+    const totalOrderDiscountAmount = discount_codes.reduce(
+      (acc, discount) => acc + discount.discount_amount,
+      0
+    );
 
     // Get line items
     const lineItemsQuery = `
@@ -174,14 +184,17 @@ async function getMemberMemberOrderDetail(c: Context): Promise<MemberOrderDetail
         WHERE
           order_line_item_id = $1
       `;
-      const lineItemDiscountsResult = await pool.query(lineItemDiscountsQuery, [row.line_item_id]);
+      const lineItemDiscountsResult = await pool.query(lineItemDiscountsQuery, [
+        row.line_item_id,
+      ]);
 
-      const lineItemDiscounts: LineItemDiscountCode[] = lineItemDiscountsResult.rows.map((discountRow) => ({
-        line_item_discount_id: discountRow.line_item_discount_id,
-        discount_type: discountRow.discount_type,
-        discount_code: discountRow.discount_code,
-        discount_amount: parseFloat(discountRow.discount_amount),
-      }));
+      const lineItemDiscounts: LineItemDiscountCode[] =
+        lineItemDiscountsResult.rows.map((discountRow) => ({
+          line_item_discount_id: discountRow.line_item_discount_id,
+          discount_type: discountRow.discount_type,
+          discount_code: discountRow.discount_code,
+          discount_amount: parseFloat(discountRow.discount_amount),
+        }));
 
       const lineItem: LineItem = {
         line_item_id: row.line_item_id,
@@ -205,19 +218,24 @@ async function getMemberMemberOrderDetail(c: Context): Promise<MemberOrderDetail
       0
     );
 
-    const totalDiscountAmount = totalOrderDiscountAmount + totalLineItemDiscountAmount;
+    const totalDiscountAmount =
+      totalOrderDiscountAmount + totalLineItemDiscountAmount;
 
     const memberOrderDetail: MemberOrderDetail = {
       order_id: orderRow.order_id,
       total_price: parseFloat(orderRow.total_price),
       webstore_order_number: orderRow.webstore_order_number,
       order_created_date: orderRow.order_created_date.toISOString(),
-      delivery_date: orderRow.delivery_date ? orderRow.delivery_date.toISOString() : null,
+      delivery_date: orderRow.delivery_date
+        ? orderRow.delivery_date.toISOString()
+        : null,
       customer_name: orderRow.customer_name,
       customer_email: orderRow.customer_email,
       customer_phone: orderRow.customer_phone,
       customer_address: orderRow.customer_address,
-      point_earning_id: pointEarningRow ? pointEarningRow.point_earning_id : null,
+      point_earning_id: pointEarningRow
+        ? pointEarningRow.point_earning_id
+        : null,
       point_earning: pointEarningRow ? pointEarningRow.point_earning : null,
       discount_codes: discount_codes,
       total_discount_amount: totalDiscountAmount,
@@ -228,6 +246,8 @@ async function getMemberMemberOrderDetail(c: Context): Promise<MemberOrderDetail
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

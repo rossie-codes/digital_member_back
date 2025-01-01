@@ -13,10 +13,9 @@ interface RedemptionItemRecord {
 async function getMemberRedemptionItemRecord(
   c: Context
 ): Promise<RedemptionItemRecord[]> {
-
   const user = c.get("user"); // Retrieve the user from context
   const member_id = user.memberId;
-  
+
   const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
   const pool = await getTenantClient(tenant);
@@ -53,6 +52,8 @@ async function getMemberRedemptionItemRecord(
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

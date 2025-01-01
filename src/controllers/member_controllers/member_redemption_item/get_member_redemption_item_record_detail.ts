@@ -7,7 +7,7 @@ import type { Context } from "hono";
 interface MemberRedemptionItemRecordDetail {
   redemption_item_id: number;
   redemption_item_name: string;
-  redemption_type: 'fixed_amount' | 'percentage';
+  redemption_type: "fixed_amount" | "percentage";
   discount_amount: number;
   validity_period: number;
   valid_from: string | null;
@@ -24,12 +24,12 @@ interface MemberRedemptionItemRecordDetail {
 async function getMemberRedemptionItemRecordDetail(
   c: Context
 ): Promise<MemberRedemptionItemRecordDetail> {
-  console.log('getMemberRedemptionItemRecordDetail function begin');
-  
+  console.log("getMemberRedemptionItemRecordDetail function begin");
+
   const user = c.get("user"); // Retrieve the user from context
   const member_id = user.memberId;
   // Retrieve the redemption_record_id from request parameters
-  const redemption_record_id = c.req.param('redemption_record_id');
+  const redemption_record_id = c.req.param("redemption_record_id");
 
   const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
@@ -65,7 +65,7 @@ async function getMemberRedemptionItemRecordDetail(
     const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
-      throw new Error('Redemption record not found');
+      throw new Error("Redemption record not found");
     }
 
     const row = result.rows[0];
@@ -91,6 +91,8 @@ async function getMemberRedemptionItemRecordDetail(
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

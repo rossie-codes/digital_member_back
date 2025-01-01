@@ -12,13 +12,15 @@ interface MemberDashboardCard {
   membership_expiry_date: string;
 }
 
-async function getMemberDashboardCard(c: Context): Promise<MemberDashboardCard> {
-  console.log('getMemberDashboardCard function begin');
+async function getMemberDashboardCard(
+  c: Context
+): Promise<MemberDashboardCard> {
+  console.log("getMemberDashboardCard function begin");
 
-  const user = c.get('user'); // Retrieve the user from context
-  console.log('user is:', user);
+  const user = c.get("user"); // Retrieve the user from context
+  console.log("user is:", user);
   const member_id = user.memberId;
-  console.log('member_id is:', member_id);
+  console.log("member_id is:", member_id);
 
   const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
@@ -41,7 +43,7 @@ async function getMemberDashboardCard(c: Context): Promise<MemberDashboardCard> 
     const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
-      throw new Error('Member not found');
+      throw new Error("Member not found");
     }
 
     const row = result.rows[0];
@@ -54,12 +56,13 @@ async function getMemberDashboardCard(c: Context): Promise<MemberDashboardCard> 
       membership_expiry_date: row.membership_expiry_date.toISOString(), // Adjust as needed
     };
 
-    console.log('getMemberDashboardCard function end');
+    console.log("getMemberDashboardCard function end");
     return memberDashboardCard;
-
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

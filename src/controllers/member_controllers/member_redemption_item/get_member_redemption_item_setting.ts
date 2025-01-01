@@ -7,14 +7,13 @@ import type { Context } from "hono";
 interface RedemptionItemSetting {
   redemption_item_id: number;
   redemption_item_name: string;
-  redemption_type: 'fixed_amount' | 'percentage';
+  redemption_type: "fixed_amount" | "percentage";
   redeem_point: number;
 }
 
 async function getMemberRedemptionItemSetting(
   c: Context
 ): Promise<RedemptionItemSetting[]> {
-
   const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
   const pool = await getTenantClient(tenant);
@@ -39,6 +38,8 @@ async function getMemberRedemptionItemSetting(
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

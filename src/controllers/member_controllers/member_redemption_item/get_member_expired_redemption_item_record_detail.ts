@@ -7,7 +7,7 @@ import type { Context } from "hono";
 interface MemberExpiredRedemptionItemRecordDetail {
   redemption_item_id: number;
   redemption_item_name: string;
-  redemption_type: 'fixed_amount' | 'percentage';
+  redemption_type: "fixed_amount" | "percentage";
   discount_amount: number;
   validity_period: number;
   valid_from: string | null;
@@ -24,12 +24,12 @@ interface MemberExpiredRedemptionItemRecordDetail {
 async function getMemberExpiredRedemptionItemRecordDetail(
   c: Context
 ): Promise<MemberExpiredRedemptionItemRecordDetail> {
-  console.log('getMemberExpiredRedemptionItemRecordDetail function begin');
-  
+  console.log("getMemberExpiredRedemptionItemRecordDetail function begin");
+
   const user = c.get("user"); // Retrieve the user from context
   const member_id = user.memberId;
   // Retrieve the redemption_record_id from request parameters
-  const redemption_record_id = c.req.param('redemption_record_id');
+  const redemption_record_id = c.req.param("redemption_record_id");
 
   const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
@@ -65,32 +65,37 @@ async function getMemberExpiredRedemptionItemRecordDetail(
     const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
-      throw new Error('Redemption record not found');
+      throw new Error("Redemption record not found");
     }
 
     const row = result.rows[0];
 
-    const memberExpiredRedemptionItemRecordDetail: MemberExpiredRedemptionItemRecordDetail = {
-      redemption_item_id: row.redemption_item_id,
-      redemption_item_name: row.redemption_item_name,
-      redemption_type: row.redemption_type,
-      discount_amount: parseFloat(row.discount_amount),
-      validity_period: row.validity_period,
-      valid_from: row.valid_from ? row.valid_from.toISOString() : null,
-      valid_until: row.valid_until ? row.valid_until.toISOString() : null,
-      redeem_point: row.redeem_point,
-      redemption_content: row.redemption_content,
-      redemption_term: row.redemption_term,
-      redemption_record_id: row.redemption_record_id,
-      redeem_code: row.redeem_code,
-      received_date: row.received_date ? row.received_date.toISOString() : null,
-      end_date: row.end_date ? row.end_date.toISOString() : null,
-    };
+    const memberExpiredRedemptionItemRecordDetail: MemberExpiredRedemptionItemRecordDetail =
+      {
+        redemption_item_id: row.redemption_item_id,
+        redemption_item_name: row.redemption_item_name,
+        redemption_type: row.redemption_type,
+        discount_amount: parseFloat(row.discount_amount),
+        validity_period: row.validity_period,
+        valid_from: row.valid_from ? row.valid_from.toISOString() : null,
+        valid_until: row.valid_until ? row.valid_until.toISOString() : null,
+        redeem_point: row.redeem_point,
+        redemption_content: row.redemption_content,
+        redemption_term: row.redemption_term,
+        redemption_record_id: row.redemption_record_id,
+        redeem_code: row.redeem_code,
+        received_date: row.received_date
+          ? row.received_date.toISOString()
+          : null,
+        end_date: row.end_date ? row.end_date.toISOString() : null,
+      };
 
     return memberExpiredRedemptionItemRecordDetail;
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

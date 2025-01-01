@@ -18,8 +18,7 @@ interface MemberRedemptionPageCard {
 async function getMemberRedemptionPageCard(
   c: Context
 ): Promise<MemberRedemptionPageCard> {
-  
-  const user = c.get('user'); // Retrieve the user from context
+  const user = c.get("user"); // Retrieve the user from context
   const member_id = user.memberId;
 
   const tenant = c.get("tenant_host");
@@ -44,7 +43,7 @@ async function getMemberRedemptionPageCard(
     const memberResult = await pool.query(memberQuery, memberValues);
 
     if (memberResult.rows.length === 0) {
-      throw new Error('Member not found');
+      throw new Error("Member not found");
     }
 
     const memberRow = memberResult.rows[0];
@@ -80,9 +79,15 @@ async function getMemberRedemptionPageCard(
       membership_tier_id: memberRow.membership_tier_id,
       membership_tier_name: memberRow.membership_tier_name,
       points_balance: memberRow.points_balance,
-      next_membership_tier_id: nextTierRow ? nextTierRow.membership_tier_id : null,
-      next_membership_tier_name: nextTierRow ? nextTierRow.membership_tier_name : null,
-      next_membership_tier_point: nextTierRow ? nextTierRow.require_point : null,
+      next_membership_tier_id: nextTierRow
+        ? nextTierRow.membership_tier_id
+        : null,
+      next_membership_tier_name: nextTierRow
+        ? nextTierRow.membership_tier_name
+        : null,
+      next_membership_tier_point: nextTierRow
+        ? nextTierRow.require_point
+        : null,
       point_to_next_tier: point_to_next_tier,
     };
 
@@ -90,6 +95,8 @@ async function getMemberRedemptionPageCard(
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

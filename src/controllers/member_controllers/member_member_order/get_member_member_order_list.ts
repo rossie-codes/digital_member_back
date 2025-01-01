@@ -18,11 +18,8 @@ interface MemberOrder {
   point_earning: number | null;
 }
 
-async function getMemberMemberOrderList(
-  c: Context
-): Promise<MemberOrder[]> {
-  
-  const user = c.get('user'); // Assuming user is set in context
+async function getMemberMemberOrderList(c: Context): Promise<MemberOrder[]> {
+  const user = c.get("user"); // Assuming user is set in context
   const member_id = user.memberId;
 
   const tenant = c.get("tenant_host");
@@ -38,9 +35,8 @@ async function getMemberMemberOrderList(
     `;
     const memberResult = await pool.query(memberQuery, [member_id]);
 
-
     if (memberResult.rows.length === 0) {
-      throw new Error('Member not found');
+      throw new Error("Member not found");
     }
 
     const member_phone = memberResult.rows[0].member_phone;
@@ -90,6 +86,8 @@ async function getMemberMemberOrderList(
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

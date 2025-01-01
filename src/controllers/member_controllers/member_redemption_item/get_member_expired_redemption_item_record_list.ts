@@ -13,7 +13,6 @@ interface ExpiredRedemptionItemRecord {
 async function getMemberExpiredRedemptionItemRecord(
   c: Context
 ): Promise<ExpiredRedemptionItemRecord[]> {
-  
   const user = c.get("user"); // Retrieve the user from context
   const member_id = user.memberId;
 
@@ -40,19 +39,22 @@ async function getMemberExpiredRedemptionItemRecord(
 
     const result = await pool.query(query, values);
 
-    const memberExpiredRedemptionItemRecord: ExpiredRedemptionItemRecord[] = result.rows.map(
-      (row) => ({
+    const memberExpiredRedemptionItemRecord: ExpiredRedemptionItemRecord[] =
+      result.rows.map((row) => ({
         expired_redemption_record_id: row.redemption_record_id,
         expired_redemption_item_id: row.redemption_item_id,
         expired_redemption_item_name: row.redemption_item_name,
-        expired_valid_until: row.valid_until ? row.valid_until.toISOString() : null,
-      })
-    );
+        expired_valid_until: row.valid_until
+          ? row.valid_until.toISOString()
+          : null,
+      }));
 
     return memberExpiredRedemptionItemRecord;
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

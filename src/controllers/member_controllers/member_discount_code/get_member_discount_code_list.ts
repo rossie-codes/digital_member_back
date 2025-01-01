@@ -37,7 +37,6 @@ async function getMemberDiscountCode(
 
     const result = await pool.query(query);
 
-
     const memberDiscountCodes: MemberDiscountCode[] = result.rows.map(
       (row) => ({
         discount_code_id: row.discount_code_id,
@@ -51,6 +50,8 @@ async function getMemberDiscountCode(
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

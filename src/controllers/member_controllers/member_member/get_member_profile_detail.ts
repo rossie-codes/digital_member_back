@@ -11,12 +11,12 @@ interface ProfileDetail {
 }
 
 async function getProfileDetail(c: Context): Promise<ProfileDetail> {
-  console.log('getProfileDetail function begin');
+  console.log("getProfileDetail function begin");
 
-  const user = c.get('user'); // Retrieve the user from context
-  console.log('user is:', user);
+  const user = c.get("user"); // Retrieve the user from context
+  console.log("user is:", user);
   const member_id = user.memberId;
-  console.log('member_id is:', member_id);
+  console.log("member_id is:", member_id);
 
   const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
@@ -36,7 +36,7 @@ async function getProfileDetail(c: Context): Promise<ProfileDetail> {
     const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
-      throw new Error('Member not found');
+      throw new Error("Member not found");
     }
 
     const row = result.rows[0];
@@ -47,12 +47,13 @@ async function getProfileDetail(c: Context): Promise<ProfileDetail> {
       birthday: row.birthday ? row.birthday.toISOString() : null,
     };
 
-    console.log('getProfileDetail function end');
+    console.log("getProfileDetail function end");
     return memberProfileDetail;
-
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 

@@ -11,13 +11,13 @@ interface MemberOrderCard {
 }
 
 async function getMemberMemberOrderCard(c: Context): Promise<MemberOrderCard> {
-  console.log('getMemberDashboardCard function begin');
+  console.log("getMemberDashboardCard function begin");
 
   // Retrieve the user from context (assuming you've set it using middleware)
-  const user = c.get('user');
-  console.log('user is:', user);
+  const user = c.get("user");
+  console.log("user is:", user);
   const member_id = user.memberId;
-  console.log('member_id is:', member_id);
+  console.log("member_id is:", member_id);
 
   const tenant = c.get("tenant_host");
   console.log("tenant", tenant);
@@ -45,7 +45,7 @@ async function getMemberMemberOrderCard(c: Context): Promise<MemberOrderCard> {
     const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
-      throw new Error('Member not found');
+      throw new Error("Member not found");
     }
 
     const row = result.rows[0];
@@ -56,12 +56,13 @@ async function getMemberMemberOrderCard(c: Context): Promise<MemberOrderCard> {
       count_member_order: parseInt(row.count_member_order, 10),
     };
 
-    console.log('getMemberDashboardCard function end');
+    console.log("getMemberDashboardCard function end");
     return memberDashboardCard;
-
   } catch (error) {
     console.error("Database query error:", error);
     throw new Error("Database query failed");
+  } finally {
+    pool.release();
   }
 }
 
