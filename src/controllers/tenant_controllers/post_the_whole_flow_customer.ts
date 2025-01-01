@@ -191,14 +191,14 @@ async function theWholeFlowCustomer(c: Context): Promise<Response> {
       );
 
       // 9B: Mark the tenant login record as service_created
-      await client.query(
-        `
-        UPDATE system_schema.system_tenant_login
-        SET service_created = true
-        WHERE tenant_login_id = $1
-        `,
-        [availableTenant.tenant_login_id]
-      );
+      // await client.query(
+      //   `
+      //   UPDATE system_schema.system_tenant_login
+      //   SET service_created = true
+      //   WHERE tenant_login_id = $1
+      //   `,
+      //   [availableTenant.tenant_login_id]
+      // );
 
       await client.query("COMMIT");
 

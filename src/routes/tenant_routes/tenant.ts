@@ -20,10 +20,10 @@ tenantRouter.post("/post_new_tenant", async (c: Context) => {
     // const data = await cloneTenantSchema(c);
     // const data = await postTenantCreateNewTenantLoginRecord(c);
 
-    const data = await theWholeFlowCustomer(c);
-    // const data = await theWholeFlowAdmin(c);
+    const data1 = await theWholeFlowCustomer(c);
+    const data2 = await theWholeFlowAdmin(c);
 
-    console.log("data", data);
+    // console.log("data", data2);
     console.log("post_new_tenant route done");
 
     // return c.json(data);
