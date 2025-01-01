@@ -6,7 +6,8 @@ import type { Context } from "hono";
  * uppercase letters, lowercase letters, and digits.
  */
 function generateRandomSecret(length: number): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
   for (let i = 0; i < length; i++) {
     const index = Math.floor(Math.random() * chars.length);
@@ -29,7 +30,9 @@ function generateRandomSchemaName(length: number): string {
   return result;
 }
 
-async function postTenantCreateNewTenantLoginRecord(c: Context): Promise<Response> {
+async function postTenantCreateNewTenantLoginRecord(
+  c: Context
+): Promise<Response> {
   console.log("postTenantCreateNewTenantLoginRecord function begin");
 
   let client;
@@ -48,7 +51,12 @@ async function postTenantCreateNewTenantLoginRecord(c: Context): Promise<Respons
 
     if (currentFalseCount >= 5) {
       await client.query("ROLLBACK");
-      return c.json({ message: "used limit reached. Need not to create a new tenant login." }, 400);
+      return c.json(
+        {
+          message: "used limit reached. Need not to create a new tenant login.",
+        },
+        400
+      );
     }
 
     // Query only records where tenant_host starts with "membi-"
@@ -77,16 +85,18 @@ async function postTenantCreateNewTenantLoginRecord(c: Context): Promise<Respons
     const tenantHost = `membi-${paddedNumber}`;
     const adminHost = `membi-${paddedNumber}-admin`;
 
+    const tenantHostForSecrets = tenantHost.replace("-", "_");
+
     // Use generateRandomSchemaName() for tenant_schema
     const schemaPart = generateRandomSchemaName(6);
-    const tenantSchema = `${tenantHost}_${schemaPart}`;
+    const tenantSchema = `${tenantHostForSecrets}_${schemaPart}`;
 
     // Use generateRandomSecret() for admin_secret and customer_secret
     const adminSecretPart = generateRandomSecret(6);
     const customerSecretPart = generateRandomSecret(6);
 
-    const adminSecret = `${tenantHost}_ad_${adminSecretPart}`;
-    const customerSecret = `${tenantHost}_cu_${customerSecretPart}`;
+    const adminSecret = `${tenantHostForSecrets}_ad_${adminSecretPart}`;
+    const customerSecret = `${tenantHostForSecrets}_cu_${customerSecretPart}`;
 
     // Insert the new record
     const insertQuery = `
@@ -116,7 +126,13 @@ async function postTenantCreateNewTenantLoginRecord(c: Context): Promise<Respons
       )
       RETURNING tenant_login_id
     `;
-    const insertParams = [tenantHost, tenantSchema, adminSecret, customerSecret, adminHost];
+    const insertParams = [
+      tenantHost,
+      tenantSchema,
+      adminSecret,
+      customerSecret,
+      adminHost,
+    ];
     const insertResult = await client.query(insertQuery, insertParams);
 
     await client.query("COMMIT");
