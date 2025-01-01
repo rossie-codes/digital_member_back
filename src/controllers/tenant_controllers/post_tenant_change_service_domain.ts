@@ -20,12 +20,14 @@ interface ServiceCreate {
 
 async function postTenantChangeServiceDomain(
   serviceId: string,
-  tenantHost: string
+  tenantHost: string,
+  targetDomain: string
 ): Promise<ServiceCreate> {
   console.log("postTenantChangeServiceDomain function begin");
 
   console.log("Selected tenant for service creation serviceId:", serviceId);
   console.log("Selected tenant for service creation tenantHost:", tenantHost);
+  console.log("Selected tenant for service creation targetDomain:", targetDomain);
 
   // Step 4: Prepare GraphQL mutation payload
   const graphqlQuery = {
@@ -97,7 +99,7 @@ async function postTenantChangeServiceDomain(
           environmentId: RAILWAY_ENVIRONMENT_ID,
           serviceDomainId:
             serviceDomainCreateResponse.data.serviceDomainCreate.id,
-          domain: `${tenantHost}_admin.up.railway.app`,
+          domain: targetDomain,
         },
       },
     };

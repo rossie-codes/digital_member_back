@@ -29,7 +29,7 @@ interface ServiceCreate {
 }
 
 async function postTenantCreateNewService(
-  availableTenant: AvailableTenant
+  availableTenant: AvailableTenant, serviceName: string, targetRepo: string
 ): Promise<ServiceCreate> {
   console.log("postTenantCreateNewService function begin");
 
@@ -54,10 +54,10 @@ async function postTenantCreateNewService(
     variables: {
       input: {
         source: {
-          repo: RAILWAY_REPO_ADMIN,
+          repo: targetRepo
         },
         projectId: RAILWAY_PROJECT_ID,
-        name: availableTenant.tenant_host,
+        name: serviceName,
       },
     },
   };

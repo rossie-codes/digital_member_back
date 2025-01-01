@@ -70,7 +70,7 @@ async function getTenantClient(tenantIdentifier: string) {
 }
 
 
-async function getTenantHostAdmin(tenant_host: string) {
+async function getTenantHostAdmin(admin_host: string) {
 
   console.log('getTenantHostAdmin function begin');
 
@@ -84,12 +84,13 @@ async function getTenantHostAdmin(tenant_host: string) {
     await client.query(`SET search_path TO system_schema;`);
 
     const result = await client.query(
-      "SELECT admin_secret, app_domain FROM system_tenant_login WHERE tenant_host = $1",
-      [tenant_host]
+      "SELECT tenant_host, admin_secret, app_domain FROM system_tenant_login WHERE admin_host = $1",
+      [admin_host]
     );
 
     console.log('result', result.rows);
 
+    const tenant_host = result.rows[0].tenant_host;
     const admin_secret = result.rows[0].admin_secret;
     const app_domain = result.rows[0].app_domain;
 

@@ -8,8 +8,11 @@ const RAILWAY_REPO_CUSTOMER = process.env.RAILWAY_REPO_CUSTOMER;
 const RAILWAY_PROJECT_ID = process.env.RAILWAY_PROJECT_ID;
 const RAILWAY_ENVIRONMENT_ID = process.env.RAILWAY_ENVIRONMENT_ID;
 
-
-async function postTenantServiceConnect(serviceId: string): Promise<Response> {
+async function postTenantServiceConnect(
+  serviceId: string,
+  targerRepo: string,
+  targetBranch: string
+): Promise<Response> {
   console.log("async function postTenantServiceConnect function begin");
 
   console.log("Selected tenant for service creation serviceId:", serviceId);
@@ -37,8 +40,8 @@ async function postTenantServiceConnect(serviceId: string): Promise<Response> {
     variables: {
       id: serviceId,
       input: {
-        repo: "itakastudio/digital_member_front",
-        branch: "main",
+        repo: targerRepo,
+        branch: targetBranch
       },
     },
   };

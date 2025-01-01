@@ -51,11 +51,11 @@ async function postTenantCreateNewTenantLoginRecord(c: Context): Promise<Respons
       return c.json({ message: "used limit reached. Need not to create a new tenant login." }, 400);
     }
 
-    // Query only records where tenant_host starts with "membi_"
+    // Query only records where tenant_host starts with "membi-"
     const lastHostQuery = `
       SELECT tenant_host
       FROM system_schema.system_tenant_login
-      WHERE tenant_host LIKE 'membi_%'
+      WHERE tenant_host LIKE 'membi-%'
       ORDER BY tenant_login_id DESC
       LIMIT 1
     `;
@@ -63,18 +63,19 @@ async function postTenantCreateNewTenantLoginRecord(c: Context): Promise<Respons
 
     let nextNumber = 1;
     if (lastHostResult.rowCount && lastHostResult.rowCount > 0) {
-      // e.g. "membi_0002"
+      // e.g. "membi-0002"
       const lastHost = lastHostResult.rows[0].tenant_host;
-      const parts = lastHost.split("_");
+      const parts = lastHost.split("-");
       if (parts.length >= 2) {
         const lastNumber = parseInt(parts[1], 10);
         nextNumber = isNaN(lastNumber) ? 1 : lastNumber + 1;
       }
     }
 
-    // If there's no record, this will remain "membi_0001"
+    // If there's no record, this will remain "membi-0001"
     const paddedNumber = nextNumber.toString().padStart(4, "0"); // "0001", "0002", ...
-    const tenantHost = `membi_${paddedNumber}`;
+    const tenantHost = `membi-${paddedNumber}`;
+    const adminHost = `membi-${paddedNumber}-admin`;
 
     // Use generateRandomSchemaName() for tenant_schema
     const schemaPart = generateRandomSchemaName(6);
@@ -98,7 +99,8 @@ async function postTenantCreateNewTenantLoginRecord(c: Context): Promise<Respons
         used,
         admin_secret,
         customer_secret,
-        app_domain
+        app_domain,
+        admin_host
       )
       VALUES (
         NULL,
@@ -109,11 +111,12 @@ async function postTenantCreateNewTenantLoginRecord(c: Context): Promise<Respons
         false,
         $3,
         $4,
-        '.up.railway.app'
+        '.up.railway.app',
+        $5
       )
       RETURNING tenant_login_id
     `;
-    const insertParams = [tenantHost, tenantSchema, adminSecret, customerSecret];
+    const insertParams = [tenantHost, tenantSchema, adminSecret, customerSecret, adminHost];
     const insertResult = await client.query(insertQuery, insertParams);
 
     await client.query("COMMIT");
@@ -125,6 +128,7 @@ async function postTenantCreateNewTenantLoginRecord(c: Context): Promise<Respons
       tenant_schema: tenantSchema,
       admin_secret: adminSecret,
       customer_secret: customerSecret,
+      admin_host: adminHost,
     });
   } catch (err) {
     if (client) {

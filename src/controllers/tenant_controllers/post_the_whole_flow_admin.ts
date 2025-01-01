@@ -2,18 +2,28 @@ import { pool } from "../db";
 import type { Context } from "hono";
 import getTenantLoginAvailability from "./get_tenant_login_availability";
 import postTenantCreateNewTenantLoginRecord from "./post_tenant_create_new_tenant_login_record";
-import postTenantCreateNewService from "./post_tenant_create_new_service_admin";
-import postTenantChangeServiceDomain from "./post_tenant_change_service_domain_admin";
+import postTenantCreateNewService from "./post_tenant_create_new_service";
+import postTenantChangeServiceDomain from "./post_tenant_change_service_domain";
 import postTenantChangeServiceEnvVaiable from "./post_tenant_change_service_env_variable";
 import postTenantServiceConnect from "./post_tenant_service_connect";
 import cloneTenantSchema from "./post_tenant_clone_new_schema";
 
 // Environment variables for Railway
-const RAILWAY_TOKEN = process.env.RAILWAY_TOKEN;
-const RAILWAY_GRAPHQL_URL = process.env.RAILWAY_GRAPHQL_URL;
-const RAILWAY_REPO = process.env.RAILWAY_REPO;
-const RAILWAY_PROJECT_ID = process.env.RAILWAY_PROJECT_ID;
-const RAILWAY_ENVIRONMENT_ID = process.env.RAILWAY_ENVIRONMENT_ID;
+// const RAILWAY_TOKEN = process.env.RAILWAY_TOKEN;
+// const RAILWAY_GRAPHQL_URL = process.env.RAILWAY_GRAPHQL_URL;
+// const RAILWAY_REPO_ADMIN = process.env.RAILWAY_REPO_ADMIN;
+// const RAILWAY_REPO_CUSTOMER = process.env.RAILWAY_REPO_CUSTOMER;
+// const RAILWAY_PROJECT_ID = process.env.RAILWAY_PROJECT_ID;
+// const RAILWAY_ENVIRONMENT_ID = process.env.RAILWAY_ENVIRONMENT_ID;
+
+const {
+  RAILWAY_TOKEN,
+  RAILWAY_GRAPHQL_URL,
+  RAILWAY_REPO_ADMIN,
+  RAILWAY_REPO_CUSTOMER,
+  RAILWAY_PROJECT_ID,
+  RAILWAY_ENVIRONMENT_ID,
+} = process.env;
 
 interface AvailableTenant {
   tenant_id: number;
@@ -25,18 +35,32 @@ interface AvailableTenant {
   column_used_with_false_value: number;
   admin_secret: string;
   customer_secret: string;
+  admin_host: string;
 }
 
 async function theWholeFlowAdmin(c: Context): Promise<Response> {
+
+  console.log("theWholeFlowAdmin check env variables begin");
+  // Ensure required environment variables are set
+  if (
+    !RAILWAY_TOKEN ||
+    !RAILWAY_GRAPHQL_URL ||
+    !RAILWAY_REPO_ADMIN ||
+    !RAILWAY_REPO_CUSTOMER ||
+    !RAILWAY_PROJECT_ID ||
+    !RAILWAY_ENVIRONMENT_ID
+  ) {
+    return c.json(
+      { message: "Missing required Railway environment variable(s)." },
+      500
+    );
+  }
+
   console.log("theWholeFlow function begin");
 
   try {
-
-
-
     // Step 1: Create a new tenant login record
     const newTenantRecord = await postTenantCreateNewTenantLoginRecord(c);
-
     console.log("newTenantRecord", newTenantRecord);
 
     // Step 2: Get tenant login availability
@@ -58,10 +82,14 @@ async function theWholeFlowAdmin(c: Context): Promise<Response> {
 
     console.log("Selected tenant for service creation:", availableTenant);
 
+    const repoAdmin = RAILWAY_REPO_ADMIN;
+    const serviceName = `${availableTenant.tenant_host}_admin`;
     // Step 4: Prepare GraphQL mutation payload for service creation
     // Step 5: Perform the GraphQL request to Railway to create a new service
     const createNewServiceResponse = await postTenantCreateNewService(
-      availableTenant
+      availableTenant,
+      serviceName,
+      repoAdmin
     );
 
     console.log("Service creation response:", createNewServiceResponse);
@@ -71,15 +99,18 @@ async function theWholeFlowAdmin(c: Context): Promise<Response> {
       createNewServiceResponse.id
     );
 
+    const targetDomain = `${availableTenant.tenant_host}-admin.up.railway.app`;
+
     // Step 6: Perform the GraphQL request to Railway to change the service domain
     const changeServiceDomainResponse = await postTenantChangeServiceDomain(
       createNewServiceResponse.id,
-      availableTenant.tenant_host
+      availableTenant.tenant_host,
+      targetDomain
     );
 
     console.log("Service domain change response:", changeServiceDomainResponse);
 
-    // Step 7: Perform the GraphQL request to Railway to change the service environment variables    
+    // Step 7: Perform the GraphQL request to Railway to change the service environment variables
     const changeServiceEnvVariableResponse =
       await postTenantChangeServiceEnvVaiable(
         "TENANT_HOST",
@@ -107,16 +138,22 @@ async function theWholeFlowAdmin(c: Context): Promise<Response> {
     );
 
     // Step 8: Perform the GraphQL request to Railway to connect service to github repo branch, this will automatically deploy the service
-    const serviceConnectResponse = await postTenantServiceConnect(createNewServiceResponse.id)
+    const serviceConnectResponse = await postTenantServiceConnect(
+      createNewServiceResponse.id,
+      repoAdmin,
+      "main"
+    );
 
     console.log("Service connect response:", serviceConnectResponse);
 
+    const cloneTenantSchemaResponse = await cloneTenantSchema(
+      availableTenant.tenant_schema
+    );
 
-
-    const cloneTenantSchemaResponse = await cloneTenantSchema(availableTenant.tenant_schema)
-    
-    console.log("Schema cloned from membi_template_schema: ", cloneTenantSchemaResponse);
-
+    console.log(
+      "Schema cloned from membi_template_schema: ",
+      cloneTenantSchemaResponse
+    );
 
     // Step 9: Update the tenant login record to mark the service as created
     const client = await pool.connect();
