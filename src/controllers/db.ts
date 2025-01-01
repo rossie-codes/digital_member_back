@@ -73,6 +73,7 @@ async function getTenantClient(tenantIdentifier: string) {
 async function getTenantHostAdmin(admin_host: string) {
 
   console.log('getTenantHostAdmin function begin');
+  console.log('admin_host is: ', admin_host);
 
   const client = await pool.connect(); // Connect to the database
 

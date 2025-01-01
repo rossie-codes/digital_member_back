@@ -18,7 +18,6 @@ export const memberAuthMiddleware = async (c: Context, next: Next) => {
     return c.json({ error: 'Tenant identifier missing' }, 400); // Bad Request if no tenant is found
   }
   console.log('Tenant Identifier:', tenant_host);
-  c.set('tenant_host', tenant_host);
 
   const customer_secret_domain = await getTenantHostCustomer(tenant_host);
   console.log('customer_secret_domain: ', customer_secret_domain)
@@ -26,8 +25,11 @@ export const memberAuthMiddleware = async (c: Context, next: Next) => {
   const app_domain = customer_secret_domain.app_domain;
 
   c.set('app_domain', app_domain);
+  c.set('tenant_host', tenant_host);
+  c.set('customer_secret', customer_secret);
 
   const membi_m_token = getCookie(c, `${tenant_host}_m_token`);
+  console.log('membi_m_token', membi_m_token);
 
   if (!membi_m_token) {
     return c.json({ error: 'Unauthorized' }, 401);
@@ -64,16 +66,14 @@ export const memberLoginMiddleware = async (c: Context, next: Next) => {
 
     console.log('Tenant Identifier:', tenant_host);
 
-    c.set('tenant_host', tenant_host);
-
     const customer_secret_domain = await getTenantHostCustomer(tenant_host);
     console.log('customer_secret_domain: ', customer_secret_domain)
     const customer_secret = customer_secret_domain.customer_secret;
     const app_domain = customer_secret_domain.app_domain;
 
     c.set('app_domain', app_domain);
-
-
+    c.set('tenant_host', tenant_host);
+    c.set('customer_secret', customer_secret)
 
     await next();
   } catch (err) {

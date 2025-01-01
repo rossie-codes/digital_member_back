@@ -19,7 +19,6 @@ export const adminAuthMiddleware = async (c: Context, next: Next) => {
   }
   console.log('Tenant Identifier:', admin_host);
 
-
   const admin_secret_domain = await getTenantHostAdmin(admin_host);
   console.log('admin_secret_domain: ', admin_secret_domain)
   const admin_secret = admin_secret_domain.admin_secret;
@@ -32,10 +31,10 @@ export const adminAuthMiddleware = async (c: Context, next: Next) => {
 
   c.set('app_domain', app_domain);
   c.set('tenant_host', tenant_host);
+  c.set('admin_secret', admin_secret);
 
   const membi_admin_token = getCookie(c, `${tenant_host}_admin_token`);
   console.log('membi_admin_token', membi_admin_token);
-
 
   if (!membi_admin_token) {
     return c.json({ error: 'Unauthorized' }, 401);
@@ -72,8 +71,6 @@ export const adminLoginMiddleware = async (c: Context, next: Next) => {
 
     console.log('Tenant Identifier:', admin_host);
 
-
-
     const admin_secret_domain = await getTenantHostAdmin(admin_host);
     console.log('admin_secret_domain: ', admin_secret_domain)
     const admin_secret = admin_secret_domain.admin_secret;
@@ -82,7 +79,7 @@ export const adminLoginMiddleware = async (c: Context, next: Next) => {
 
     c.set('app_domain', app_domain);
     c.set('tenant_host', tenant_host);
-
+    c.set('admin_secret', admin_secret);
 
     await next();
   } catch (err) {

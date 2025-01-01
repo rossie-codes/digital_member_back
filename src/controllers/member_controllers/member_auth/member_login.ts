@@ -16,6 +16,8 @@ async function loginMember(c: Context) {
 
   const app_domain = c.get('app_domain');
   const tenant_host = c.get("tenant_host");
+  const customer_secret = c.get("customer_secret");
+
   // const tenantIdentifier = 'https://mm9_client'
   // const tenantIdentifier = 'https://membi-admin'
 
@@ -65,10 +67,9 @@ async function loginMember(c: Context) {
     console.log('loginCustomer function handle membi_m_token')
     // Generate a JWT membi_m_token
 
-    const customer_secret_domain = await getTenantHostCustomer(tenant_host)
-    console.log('loginCustomer function handle membi_m_token', customer_secret_domain)
-
-    const customer_secret = customer_secret_domain.customer_secret;
+    // const customer_secret_domain = await getTenantHostCustomer(tenant_host)
+    // console.log('loginCustomer function handle membi_m_token', customer_secret_domain)
+    // const customer_secret = customer_secret_domain.customer_secret;
 
 
     // const membi_m_token = jwt.sign({ memberId: user.member_id }, MEMBI_CUSTOMER_SECRET, { expiresIn: '10h' });

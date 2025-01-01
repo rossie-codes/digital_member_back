@@ -12,7 +12,8 @@ export async function loginAdmin(c: Context) {
   console.log('loginAdmin function begin')
 
   const app_domain = c.get('app_domain');
-  const tenant_host = c.get("tenant_host");
+  const tenant_host = c.get('tenant_host');
+  const admin_secret = c.get('admin_secret');
   // const tenantIdentifier = 'https://mm9_client'
   // const tenantIdentifier = 'https://membi-admin'
 
@@ -60,13 +61,12 @@ export async function loginAdmin(c: Context) {
 
       return c.json({ error: 'Invalid credentials' }, 401);
     }
-    console.log('loginAdmin function handle membi_admin_token')
+    console.log('loginAdmin function handle membi_admin_token, tenant_host is: ', tenant_host)
     // Generate a JWT membi_admin_token
 
-    const admin_secret_domain = await getTenantHostAdmin(tenant_host)
-    console.log('loginAdmin function handle membi_admin_token', admin_secret_domain)
-
-    const admin_secret = admin_secret_domain.admin_secret;
+    // const admin_secret_domain = await getTenantHostAdmin(tenant_host)
+    // console.log('loginAdmin function handle membi_admin_token', admin_secret_domain)
+    // const admin_secret = admin_secret_domain.admin_secret;
 
     const membi_admin_token = jwt.sign({ adminId: user.admin_id }, admin_secret, { expiresIn: '10h' });
     // const membi_admin_token = jwt.sign({ adminId: user.admin_id }, admin_secret, { expiresIn: '10h' });
