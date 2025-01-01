@@ -13,20 +13,21 @@ export const adminAuthMiddleware = async (c: Context, next: Next) => {
   // const membi_admin_token = c.req.cookie('membi_admin_token');
 
   const user_sub_domain = c.req.header('origin'); // Get the host from the request headers
-  const tenant_host = extractTenantFromHost(user_sub_domain!);
-  if (!tenant_host) {
+  const admin_host = extractTenantFromHost(user_sub_domain!);
+  if (!admin_host) {
     return c.json({ error: 'Tenant identifier missing' }, 400); // Bad Request if no tenant is found
   }
-  console.log('Tenant Identifier:', tenant_host);
-  c.set('tenant_host', tenant_host);
+  console.log('Tenant Identifier:', admin_host);
 
-  const admin_secret_domain = await getTenantHostAdmin(tenant_host);
+
+  const admin_secret_domain = await getTenantHostAdmin(admin_host);
   console.log('admin_secret_domain: ', admin_secret_domain)
   const admin_secret = admin_secret_domain.admin_secret;
   const app_domain = admin_secret_domain.app_domain;
+  const tenant_host = admin_secret_domain.tenant_host;
 
   c.set('app_domain', app_domain);
-
+  c.set('tenant_host', tenant_host);
 
   const membi_admin_token = getCookie(c, `${tenant_host}_admin_token`);
   console.log('membi_admin_token', membi_admin_token);
