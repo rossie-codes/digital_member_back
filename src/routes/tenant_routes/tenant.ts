@@ -17,12 +17,11 @@ tenantRouter.post("/post_new_tenant", async (c: Context) => {
   try {
     console.log("post_new_tenant route begin");
 
-    // const data = await cloneTenantSchema(c);
     // const data = await postTenantCreateNewTenantLoginRecord(c);
 
-    // const data1 = await theWholeFlowCustomer(c);
-    // const data2 = await theWholeFlowAdmin(c);
-    const data3 = await cloneTenantSchema('membi_0006_7p38s9');
+    const data1 = await theWholeFlowCustomer(c);
+    const data2 = await theWholeFlowAdmin(c);
+    // const data3 = await cloneTenantSchema('membi_0006_7p38s9');
 
     // console.log("data", data2);
     console.log("post_new_tenant route done");
