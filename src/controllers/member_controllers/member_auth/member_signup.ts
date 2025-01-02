@@ -13,16 +13,24 @@ interface SignupPayload {
   member_password: string;
 }
 
+function generateRandomCode(length: number): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+
+
 async function signupMember(c: Context) {
 
   console.log('loginMember function begin')
-  
+
 
   const app_domain = c.get('app_domain');
   const tenant_host = c.get("tenant_host");
-  // const tenantIdentifier = 'https://mm9_client'
-  // const tenantIdentifier = 'https://membi-admin'
-
   console.log("tenant at login as tenant_host: ", tenant_host);
   console.log("tenant at login ad app_domain: ", app_domain);
 
@@ -32,6 +40,8 @@ async function signupMember(c: Context) {
   try {
     console.log('Signup request received');
     const { member_name, member_birthday, member_phone, referrer_phone, member_password }: SignupPayload = await c.req.json();
+
+    let points_balance = 0;
 
     // Validate inputs
     if (!member_phone || !member_password) {
@@ -64,6 +74,68 @@ async function signupMember(c: Context) {
 
     let member_id: number;
 
+    let member_referral_code = generateRandomCode(6);
+
+    // Ensure the referral code is unique
+    let codeExists = true;
+    while (codeExists) {
+      const codeQuery =
+        "SELECT member_id FROM member WHERE member_referral_code = $1";
+      const codeResult = await pool.query(codeQuery, [member_referral_code]);
+
+      if (codeResult.rows.length === 0) {
+        // Code is unique
+        codeExists = false;
+      } else {
+        // Generate a new code
+        member_referral_code = generateRandomCode(6);
+      }
+    }
+
+
+    // Determine membership_tier and membership_expiry_date
+    // Get the tier with the lowest membership_tier_sequence
+    // Determine membership_tier and membership_expiry_date based on member's points_balance
+    const tierQuery = `
+                SELECT membership_tier_id, membership_period
+                FROM membership_tier
+                WHERE require_point <= $1
+                ORDER BY require_point DESC
+                LIMIT 1
+                `;
+
+    const tierResult = await pool.query(tierQuery, [points_balance]);
+
+    console.log("tierResult:", tierResult.rows);
+
+    let membership_tier_id: number | null = null;
+    let membership_expiry_date: string | null = null;
+
+    if (tierResult.rows.length > 0) {
+      const { membership_tier_id: tierId, membership_period } =
+        tierResult.rows[0];
+
+      membership_tier_id = tierId;
+
+      // Set membership_expiry_date based on membership_period
+      const currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0); // Reset time to midnight
+      const expiryDate = new Date(currentDate);
+      expiryDate.setMonth(expiryDate.getMonth() + membership_period);
+
+      // Format the date as YYYY-MM-DD
+      membership_expiry_date = expiryDate.toISOString().split("T")[0];
+
+      console.log("membership_expiry_date:", membership_expiry_date);
+    } else {
+      // Handle case when no tier is matched
+      // You may set a default tier or handle it as needed
+      console.warn(
+        "No matching membership tier found for the given points_balance value."
+      );
+    }
+
+
     // Start transaction
     // const client = await pool.connect();
     const client = await getTenantClient(tenant_host);
@@ -82,11 +154,35 @@ async function signupMember(c: Context) {
         // Member does not exist, create member record
         console.log('Creating new member record');
         const insertMemberQuery = `
-          INSERT INTO member (member_phone, member_name, birthday, membership_status)
-          VALUES ($1, $2, $3, 'active')
-          RETURNING member_id
-        `;
-        const insertMemberValues = [member_phone, member_name || null, member_birthday || null];
+        INSERT INTO member (
+          created_at,
+          membership_start_date,
+          member_phone,
+          member_name,
+          member_referral_code,
+          points_balance,
+          membership_tier_id,
+          membership_expiry_date,
+          referrer_member_id,
+          birthday,
+          is_active,
+          membership_status,
+          point
+        ) VALUES (
+          NOW(), NOW(),
+          $1, $2, $3, $4, $5, $6, $7, $8, 1, 'active', 0
+        ) RETURNING member_id
+      `;
+        const insertMemberValues = [
+          member_phone,
+          member_name || null,
+          member_referral_code,
+          points_balance,
+          membership_tier_id,
+          membership_expiry_date,
+          referrer_member_id,
+          member_birthday || null];
+
         const memberResult = await client.query(insertMemberQuery, insertMemberValues);
         member_id = memberResult.rows[0].member_id;
       }

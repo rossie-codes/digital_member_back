@@ -1,5 +1,5 @@
-return 的 data 總是 [object Promise]
-ChatGPT o1 解決了
+// return 的 data 總是 [object Promise]
+// ChatGPT o1 解決了
 
 // // import abc from './src/controllers/basic_db'
 // // abc()
